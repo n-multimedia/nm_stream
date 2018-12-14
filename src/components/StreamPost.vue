@@ -11,10 +11,13 @@
             <div class="col-10">
               <div class="row">
                 <div class="col-12">
-                  <div>
+                  <div v-if="this.privacy !== null" class="float-right">
+                    <img class="post-privacy" :src="privacy.img" :alt="privacy.title" :title="privacy.title">
+                  </div>
+                  <div v-if="canEdit || canDelete">
                     <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right" offset="-120">
-                      <b-dropdown-item v-on:click="edit()">t('Edit')</b-dropdown-item>
-                      <b-dropdown-item>t('Delete')</b-dropdown-item>
+                      <b-dropdown-item v-on:click="edit()" v-if="canEdit">t('Edit')</b-dropdown-item>
+                      <b-dropdown-item v-if="canDelete">t('Delete')</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="username"><a :href="post.user.profileUrl">{{post.user.name}}</a></div>
@@ -48,11 +51,14 @@
           </div>
           <div class="row comments-wrapper">
             <div class="col-10 offset-2">
-              <stream-comment-form v-bind:loggedInUser="streamOptions.loggedInUser"></stream-comment-form>
+              <stream-comment-form v-bind:streamOptions="streamOptions"></stream-comment-form>
               <transition name="fade">
                 <div v-if="sortedComments.length > 0 && showComments === true">
                   <transition-group name="list">
-                    <stream-comment v-for="comment in sortedComments" :key="comment.cid" :comment="comment"
+                    <stream-comment v-for="comment in sortedComments"
+                                    :streamOptions="streamOptions"
+                                    :key="comment.cid"
+                                    :comment="comment"
                                     :user="comment.user"/>
                   </transition-group>
                 </div>
@@ -63,7 +69,7 @@
       </div>
       <div class="back">
         <div class="stream-post card">
-          <stream-post-form
+          <stream-post-form ref="streamPostForm"
             :streamOptions="streamOptions"
             :editPost="post"
             v-on:edit-canceled="editCanceled()"
@@ -76,6 +82,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import StreamComment from './StreamComment'
 import StreamCommentForm from './StreamCommentForm'
 import StreamPostForm from './StreamPostForm'
@@ -87,8 +94,9 @@ export default {
   data () {
     return {
       showComments: false,
-      canEdit: false,
-      canDelete: false
+      canEdit: true,
+      canDelete: true,
+      privacy: null
     }
   },
   computed: {
@@ -102,22 +110,36 @@ export default {
       }
     }
   },
+  mounted: function () {
+    // set privacy value by ID
+    this.loadPrivacyValue()
+  },
   methods: {
     edit (event) {
       this.showComments = false
       // hide comments and show back
       setTimeout(() => {
         this.$el.classList.add('flip-active')
+        this.$refs.streamPostForm.resizePostFormContainer()
       }, 200)
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
+    },
+    loadPrivacyValue () {
+      this.privacy = Vue._.filter(this.streamOptions.privacyOptions, ['value', this.post.privacy.privacyDefault]).pop()
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+  .card-flip {
+    position: relative;
+    &:hover {
+      z-index: 999;
+    }
+  }
   .stream-post {
     transition: 0.3s;
     &:hover {
@@ -152,6 +174,10 @@ export default {
         position: absolute;
         background-color: white;
       }
+    }
+
+    .post-privacy {
+      padding: 20px 0;
     }
   }
 </style>

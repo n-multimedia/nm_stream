@@ -3,7 +3,7 @@
     <div class="row">
       <div class="col-2">
         <transition name="fade">
-          <img v-if="formActive" class="card-img-top rounded-circle" :src="loggedInUser.avatarUrl" :key="formActive" :title="loggedInUser.name" />
+          <img v-if="formActive" class="card-img-top rounded-circle" :src="author.avatarUrl" :key="formActive" :title="author.name" />
         </transition>
       </div>
       <div class="col-10">
@@ -26,19 +26,57 @@
 </template>
 <script>
 export default {
-  props: ['loggedInUser'],
+  props: ['streamOptions', 'editComment'],
   name: 'stream-comment-form',
   methods: {
     resizeTextarea (event) {
-      event.target.style.height = 'auto'
-      event.target.style.height = (event.target.scrollHeight) + 'px'
+      this.resizeTextareaElement(event.target)
+      this.resizeCommentFormContainer()
+    },
+    resizeCommentFormContainer () {
+      // resizing post relevant for edit mode only
+      if (this.editComment) {
+        this.$parent.$el.querySelector('.stream-comment').style.height = (130 + this.$el.querySelector('textarea').scrollHeight) + 'px'
+      }
+    },
+    resizeTextareaElement (textarea) {
+      textarea.style.height = 'auto'
+      textarea.style.height = (textarea.scrollHeight) + 'px'
     },
     resetForm () {
-      this.bodyText = ''
-      this.formActive = false
+      // editPost
+      if (this.editComment) {
+        this.$emit('edit-canceled')
+        this.$parent.$el.querySelector('.stream-comment').style.height = 'auto'
 
-      this.$el.querySelector('textarea.stream-comment-body').blur()
-      this.$el.querySelector('textarea.stream-comment-body').style.height = 'auto'
+        // restore post values
+        this.initializeComment()
+      } else {
+        this.bodyText = ''
+        this.formActive = false
+
+        this.$el.querySelector('textarea.stream-comment-body').blur()
+        this.$el.querySelector('textarea.stream-comment-body').style.height = 'auto'
+      }
+    },
+    initializeComment () {
+      if (this.editComment) {
+        // console.log('editpost', this.editPost)
+        this.formActive = true
+        this.bodyText = this.editComment.body
+        // resize textarea
+        this.$nextTick(() => {
+          this.resizeTextareaElement(this.$el.querySelector('textarea'))
+        })
+      }
+    },
+    updateAuthor () {
+      this.author = this.streamOptions.loggedInUser
+
+      // set post author if editing a post
+      if (this.editComment) {
+        this.author = this.editComment.user
+      }
     }
   },
   mounted: function () {
@@ -46,6 +84,15 @@ export default {
       this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight) + 'px;overflow-y:hidden;')
       this.$el.addEventListener('input', this.resizeTextarea)
     })
+
+    // /////////////////////////////
+    // an existing post was passed
+    // /////////////////////////////
+    // => edit Post
+    this.initializeComment()
+
+    // set post author for edit post or logged in user for the new post
+    this.updateAuthor()
   },
   beforeDestroy () {
     this.$el.removeEventListener('input', this.resizeTextarea)
@@ -56,6 +103,7 @@ export default {
   data () {
     return {
       formActive: false,
+      author: null,
       bodyText: ''
     }
   }

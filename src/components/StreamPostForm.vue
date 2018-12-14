@@ -77,7 +77,7 @@ export default {
       // resizing post relevant for edit mode only
       if (this.editPost) {
         let dragzoneHeight = parseFloat(this.$refs.vueDropZome.$el.style.height)
-        this.$parent.$el.querySelector('.stream-post').style.height = (250 + dragzoneHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        this.$parent.$el.querySelector('.stream-post').style.height = (150 + dragzoneHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
       }
     },
     resizeTextareaElement (textarea) {
@@ -149,9 +149,6 @@ export default {
         this.privacyDefault = this.editPost.privacy.privacyDefault
         this.privacyOptions = this.loadPrivacyOptions(this.editPost.privacy.privacyOptions)
         this.privacyValue = Vue._.filter(this.privacyOptions, ['value', this.privacyDefault])
-
-        console.log(this.privacyDefault)
-        console.log(this.privacyOptions)
         // resize textarea
         this.$nextTick(() => {
           this.resizeTextareaElement(this.$el.querySelector('textarea'))
@@ -385,6 +382,26 @@ export default {
       .dz-message {
         margin: 10px;
         transition: 0.5s;
+      }
+      .dz-file-preview {
+        display: block;
+        background: none;
+      }
+      .dz-image {
+        display: none;
+      }
+      .dz-remove {
+        right: 15px;
+      }
+      .dz-success-mark,
+      .dz-error-mark {
+        top: 25%;
+      }
+      .dz-details {
+        background-color: #333;
+      }
+      .dz-error-message {
+        top: 0;
       }
     }
     .dropzone.dz-drag-hover {

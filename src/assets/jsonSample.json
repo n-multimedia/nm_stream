@@ -116,7 +116,16 @@
       "created": 1511175031,
       "updated": 1511175031,
       "attachments": [],
-      "privacy": 4,
+      "privacy": {
+        "privacyDefault": 4,
+        "privacyOptions": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ]
+      },
       "contextNid": {
         "nid": 555,
         "title": "Introduction to IT science",
@@ -155,7 +164,16 @@
       "created": 1491175031,
       "updated": 1491022031,
       "attachments": [],
-      "privacy": 4,
+      "privacy": {
+        "privacyDefault": 4,
+        "privacyOptions": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ]
+      },
       "contextNid": {
         "nid": 555,
         "title": "Introduction to IT science",
@@ -242,7 +260,16 @@
       "created": 1451175031,
       "updated": 1451175031,
       "attachments": [],
-      "privacy": 1
+      "privacy": {
+        "privacyDefault": 4,
+        "privacyOptions": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ]
+      }
     },
     {
       "uid": 10,
@@ -300,7 +327,16 @@
       "created": 1421175031,
       "updated": 1421175031,
       "attachments": [],
-      "privacy": 4,
+      "privacy": {
+        "privacyDefault": 4,
+        "privacyOptions": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ]
+      },
       "contextNid": {
         "nid": 555,
         "title": "Introduction to IT science",
@@ -339,7 +375,16 @@
       "created": 1401175031,
       "updated": 1401175031,
       "attachments": [],
-      "privacy": 1
+      "privacy": {
+        "privacyDefault": 4,
+        "privacyOptions": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ]
+      }
     },
     {
       "uid": 3,
