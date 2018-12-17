@@ -13,8 +13,8 @@
                 <div class="col-12">
                   <div v-if="canEdit || canDelete">
                     <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right" offset="-120">
-                      <b-dropdown-item v-on:click="edit()" v-if="canEdit">t('Edit')</b-dropdown-item>
-                      <b-dropdown-item v-if="canDelete">t('Delete')</b-dropdown-item>
+                      <b-dropdown-item v-if="canEdit" v-on:click="editComment">t('Edit')</b-dropdown-item>
+                      <b-dropdown-item v-if="canDelete" v-on:click="deleteComment">t('Delete')</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="username"><a :href="user.profileUrl">{{user.name}}</a></div>
@@ -58,9 +58,12 @@ export default {
     }
   },
   methods: {
-    edit (event) {
+    editComment (event) {
       this.$el.classList.add('flip-active')
       this.$refs.streamCommentForm.resizeCommentFormContainer()
+    },
+    deleteComment (event) {
+      console.log('delete comment')
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')

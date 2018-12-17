@@ -237,6 +237,8 @@ export default {
     text-align: left;
     // min-height: 190px;
     overflow: visible !important;
+    position: relative;
+    z-index: 1000;
   }
 
   .stream-action-1 {

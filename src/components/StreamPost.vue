@@ -16,8 +16,8 @@
                   </div>
                   <div v-if="canEdit || canDelete">
                     <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right" offset="-120">
-                      <b-dropdown-item v-on:click="edit()" v-if="canEdit">t('Edit')</b-dropdown-item>
-                      <b-dropdown-item v-if="canDelete">t('Delete')</b-dropdown-item>
+                      <b-dropdown-item v-if="canEdit" v-on:click="editPost">t('Edit')</b-dropdown-item>
+                      <b-dropdown-item v-if="canDelete" v-on:click="deletePost">t('Delete')</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="username"><a :href="post.user.profileUrl">{{post.user.name}}</a></div>
@@ -78,6 +78,11 @@
         </div>
       </div>
     </div>
+    <!-- Modal Component -->
+    <!--<b-modal :id="modalID" >
+      <div class="d-block">Hello From My Modal!</div>
+      <b-btn>Close Me</b-btn>
+    </b-modal>-->
   </div>
 </template>
 
@@ -108,6 +113,9 @@ export default {
           return a.created < b.created
         })
       }
+    },
+    modalID: function () {
+      return 'modal-delete' + this.post.nid
     }
   },
   mounted: function () {
@@ -115,13 +123,17 @@ export default {
     this.loadPrivacyValue()
   },
   methods: {
-    edit (event) {
+    editPost (event) {
       this.showComments = false
       // hide comments and show back
       setTimeout(() => {
         this.$el.classList.add('flip-active')
         this.$refs.streamPostForm.resizePostFormContainer()
       }, 200)
+    },
+    deletePost (event) {
+      console.log('delete')
+      // this.$root.$emit('bv::show::modal', this.modalID)
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
@@ -136,8 +148,11 @@ export default {
 <style lang="scss" scoped>
   .card-flip {
     position: relative;
-    &:hover {
+    &.flip-active {
       z-index: 999;
+    }
+    &.flip-active:hover {
+      z-index: 1000;
     }
   }
   .stream-post {
