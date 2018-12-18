@@ -141,9 +141,16 @@ Flipping
 
 .card-flip,
 .front,
-.back {
+.back-delete,
+.back-edit {
   width: 100%;
   // height: 480px;
+}
+
+.back-delete {
+  button {
+    margin-left: 10px;
+  }
 }
 
 .flip {
@@ -153,14 +160,16 @@ Flipping
 }
 
 .front,
-.back {
+.back-delete,
+.back-edit {
   backface-visibility: hidden;
   // position: absolute;
   // top: 0;
   // left: 0;
 }
 
-.back {
+.back-delete,
+.back-edit {
   position: absolute;
   top: 0;
   left: 0;
@@ -172,7 +181,8 @@ Flipping
   transform: rotateY(0deg);
 }
 
-.back {
+.back-delete,
+.back-edit {
   transform: rotateY(180deg);
 }
 </style>

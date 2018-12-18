@@ -67,7 +67,7 @@
           </div>
         </div>
       </div>
-      <div class="back">
+      <div class="back-edit" ref="backEdit">
         <div class="stream-post card">
           <stream-post-form ref="streamPostForm"
             :streamOptions="streamOptions"
@@ -75,6 +75,21 @@
             v-on:edit-canceled="editCanceled()"
           >
           </stream-post-form>
+        </div>
+      </div>
+      <div class="back-delete" ref="backDelete">
+        <div class="stream-post card">
+          <h3>t("Do you really want to delete this Post")</h3>
+          <br/>
+          <p>
+            t("You are about to delete the post. This action can not be undone.")
+          </p>
+          <br/>
+          <div class="float-right">
+            <button class="btn btn-outline-danger float-right">t('Delete')</button>
+            <button class="btn btn-outline-secondary float-right">t('Cancel')</button>
+          </div>
+
         </div>
       </div>
     </div>
@@ -129,11 +144,22 @@ export default {
       setTimeout(() => {
         this.$el.classList.add('flip-active')
         this.$refs.streamPostForm.resizePostFormContainer()
+
+        this.$refs.backDelete.classList.add('hide')
+        this.$refs.backEdit.classList.remove('hide')
       }, 200)
     },
     deletePost (event) {
       console.log('delete')
-      // this.$root.$emit('bv::show::modal', this.modalID)
+      this.showComments = false
+      // hide comments and show back
+      setTimeout(() => {
+        this.$el.classList.add('flip-active')
+        // this.$refs.streamPostForm.resizePostFormContainer()
+
+        this.$refs.backEdit.classList.add('hide')
+        this.$refs.backDelete.classList.remove('hide')
+      }, 200)
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
@@ -194,6 +220,7 @@ export default {
     .post-privacy {
       padding: 20px 0;
     }
+
   }
 </style>
 
@@ -224,6 +251,10 @@ export default {
         display: none;
       }
     }
+  }
+
+  .hide {
+    display: none;
   }
 
 </style>

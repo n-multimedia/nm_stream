@@ -31,7 +31,7 @@
           </div>
         </div>
       </div>
-      <div class="back">
+      <div class="back-edit" ref="backEdit">
         <div class="stream-comment card">
           <stream-comment-form ref="streamCommentForm"
             :streamOptions="streamOptions"
@@ -39,6 +39,20 @@
             v-on:edit-canceled="editCanceled()"
           >
           </stream-comment-form>
+        </div>
+      </div>
+      <div class="back-delete" ref="backDelete">
+        <div class="stream-post card">
+          <h4>t("Do you really want to delete this Post")</h4>
+          <br/>
+          <p>
+            t("You are about to delete the comment. This action can not be undone.")
+          </p>
+          <div class="float-right">
+            <button class="btn btn-outline-danger float-right">t('Delete')</button>
+            <button class="btn btn-outline-secondary float-right">t('Cancel')</button>
+          </div>
+
         </div>
       </div>
     </div>
@@ -60,10 +74,22 @@ export default {
   methods: {
     editComment (event) {
       this.$el.classList.add('flip-active')
-      this.$refs.streamCommentForm.resizeCommentFormContainer()
+      // hide comments and show back
+      setTimeout(() => {
+        this.$refs.streamCommentForm.resizeCommentFormContainer()
+        this.$refs.backDelete.classList.add('hide')
+        this.$refs.backEdit.classList.remove('hide')
+      }, 200)
     },
     deleteComment (event) {
       console.log('delete comment')
+      // hide comments and show back
+      setTimeout(() => {
+        this.$el.classList.add('flip-active')
+
+        this.$refs.backEdit.classList.add('hide')
+        this.$refs.backDelete.classList.remove('hide')
+      }, 200)
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
