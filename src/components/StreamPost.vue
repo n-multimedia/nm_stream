@@ -22,7 +22,7 @@
                   </div>
                   <div class="username"><a :href="post.user.profileUrl">{{post.user.name}}</a></div>
                   <div class="created">
-                    <span :title="post.created | moment('L LT')"> {{ post.created | moment('from') }}
+                    <font-awesome-icon :icon="['far', 'clock']" /><span :title="post.created | moment('L LT')"> {{ post.created | moment('from') }}
                       <!--(am {{ post.created | moment("L") }} um {{ post.created | moment("LTS") }})--></span>
                   </div>
                 </div>
@@ -87,7 +87,7 @@
           <br/>
           <div class="float-right">
             <button class="btn btn-outline-danger float-right">t('Delete')</button>
-            <button class="btn btn-outline-secondary float-right">t('Cancel')</button>
+            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel">t('Cancel')</button>
           </div>
 
         </div>
@@ -141,13 +141,13 @@ export default {
     editPost (event) {
       this.showComments = false
       // hide comments and show back
+      this.$el.classList.add('flip-active')
       setTimeout(() => {
-        this.$el.classList.add('flip-active')
         this.$refs.streamPostForm.resizePostFormContainer()
-
-        this.$refs.backDelete.classList.add('hide')
-        this.$refs.backEdit.classList.remove('hide')
       }, 200)
+
+      this.$refs.backDelete.classList.add('hide')
+      this.$refs.backEdit.classList.remove('hide')
     },
     deletePost (event) {
       console.log('delete')
@@ -162,6 +162,9 @@ export default {
       }, 200)
     },
     editCanceled (event) {
+      this.$el.classList.remove('flip-active')
+    },
+    onDeleteCancel () {
       this.$el.classList.remove('flip-active')
     },
     loadPrivacyValue () {

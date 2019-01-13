@@ -89,7 +89,6 @@ export default {
       if (this.editPost) {
         this.$emit('edit-canceled')
         this.$parent.$el.querySelector('.stream-post').style.height = 'auto'
-
         // restore post values
         this.initializePost()
       } else {
@@ -99,6 +98,8 @@ export default {
         this.$el.querySelector('textarea.stream-post-body').blur()
         this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
       }
+
+      this.$refs.vueDropZome.removeAllFiles()
     },
     dragOver (event) {
       // enable editor

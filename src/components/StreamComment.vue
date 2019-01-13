@@ -50,7 +50,7 @@
           </p>
           <div class="float-right">
             <button class="btn btn-outline-danger float-right">t('Delete')</button>
-            <button class="btn btn-outline-secondary float-right">t('Cancel')</button>
+            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel()">t('Cancel')</button>
           </div>
 
         </div>
@@ -90,6 +90,9 @@ export default {
         this.$refs.backEdit.classList.add('hide')
         this.$refs.backDelete.classList.remove('hide')
       }, 200)
+    },
+    onDeleteCancel (event) {
+      this.$el.classList.remove('flip-active')
     },
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
