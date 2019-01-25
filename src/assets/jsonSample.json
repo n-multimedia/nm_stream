@@ -317,6 +317,11 @@
           4,
           6
         ]
+      },
+      "permissions": {
+        "canCreateComment": true,
+        "canEdit": false,
+        "canDelete": true
       }
     },
     {
@@ -452,6 +457,11 @@
           4,
           6
         ]
+      },
+      "permissions": {
+        "canCreateComment": true,
+        "canEdit": false,
+        "canDelete": true
       }
     },
     {

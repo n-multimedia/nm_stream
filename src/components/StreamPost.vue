@@ -51,7 +51,7 @@
           </div>
           <div class="row comments-wrapper">
             <div class="col-10 offset-2">
-              <stream-comment-form v-if="canEdit" v-bind:streamOptions="streamOptions"></stream-comment-form>
+              <stream-comment-form v-if="canCreateComment" v-bind:streamOptions="streamOptions"></stream-comment-form>
               <transition name="fade">
                 <div v-if="sortedComments.length > 0 && showComments === true">
                   <transition-group name="list">
@@ -122,6 +122,9 @@ export default {
       return this.post.permissions.canEdit
     },
     canDelete: function () {
+      return this.post.permissions.canDelete
+    },
+    canCreateComment: function () {
       return this.post.permissions.canDelete
     },
     sortedComments: function () {
