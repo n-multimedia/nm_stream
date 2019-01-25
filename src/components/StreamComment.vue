@@ -67,8 +67,8 @@ export default {
   name: 'stream-comment',
   data () {
     return {
-      canEdit: true,
-      canDelete: true
+      canEdit: this.comment.permissions.canEdit,
+      canDelete: this.comment.permissions.canDelete
     }
   },
   methods: {
