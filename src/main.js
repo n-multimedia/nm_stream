@@ -11,6 +11,8 @@ import { Multiselect } from 'vue-multiselect'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faClock } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import VueI18n from 'vue-i18n'
+import de from './i18n/de_DE'
 
 library.add(faClock)
 
@@ -21,6 +23,7 @@ Vue.component('multiselect', Multiselect)
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(VueLodash)
+Vue.use(VueI18n)
 
 const moment = require('moment')
 require('moment/locale/de')
@@ -29,8 +32,15 @@ Vue.use(require('vue-moment'), {
   moment
 })
 
+// Create VueI18n instance with options
+const i18n = new VueI18n({
+  locale: 'de', // set locale
+  messages: de
+})
+
 /* eslint-disable no-new */
 window.stream = new Vue({
+  i18n,
   el: '#stream',
   components: {Stream},
   template: '<stream ref="stream"></stream>',

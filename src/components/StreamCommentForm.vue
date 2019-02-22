@@ -7,14 +7,14 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="resetForm" v-model="bodyText" v-on:focus="formActive = true" placeholder="t('Your comment')"></textarea>
+        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="resetForm" v-model="bodyText" v-on:focus="formActive = true" :placeholder="$t('placeholder.your_comment_message')"></textarea>
         <transition name="fade">
           <div class="row stream-action-2" :key="formActive">
             <div class="col-12">
               <div class="row">
                 <div class="col-12 action-buttons" v-if="formActive">
-                  <button class="btn btn-outline-primary stream-comment-post float-right">t('Post')</button>
-                  <button class="btn btn-outline-secondary stream-comment-cancel float-right" v-on:click="resetForm">t('Cancel')</button>
+                  <button class="btn btn-outline-primary stream-comment-post float-right">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-secondary stream-comment-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
                 </div>
               </div>
             </div>

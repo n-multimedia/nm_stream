@@ -16,8 +16,8 @@
                   </div>
                   <div v-if="canEdit || canDelete">
                     <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right" offset="-120">
-                      <b-dropdown-item v-if="canEdit" v-on:click="editPost">t('Edit')</b-dropdown-item>
-                      <b-dropdown-item v-if="canDelete" v-on:click="deletePost">t('Delete')</b-dropdown-item>
+                      <b-dropdown-item v-if="canEdit" v-on:click="editPost">{{ $t('button.edit') }}</b-dropdown-item>
+                      <b-dropdown-item v-if="canDelete" v-on:click="deletePost">{{ $t('button.delete') }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="username"><a :href="post.user.profileUrl">{{post.user.name}}</a></div>
@@ -34,14 +34,14 @@
               </div>
               <div class="row">
                 <div class="col-7">
-                  <div class="stream-post-attachments" v-if="post.attachments.length > 0">t('Attachments')</div>
+                  <div class="stream-post-attachments" v-if="post.attachments.length > 0">{{ $t('label.attachments') }}</div>
                   <div class="stream-post-footer">
                     <div v-if="sortedComments.length > 0">
                       <transition name="slide-fade">
-                        <a href="#" v-if="!showComments" key="true" v-on:click.prevent="showComments = !showComments">t("Show
-                          {{sortedComments.length}} comments")</a>
-                        <a href="#" v-else key="false" v-on:click.prevent="showComments = !showComments">t("Hide
-                          {{sortedComments.length}} comments")</a>
+                        <a href="#" v-if="!showComments" key="true" v-on:click.prevent="showComments = !showComments">
+                          {{ $t('link.show_x_comments', { count: sortedComments.length }) }}
+                        </a>
+                        <a href="#" v-else key="false" v-on:click.prevent="showComments = !showComments">{{ $t('link.hide_x_comments', { count: sortedComments.length }) }}</a>
                       </transition>
                     </div>
                   </div>
@@ -79,15 +79,15 @@
       </div>
       <div class="back-delete" ref="backDelete">
         <div class="stream-post card">
-          <h3>t("Do you really want to delete this Post")</h3>
+          <h3>{{ $t('warning.delete_post_really_want_to') }}</h3>
           <br/>
           <p>
-            t("You are about to delete the post. This action can not be undone.")
+            {{ $t('warning.delete_post_action_cannot_be_undone') }}
           </p>
           <br/>
           <div class="float-right">
-            <button class="btn btn-outline-danger float-right">t('Delete')</button>
-            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel">t('Cancel')</button>
+            <button class="btn btn-outline-danger float-right">{{ $t('button.delete') }}</button>
+            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel">{{ $t('button.cancel') }}</button>
           </div>
 
         </div>

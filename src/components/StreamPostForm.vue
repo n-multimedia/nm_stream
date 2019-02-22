@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-post-body" name="body" v-on:keyup.esc="resetForm" v-on:focus="formActive = true" v-model="bodyText" placeholder="t('Your message')"></textarea>
+        <textarea class="stream-post-body" name="body" v-on:keyup.esc="resetForm" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <div class="row stream-action-1">
           <transition name="fade">
             <div class="col-12 stream-attachments" v-if="formActive" :key="formActive">
@@ -34,7 +34,7 @@
               <transition name="fade">
                 <div class="col-12 action-buttons" v-if="formActive" :key="formActive">
                   <div class="stream-post-privacy-settings" v-if="privacyOptions.length > 0">
-                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :show-labels="false" :allow-empty="false" placeholder="t('Select privacy setting')">
+                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')">
                       <template slot="singleLabel" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title">
                         <span class="option__desc"><span class="option__title">{{ props.option.title }}</span></span>
                       </template>
@@ -43,8 +43,8 @@
                       </template>
                     </multiselect>
                   </div>
-                  <button class="btn btn-outline-primary stream-post-post float-right">t('Post')</button>
-                  <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm">t('Cancel')</button>
+                  <button class="btn btn-outline-primary stream-post-post float-right">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
                 </div>
               </transition>
             </div>
@@ -223,7 +223,7 @@ export default {
         addRemoveLinks: true,
         maxFilesize: 20,
         headers: {'My-Awesome-Header': 'header value'},
-        dictDefaultMessage: "<i class='fa fa-cloud-upload'></i>t('Upload files')"
+        dictDefaultMessage: "<i class='fa fa-cloud-upload'></i> " + this.$t('label.upload_files')
       }
     }
   }

@@ -43,14 +43,14 @@
       </div>
       <div class="back-delete" ref="backDelete">
         <div class="stream-post card">
-          <h4>t("Do you really want to delete this Post")</h4>
+          <h4>{{ $t('warning.delete_comment_action_cannot_be_undone') }}</h4>
           <br/>
           <p>
-            t("You are about to delete the comment. This action can not be undone.")
+            {{ $t('warning.delete_comment_action_cannot_be_undone') }}
           </p>
           <div class="float-right">
-            <button class="btn btn-outline-danger float-right">t('Delete')</button>
-            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel()">t('Cancel')</button>
+            <button class="btn btn-outline-danger float-right">{{ $t('button.delete') }}</button>
+            <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel()">{{ $t('button.cancel') }}</button>
           </div>
 
         </div>

@@ -1,0 +1,29 @@
+{
+  "de": {
+    "placeholder": {
+      "your_post_message": "Ihre Nachricht",
+      "your_comment_message": "Ihr Kommentar"
+    },
+    "label": {
+      "attachments": "Anhänge",
+      "upload_files": "Dateien hochladen"
+    },
+    "link": {
+      "show_x_comments": "{count} Kommentare anzeigen",
+      "hide_x_comments": "{count} Kommentare verstecken"
+    },
+    "button": {
+      "cancel": "Abbrechen",
+      "post": "Teilen",
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "select_privacy": "Sichtbarkeit festlegen"
+    },
+    "warning": {
+      "delete_post_really_want_to": "Möchten Sie den Beitrag wirklich löschen?",
+      "delete_post_action_cannot_be_undone": "Sie sind dabei einen Beitrag zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "delete_comment_really_want_to": "Möchten Sie den Kommentar wirklich löschen?",
+      "delete_comment_action_cannot_be_undone": "Sie sind dabei einen Kommentar zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
+    }
+  }
+}
