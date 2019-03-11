@@ -13,7 +13,7 @@
             <div class="col-12">
               <div class="row">
                 <div class="col-12 action-buttons" v-if="formActive">
-                  <button class="btn btn-outline-primary stream-comment-post float-right">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-primary stream-comment-post float-right" v-on:click="saveComment">{{ $t('button.post') }}</button>
                   <button class="btn btn-outline-secondary stream-comment-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
                 </div>
               </div>
@@ -25,8 +25,11 @@
   </div>
 </template>
 <script>
+
+import Vue from 'vue'
+
 export default {
-  props: ['streamOptions', 'editComment'],
+  props: ['streamOptions', 'post', 'editComment'],
   name: 'stream-comment-form',
   methods: {
     resizeTextarea (event) {
@@ -36,7 +39,51 @@ export default {
     resizeCommentFormContainer () {
       // resizing post relevant for edit mode only
       if (this.editComment) {
-        this.$parent.$el.querySelector('.stream-comment').style.height = (130 + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        this.$parent.$el.querySelector('.stream-comment').style.height = (140 + this.$el.querySelector('textarea').scrollHeight) + 'px'
+      }
+    },
+    saveComment () {
+      let self = this
+
+      let commentData = {}
+      commentData.body = this.bodyText
+
+      if (this.editComment) {
+        let apiCommentUpdateUrl = this.$config.get('api.apiCommentUpdateUrl').replace('%comment', this.editComment.cid).replace('%token', this.streamOptions.token)
+        // edit post => update
+        Vue.axios.post(apiCommentUpdateUrl, commentData, {withCredentials: true}).then((response) => {
+          // ?? close form before request
+          // or just show spinner instead
+          self.resetForm()
+
+          if (response.data.status === 1) {
+            self.editComment.body = commentData.body
+
+            // refresh form values
+            self.resetForm()
+          } else {
+            // an error occured
+            // TODO error hadling
+          }
+        })
+      } else {
+        let apiComementAddUrl = this.$config.get('api.apiCommentAddUrl').replace('%node', this.post.nid).replace('%token', this.streamOptions.token)
+
+        // TODO show spinner
+        Vue.axios.post(apiComementAddUrl, commentData, {withCredentials: true}).then((response) => {
+          self.resetForm()
+
+          if (response.data.status === 1) {
+            // post added successfully
+            let commentData = response.data.commentData
+            let userData = response.data.userData
+            self.$emit('stream-comment-added', commentData)
+            self.$emit('stream-user-added', userData)
+          } else {
+            // an error occured
+            // TODO error hadling
+          }
+        })
       }
     },
     resizeTextareaElement (textarea) {
@@ -46,7 +93,7 @@ export default {
     resetForm () {
       // editPost
       if (this.editComment) {
-        this.$emit('edit-canceled')
+        this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-comment').style.height = 'auto'
 
         // restore post values

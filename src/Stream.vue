@@ -1,14 +1,19 @@
 <template>
   <div id="stream" class="container">
     <stream-post-form
-      :streamOptions="streamOptions">
-    </stream-post-form>
+      :streamOptions="streamOptions"
+      v-on:stream-post-added="addPost"
+    />
     <transition-group name="list">
       <stream-post v-for="post in sortedPosts"
                    :key="post.nid"
                    :post="getLoadedPost(post)"
                    :comments="getNodeComments(post.nid)"
-                   :streamOptions="streamOptions"/>
+                   :streamOptions="streamOptions"
+                   v-on:stream-post-deleted="deletePost"
+                   v-on:stream-comment-added="addComment"
+                   v-on:stream-user-added="addUser"
+      />
     </transition-group>
   </div>
 </template>
@@ -18,6 +23,7 @@ import Vue from 'vue'
 import StreamPost from './components/StreamPost'
 import StreamPostForm from './components/StreamPostForm'
 import StreamComment from './components/StreamComment'
+import ContentService from './services/ContentService'
 import StreamOptions from './models/StreamOptions'
 
 export default {
@@ -29,14 +35,13 @@ export default {
       streamOptions: [],
       comments: [],
       users: [],
-      loggedInUser: 1
+      loggedInUser: 1,
+      contentService: new ContentService()
     }
   },
   computed: {
     sortedPosts: function () {
-      return this.posts.slice().sort((a, b) => {
-        return a.created < b.created
-      })
+      return Vue._.orderBy(this.posts, 'created', 'desc')
     }
   },
   methods: {
@@ -44,14 +49,38 @@ export default {
       console.log('initialize')
       this.getPosts()
     },
+    addPost: function (post) {
+      this.posts.push(post)
+    },
+    deletePost: function (post) {
+      let postListIndex = this.posts.indexOf(post)
+      this.posts.splice(postListIndex, 1)
+    },
+    addComment: function (comment) {
+      this.comments.push(comment)
+    },
+    addUser: function (user) {
+      if (!this.getUser(user.uid)) {
+        this.users.push(user)
+      }
+    },
     getPosts: function () {
-      this.posts = require('./assets/jsonSample.json').posts
-      this.users = require('./assets/jsonSample.json').users
-      this.comments = require('./assets/jsonSample.json').comments
-      this.streamOptions = new StreamOptions()
-      this.streamOptions.privacyOptions = require('./assets/jsonSample.json').stream.privacyOptions
-      this.streamOptions.privacyDefault = require('./assets/jsonSample.json').stream.privacyDefault
-      this.streamOptions.loggedInUser = this.getUser(require('./assets/jsonSample.json').stream.loggedInUser)
+      let self = this
+      Vue.axios.get(this.$config.get('api.apiInitUrl'), {withCredentials: true}).then((response) => {
+        self.posts = response.data.stream.posts
+        self.users = response.data.stream.users
+        self.comments = response.data.stream.comments
+        self.streamOptions = new StreamOptions()
+        self.streamOptions.privacyOptions = response.data.stream.privacyOptions
+        self.streamOptions.privacyDefault = response.data.stream.privacyDefault
+        self.streamOptions.loggedInUser = this.getUser(response.data.stream.loggedInUser)
+        self.streamOptions.token = response.data.stream.token
+        self.streamOptions.contextNID = response.data.stream.contextNID
+        self.streamOptions.containerNID = response.data.stream.containerNID
+
+        // this.$emit('content:updated', response.data.stream)
+        // console.log(self.posts)
+      })
     },
     getUser: function (uid) {
       return Vue._.find(this.users, ['uid', uid])

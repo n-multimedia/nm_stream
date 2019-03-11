@@ -1,5 +1,6 @@
 {
   "stream": {
+    "containerNID": null,
     "contextNID": null,
     "privacyDefault": 4,
     "permissions": {

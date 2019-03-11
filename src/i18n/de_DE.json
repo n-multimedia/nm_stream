@@ -6,7 +6,8 @@
     },
     "label": {
       "attachments": "Anhänge",
-      "upload_files": "Dateien hochladen"
+      "upload_files": "Dateien hochladen",
+      "attachment_delete": "Anhang löschen"
     },
     "link": {
       "show_x_comments": "{count} Kommentare anzeigen",
@@ -17,10 +18,12 @@
       "post": "Teilen",
       "edit": "Bearbeiten",
       "delete": "Löschen",
-      "select_privacy": "Sichtbarkeit festlegen"
+      "select_privacy": "Sichtbarkeit festlegen",
+      "delete_attachment": "Anhang löschen"
     },
     "warning": {
       "delete_post_really_want_to": "Möchten Sie den Beitrag wirklich löschen?",
+      "delete_attachment_really_want_to": "Möchten Sie den Anhang wirklich löschen?",
       "delete_post_action_cannot_be_undone": "Sie sind dabei einen Beitrag zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
       "delete_comment_really_want_to": "Möchten Sie den Kommentar wirklich löschen?",
       "delete_comment_action_cannot_be_undone": "Sie sind dabei einen Kommentar zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."

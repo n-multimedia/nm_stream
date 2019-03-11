@@ -1,7 +1,10 @@
 export default class StreamOptions {
-  construct () {
+  constructor () {
     this.privacyDefault = ''
-    this.privacyOptions = ''
+    this.privacyOptions = []
     this.loggedInUser = ''
+    this.containerNID = ''
+    this.contextNID = ''
+    this.token = ''
   }
 }

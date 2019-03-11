@@ -13,8 +13,8 @@
                 <div class="col-12">
                   <div v-if="canEdit || canDelete">
                     <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right" offset="-120">
-                      <b-dropdown-item v-if="canEdit" v-on:click="editComment">t('Edit')</b-dropdown-item>
-                      <b-dropdown-item v-if="canDelete" v-on:click="deleteComment">t('Delete')</b-dropdown-item>
+                      <b-dropdown-item v-if="canEdit" v-on:click="editComment">{{ $t('button.edit') }}</b-dropdown-item>
+                      <b-dropdown-item v-if="canDelete" v-on:click="deleteComment">{{ $t('button.delete') }}</b-dropdown-item>
                     </b-dropdown>
                   </div>
                   <div class="username"><a :href="user.profileUrl">{{user.name}}</a></div>
@@ -24,7 +24,7 @@
               </div>
               <div class="row">
                 <div class="col-12 body">
-                  {{comment.body}}
+                  <nl2br tag="p" :text="comment.body" />
                 </div>
               </div>
             </div>
@@ -36,7 +36,7 @@
           <stream-comment-form ref="streamCommentForm"
             :streamOptions="streamOptions"
             :editComment="comment"
-            v-on:edit-canceled="editCanceled()"
+            v-on:form-edit-canceled="editCanceled()"
           >
           </stream-comment-form>
         </div>

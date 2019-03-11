@@ -34,7 +34,7 @@
               <transition name="fade">
                 <div class="col-12 action-buttons" v-if="formActive" :key="formActive">
                   <div class="stream-post-privacy-settings" v-if="privacyOptions.length > 0">
-                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')">
+                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :searchable="false" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')">
                       <template slot="singleLabel" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title">
                         <span class="option__desc"><span class="option__title">{{ props.option.title }}</span></span>
                       </template>
@@ -43,7 +43,7 @@
                       </template>
                     </multiselect>
                   </div>
-                  <button class="btn btn-outline-primary stream-post-post float-right">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-primary stream-post-post float-right" v-on:click="savePost">{{ $t('button.post') }}</button>
                   <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
                 </div>
               </transition>
@@ -84,17 +84,66 @@ export default {
       textarea.style.height = 'auto'
       textarea.style.height = (textarea.scrollHeight) + 'px'
     },
+    savePost () {
+      let self = this
+
+      let nodeData = {}
+      nodeData.body = this.bodyText
+      nodeData.privacy = this.privacyValue.value
+
+      if (this.editPost) {
+        let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
+        // edit post => update
+        Vue.axios.post(apiNodeUpdateUrl, nodeData, {withCredentials: true}).then((response) => {
+          // ?? close form before request
+          // or just show spinner instead
+          self.resetForm()
+
+          if (response.data.status === 1) {
+            self.editPost.body = nodeData.body
+            self.editPost.privacy.privacyDefault = nodeData.privacy
+
+            // refresh form values
+            self.resetForm()
+          } else {
+            // an error occured
+            // TODO error hadling
+          }
+        })
+      } else {
+        let apiNodeAddUrl = this.$config.get('api.apiPostAddUrl').replace('%token', this.streamOptions.token)
+
+        // set container and context nodes from global streamOptions config
+        nodeData.containerNID = this.streamOptions.containerNID
+        nodeData.contextNID = this.streamOptions.contextNID
+
+        // TODO show spinner
+        Vue.axios.post(apiNodeAddUrl, nodeData, {withCredentials: true}).then((response) => {
+          self.resetForm()
+
+          if (response.data.status === 1) {
+            // post added successfully
+            let nodeData = response.data.nodeData
+            self.$emit('stream-post-added', nodeData)
+          } else {
+            // an error occured
+            // TODO error hadling
+          }
+        })
+      }
+    },
     resetForm () {
       // editPost
       if (this.editPost) {
-        this.$emit('edit-canceled')
+        this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-post').style.height = 'auto'
         // restore post values
         this.initializePost()
       } else {
         this.formActive = false
         this.bodyText = ''
-        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', this.privacyDefault])
+        let valueKeyInteger = parseInt(this.privacyDefault)
+        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
         this.$el.querySelector('textarea.stream-post-body').blur()
         this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
       }
@@ -148,8 +197,11 @@ export default {
 
         // override privacy options
         this.privacyDefault = this.editPost.privacy.privacyDefault
+
         this.privacyOptions = this.loadPrivacyOptions(this.editPost.privacy.privacyOptions)
-        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', this.privacyDefault])
+        let valueKeyInteger = parseInt(this.privacyDefault)
+        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
+
         // resize textarea
         this.$nextTick(() => {
           this.resizeTextareaElement(this.$el.querySelector('textarea'))
@@ -171,7 +223,8 @@ export default {
           this.privacyOptions = this.streamOptions.privacyOptions
           this.privacyDefault = this.streamOptions.privacyDefault
         }
-        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', this.privacyDefault])
+        let valueKeyInteger = parseInt(this.privacyDefault)
+        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
       }
       this.loggedInUser = this.streamOptions.loggedInUser
 

@@ -10,8 +10,8 @@
             </div>
             <div class="col-10">
               <div class="row">
-                <div class="col-12">
-                  <div v-if="this.privacy !== null" class="float-right">
+                <div class="col-12 post-header">
+                  <div v-if="this.privacy !== null" class="post-privacy-wrapper float-right">
                     <img class="post-privacy" :src="privacy.img" :alt="privacy.title" :title="privacy.title">
                   </div>
                   <div v-if="canEdit || canDelete">
@@ -29,12 +29,21 @@
               </div>
               <div class="row">
                 <div class="col-12 body">
-                  {{post.body}}
+                  <nl2br tag="p" :text="post.body" />
                 </div>
               </div>
               <div class="row">
-                <div class="col-7">
-                  <div class="stream-post-attachments" v-if="post.attachments.length > 0">{{ $t('label.attachments') }}</div>
+                <div class="col-12">
+                  <div class="stream-post-attachments" v-if="post.attachments.length > 0">
+                    <font-awesome-icon :icon="['far', 'file']" /> {{ $t('label.attachments') }}
+                    <ul>
+                      <li :key="attachment.fid" v-for="attachment in post.attachments">
+                        <span v-html="attachment.download_link"></span>
+                        <!-- todo delete attachment action -->
+                        <a href="#"  :title="$t('button.delete_attachment')" class="attachment-trash-delete" v-if="attachment.permissions.canDelete" v-on:click.prevent="onAttachmentDeleteConf(attachment)"><font-awesome-icon :icon="['far', 'trash-alt']" /></a>
+                      </li>
+                    </ul>
+                  </div>
                   <div class="stream-post-footer">
                     <div v-if="sortedComments.length > 0">
                       <transition name="slide-fade">
@@ -51,7 +60,10 @@
           </div>
           <div class="row comments-wrapper">
             <div class="col-10 offset-2">
-              <stream-comment-form v-if="canCreateComment" v-bind:streamOptions="streamOptions"></stream-comment-form>
+              <stream-comment-form v-if="canCreateComment" v-bind:streamOptions="streamOptions"
+                                   v-on:stream-user-added="addUser"
+                                   v-on:stream-comment-added="addComment"
+                                   :post="post"></stream-comment-form>
               <transition name="fade">
                 <div v-if="sortedComments.length > 0 && showComments === true">
                   <transition-group name="list">
@@ -72,7 +84,7 @@
           <stream-post-form ref="streamPostForm"
             :streamOptions="streamOptions"
             :editPost="post"
-            v-on:edit-canceled="editCanceled()"
+            v-on:form-edit-canceled="editCanceled()"
           >
           </stream-post-form>
         </div>
@@ -86,7 +98,7 @@
           </p>
           <br/>
           <div class="float-right">
-            <button class="btn btn-outline-danger float-right">{{ $t('button.delete') }}</button>
+            <button class="btn btn-outline-danger float-right" v-on:click="onDeleteSubmit">{{ $t('button.delete') }}</button>
             <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel">{{ $t('button.cancel') }}</button>
           </div>
 
@@ -98,6 +110,13 @@
       <div class="d-block">Hello From My Modal!</div>
       <b-btn>Close Me</b-btn>
     </b-modal>-->
+    <b-modal ref="postDeleteAttachmentConf" hide-footer :title="$t('label.attachment_delete')">
+      <div class="d-block text-center">
+        {{ $t('warning.delete_attachment_really_want_to') }}
+      </div>
+      <b-button class="mt-3" variant="" block @click="hideModal">{{ $t('button.cancel') }}</b-button>
+      <b-button class="mt-3" variant="outline-danger" block @click="onAttachmentDelete()">{{ $t('button.delete') }}</b-button>
+    </b-modal>
   </div>
 </template>
 
@@ -114,7 +133,7 @@ export default {
   data () {
     return {
       showComments: false,
-      privacy: null
+      curDeleteAttachment: null
     }
   },
   computed: {
@@ -125,24 +144,18 @@ export default {
       return this.post.permissions.canDelete
     },
     canCreateComment: function () {
-      return this.post.permissions.canDelete
+      return true
     },
     sortedComments: function () {
-      if (!this.comments) {
-        return []
-      } else {
-        return this.comments.slice().sort((a, b) => {
-          return a.created < b.created
-        })
-      }
+      return Vue._.orderBy(this.comments, 'created', 'desc')
     },
     modalID: function () {
       return 'modal-delete' + this.post.nid
+    },
+    privacy: function () {
+      let valueKeyInteger = parseInt(this.post.privacy.privacyDefault)
+      return Vue._.filter(this.streamOptions.privacyOptions, ['value', valueKeyInteger])[0]
     }
-  },
-  mounted: function () {
-    // set privacy value by ID
-    this.loadPrivacyValue()
   },
   methods: {
     editPost (event) {
@@ -171,11 +184,49 @@ export default {
     editCanceled (event) {
       this.$el.classList.remove('flip-active')
     },
+    onDeleteSubmit () {
+      let self = this
+      let apiNodeDeleteUrl = this.$config.get('api.apiPostDeleteUrl').replace('%node', this.post.nid).replace('%token', this.streamOptions.token)
+
+      // TODO show spinner
+      Vue.axios.get(apiNodeDeleteUrl, {withCredentials: true}).then((response) => {
+        if (response.data.status === 1) {
+          // post deleted successfully
+          self.$emit('stream-post-deleted', self.post)
+          this.$el.classList.remove('flip-active')
+        } else {
+          // an error occured
+          // TODO error hadling
+        }
+      })
+    },
     onDeleteCancel () {
       this.$el.classList.remove('flip-active')
     },
-    loadPrivacyValue () {
-      this.privacy = Vue._.filter(this.streamOptions.privacyOptions, ['value', this.post.privacy.privacyDefault]).pop()
+    onAttachmentDeleteConf (attachment) {
+      this.$refs.postDeleteAttachmentConf.show()
+      this.curDeleteAttachment = attachment
+    },
+    addUser (user) {
+      this.$emit('stream-user-added', user)
+    },
+    addComment (comment) {
+      this.showComments = true
+      this.$emit('stream-comment-added', comment)
+    },
+    hideModal () {
+      this.$refs.postDeleteAttachmentConf.hide()
+      this.curDeleteAttachment = null
+    },
+    onAttachmentDelete () {
+      let attachment = this.curDeleteAttachment
+      let self = this
+      let apiAttachmentDeleteUrl = this.$config.get('api.apiAttachmentDeleteUrl').replace('%node', self.post.nid).replace('%file', attachment.fid).replace('%token', this.streamOptions.token)
+      Vue.axios.get(apiAttachmentDeleteUrl, {withCredentials: true}).then((response) => {
+        // success ? response ready ;) - need to recheck
+        self.post.attachments.splice(self.post.attachments.indexOf(attachment), 1)
+      })
+      this.hideModal()
     }
   }
 }
@@ -204,9 +255,22 @@ export default {
     .created {
       color: #aaa;
     }
+
+    .stream-post-attachments {
+      color: #333;
+
+      ul {
+        margin-top: 15px;
+        list-style: none;
+        padding: 0;
+        margin-bottom: 30px;
+      }
+
+    }
+
     .body {
       padding-top: 1em;
-      padding-bottom: 1.5em;
+      padding-bottom: 1.0em;
     }
 
     .comments-wrapper {
@@ -227,8 +291,14 @@ export default {
       }
     }
 
+    .post-header {
+    }
+
+    .post-privacy-wrapper {
+    }
     .post-privacy {
-      padding: 20px 0;
+      top: 5px;
+      position: relative;
     }
 
   }
@@ -236,6 +306,8 @@ export default {
 
 <style lang="scss">
   .post-actions-dropdown {
+    margin: 0 !important;
+
     &.show {
       button {
         background-color: transparent !important;
@@ -249,7 +321,7 @@ export default {
       border: none;
       color: #aaa;
       transform: rotate(-90deg);
-      padding-tio: 0;
+      padding-top: 0;
       font-weight: bold;
       font-size: 20px;
       &:hover {
@@ -260,6 +332,13 @@ export default {
       &.dropdown-toggle::after {
         display: none;
       }
+    }
+  }
+
+  .stream-post-attachments {
+    img.file-icon {
+      vertical-align: top;
+      margin-top: 2px;
     }
   }
 

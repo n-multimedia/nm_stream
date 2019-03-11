@@ -9,12 +9,17 @@ import 'vue-multiselect/dist/vue-multiselect.min.css'
 import VueLodash from 'vue-lodash'
 import { Multiselect } from 'vue-multiselect'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faClock } from '@fortawesome/free-regular-svg-icons'
+import { faClock, faFile, faTrashAlt } from '@fortawesome/free-regular-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueI18n from 'vue-i18n'
 import de from './i18n/de_DE'
+import axios from 'axios'
+import VueAxios from 'vue-axios'
+import Nl2br from 'vue-nl2br'
+import VueConfig from 'vue-configuration'
+import appConfig from './assets/config.js'
 
-library.add(faClock)
+library.add(faClock, faFile, faTrashAlt)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
@@ -24,6 +29,11 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(VueLodash)
 Vue.use(VueI18n)
+Vue.use(VueAxios, axios)
+Vue.use(VueConfig, {
+  config: appConfig
+})
+Vue.component('nl2br', Nl2br)
 
 const moment = require('moment')
 require('moment/locale/de')
