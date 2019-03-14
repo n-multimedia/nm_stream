@@ -71,6 +71,7 @@
                                     :streamOptions="streamOptions"
                                     :key="comment.cid"
                                     :comment="comment"
+                                    v-on:stream-comment-deleted="deleteComment"
                                     :user="comment.user"/>
                   </transition-group>
                 </div>
@@ -82,9 +83,9 @@
       <div class="back-edit" ref="backEdit">
         <div class="stream-post card">
           <stream-post-form ref="streamPostForm"
-            :streamOptions="streamOptions"
-            :editPost="post"
-            v-on:form-edit-canceled="editCanceled()"
+                            :streamOptions="streamOptions"
+                            :editPost="post"
+                            v-on:form-edit-canceled="editCanceled()"
           >
           </stream-post-form>
         </div>
@@ -163,7 +164,7 @@ export default {
       // hide comments and show back
       this.$el.classList.add('flip-active')
       setTimeout(() => {
-        this.$refs.streamPostForm.resizePostFormContainer()
+        this.$refs.streamPostForm.initializePost()
       }, 200)
 
       this.$refs.backDelete.classList.add('hide')
@@ -213,6 +214,9 @@ export default {
     addComment (comment) {
       this.showComments = true
       this.$emit('stream-comment-added', comment)
+    },
+    deleteComment (comment) {
+      this.$emit('stream-comment-deleted', comment)
     },
     hideModal () {
       this.$refs.postDeleteAttachmentConf.hide()

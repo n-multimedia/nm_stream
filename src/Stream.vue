@@ -4,17 +4,20 @@
       :streamOptions="streamOptions"
       v-on:stream-post-added="addPost"
     />
-    <transition-group name="list">
-      <stream-post v-for="post in sortedPosts"
-                   :key="post.nid"
-                   :post="getLoadedPost(post)"
-                   :comments="getNodeComments(post.nid)"
-                   :streamOptions="streamOptions"
-                   v-on:stream-post-deleted="deletePost"
-                   v-on:stream-comment-added="addComment"
-                   v-on:stream-user-added="addUser"
-      />
-    </transition-group>
+    <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busyLoading" infinite-scroll-distance="10">
+      <transition-group name="list">
+        <stream-post v-for="post in sortedPosts"
+                     :key="post.nid"
+                     :post="getLoadedPost(post)"
+                     :comments="getNodeComments(post.nid)"
+                     :streamOptions="streamOptions"
+                     v-on:stream-post-deleted="deletePost"
+                     v-on:stream-comment-deleted="deleteComment"
+                     v-on:stream-comment-added="addComment"
+                     v-on:stream-user-added="addUser"
+        />
+      </transition-group>
+    </div>
   </div>
 </template>
 
@@ -35,19 +38,27 @@ export default {
       streamOptions: [],
       comments: [],
       users: [],
+      busyLoadingMore: false,
+      maxPostsLimitReached: false,
       loggedInUser: 1,
+      initialozed: false,
+      infiniteScrollLimit: 10,
+      maxPostsToShow: 10,
+      pollingUpdate: null,
       contentService: new ContentService()
     }
   },
   computed: {
     sortedPosts: function () {
-      return Vue._.orderBy(this.posts, 'created', 'desc')
+      let sortedPosts = Vue._.orderBy(this.posts, 'created', 'desc')
+      let slicedPosts = sortedPosts.slice(0, this.maxPostsToShow)
+      return slicedPosts
     }
   },
   methods: {
     initialize: function () {
       console.log('initialize')
-      this.getPosts()
+      this.initializeStream()
     },
     addPost: function (post) {
       this.posts.push(post)
@@ -55,6 +66,10 @@ export default {
     deletePost: function (post) {
       let postListIndex = this.posts.indexOf(post)
       this.posts.splice(postListIndex, 1)
+    },
+    deleteComment: function (comment) {
+      let commentListIndex = this.comments.indexOf(comment)
+      this.comments.splice(commentListIndex, 1)
     },
     addComment: function (comment) {
       this.comments.push(comment)
@@ -64,7 +79,7 @@ export default {
         this.users.push(user)
       }
     },
-    getPosts: function () {
+    initializeStream: function () {
       let self = this
       Vue.axios.get(this.$config.get('api.apiInitUrl'), {withCredentials: true}).then((response) => {
         self.posts = response.data.stream.posts
@@ -77,10 +92,36 @@ export default {
         self.streamOptions.token = response.data.stream.token
         self.streamOptions.contextNID = response.data.stream.contextNID
         self.streamOptions.containerNID = response.data.stream.containerNID
+        self.streamOptions.timestamp = response.data.stream.timestamp
+
+        self.initialized = true
+
+        // start polling
+        self.pollUpdate()
 
         // this.$emit('content:updated', response.data.stream)
         // console.log(self.posts)
       })
+    },
+    loadMore: function () {
+      // wait for initialization
+      // do not poll if last poll is still loading
+      // do not poll if there is no more new content coming
+      if (!this.initialized || this.busyLoadingMore || self.maxPostsLimitReached) {
+        return false
+      }
+
+      this.busyLoadingMore = true
+
+      this.maxPostsToShow += this.infiniteScrollLimit
+
+      this.pollUpdate()
+
+      /*
+      setTimeout(() => {
+        this.busyLoadingMore = false
+      }, 1000)
+      */
     },
     getUser: function (uid) {
       return Vue._.find(this.users, ['uid', uid])
@@ -97,6 +138,39 @@ export default {
     getLoadedPost (post) {
       post.user = this.getUser(post.uid)
       return post
+    },
+    pollUpdate () {
+      let self = this
+      this.pollingUpdate = setInterval(() => {
+        let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow)
+        // get update data
+        Vue.axios.get(pollUpdateUrl, {withCredentials: true}).then((response) => {
+          if (self.busyLoadingMore) {
+            self.maxPostsLimitReached = self.posts.length > response.data.stream.posts.length ||
+              self.users.length > response.data.stream.users.length ||
+              self.comments.length > response.data.stream.comments.length
+            self.busyLoadingMore = false
+          }
+          self.posts = Vue._.merge(self.posts, response.data.stream.posts)
+          self.users = Vue._.merge(self.users, response.data.stream.users)
+          self.comments = Vue._.merge(self.comments, response.data.stream.comments)
+
+          // self.mergeByProperty(self.posts, response.data.stream.posts, 'nid')
+          // self.mergeByProperty(self.users, response.data.stream.users, 'nid')
+          // self.mergeByProperty(self.comments, response.data.stream.comments, 'nid')
+
+          self.streamOptions.timestamp = response.data.stream.timestamp
+        })
+      }, 5000)
+    },
+    mergeByProperty (arr1, arr2, prop) {
+      Vue._.each(arr2, function (arr2obj) {
+        var arr1obj = Vue._.find(arr1, function (arr1obj) {
+          return arr1obj[prop] === arr2obj[prop]
+        })
+        // If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
+        arr1obj ? Vue._.extend(arr1obj, arr2obj) : arr1.push(arr2obj)
+      })
     }
   },
   mounted: function () {
@@ -109,6 +183,9 @@ export default {
       e = e || event
       e.preventDefault()
     }, false)
+  },
+  beforeDestroy: function () {
+    clearInterval(this.pollingUpdate)
   }
 }
 </script>

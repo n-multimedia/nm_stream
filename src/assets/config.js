@@ -1,6 +1,7 @@
 export default {
   api: {
     apiInitUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/15347/initialize',
+    apiPollUpdateUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/poll_update/%offset/%limit',
     apiAttachmentDeleteUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/file/%file/delete/%token',
     apiPostUpdateUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/update/%token',
     apiPostAddUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/add/%token',

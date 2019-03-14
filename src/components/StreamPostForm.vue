@@ -249,7 +249,7 @@ export default {
     // an existing post was passed
     // /////////////////////////////
     // => edit Post
-    this.initializePost()
+    // this.initializePost()
 
     // set post author for edit post or logged in user for the new post
     this.updateAuthor()

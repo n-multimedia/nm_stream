@@ -18,6 +18,7 @@ import VueAxios from 'vue-axios'
 import Nl2br from 'vue-nl2br'
 import VueConfig from 'vue-configuration'
 import appConfig from './assets/config.js'
+import infiniteScroll from 'vue-infinite-scroll'
 
 library.add(faClock, faFile, faTrashAlt)
 
@@ -33,6 +34,7 @@ Vue.use(VueAxios, axios)
 Vue.use(VueConfig, {
   config: appConfig
 })
+Vue.use(infiniteScroll)
 Vue.component('nl2br', Nl2br)
 
 const moment = require('moment')
@@ -59,7 +61,7 @@ window.stream = new Vue({
   },
   methods: {
     loadJsonSample: function (event) {
-      // this.$refs.stream.getPosts()
+      // this.$refs.stream.initializeStream()
     }
   }
 })

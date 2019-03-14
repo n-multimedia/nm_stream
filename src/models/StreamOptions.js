@@ -6,5 +6,6 @@ export default class StreamOptions {
     this.containerNID = ''
     this.contextNID = ''
     this.token = ''
+    this.timestamp = ''
   }
 }

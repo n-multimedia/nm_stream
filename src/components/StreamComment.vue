@@ -49,7 +49,7 @@
             {{ $t('warning.delete_comment_action_cannot_be_undone') }}
           </p>
           <div class="float-right">
-            <button class="btn btn-outline-danger float-right">{{ $t('button.delete') }}</button>
+            <button class="btn btn-outline-danger float-right" v-on:click="onDelete()">{{ $t('button.delete') }}</button>
             <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel()">{{ $t('button.cancel') }}</button>
           </div>
 
@@ -61,6 +61,8 @@
 
 <script>
 import StreamCommentForm from './StreamCommentForm'
+import Vue from 'vue'
+
 export default {
   props: ['streamOptions', 'comment', 'user'],
   components: {StreamCommentForm},
@@ -82,7 +84,8 @@ export default {
       this.$el.classList.add('flip-active')
       // hide comments and show back
       setTimeout(() => {
-        this.$refs.streamCommentForm.resizeCommentFormContainer()
+        // this.$refs.streamCommentForm.resizeCommentFormContainer()
+        this.$refs.streamCommentForm.initializeComment()
         this.$refs.backDelete.classList.add('hide')
         this.$refs.backEdit.classList.remove('hide')
       }, 200)
@@ -96,6 +99,22 @@ export default {
         this.$refs.backEdit.classList.add('hide')
         this.$refs.backDelete.classList.remove('hide')
       }, 200)
+    },
+    onDelete (event) {
+      let self = this
+      let apiCommentDeleteUrl = this.$config.get('api.apiCommentDeleteUrl').replace('%comment', this.comment.cid).replace('%token', this.streamOptions.token)
+
+      // TODO show spinner
+      Vue.axios.get(apiCommentDeleteUrl, {withCredentials: true}).then((response) => {
+        if (response.data.status === 1) {
+          // post deleted successfully
+          self.$emit('stream-comment-deleted', self.comment)
+          this.$el.classList.remove('flip-active')
+        } else {
+          // an error occured
+          // TODO error hadling
+        }
+      })
     },
     onDeleteCancel (event) {
       this.$el.classList.remove('flip-active')
