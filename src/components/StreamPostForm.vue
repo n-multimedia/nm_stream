@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-post-body" name="body" v-on:keyup.esc="resetForm" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        <textarea class="stream-post-body" name="body" v-on:keyup.esc="resetForm" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <div class="row stream-action-1">
           <transition name="fade">
             <div class="col-12 stream-attachments" v-if="formActive" :key="formActive">
@@ -24,7 +24,22 @@
               <vue-dropzone
                 ref="vueDropZome"
                 id="dropzone"
-                :options="dropzoneOptions"></vue-dropzone>
+                @vdropzone-file-added="resizeDropArea"
+                @vdropzone-complete="uploadCompleted"
+                :options="dropzoneOptions" :disabled="busyLoading"></vue-dropzone>
+              <div class="stream-post-attachments" ref="postAttachmentList" v-if="editPost && editPost.attachments.length > 0">
+                <font-awesome-icon :icon="['far', 'file']"/>
+                {{ $t('label.attachments') }}
+                <div :key="attachment.fid" v-for="attachment in editPost.attachments">
+                  <span v-html="attachment.download_link"></span>
+                  <!-- todo delete attachment action -->
+                  <a href="#" :title="$t('button.delete_attachment')" class="attachment-trash-delete"
+                     v-if="attachment.permissions.canDelete" v-on:click.prevent="onAttachmentDeleteConf(attachment)">
+                    <font-awesome-icon :icon="['far', 'trash-alt']"/>
+                  </a>
+                </div>
+              </div>
+              <pulse-loader :loading="busyLoading" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
             </div>
           </transition>
         </div>
@@ -34,17 +49,17 @@
               <transition name="fade">
                 <div class="col-12 action-buttons" v-if="formActive" :key="formActive">
                   <div class="stream-post-privacy-settings" v-if="privacyOptions.length > 0">
-                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :searchable="false" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')">
+                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :searchable="false" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')" :disabled="busyLoading">
                       <template slot="singleLabel" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title">
                         <span class="option__desc"><span class="option__title">{{ props.option.title }}</span></span>
                       </template>
-                      <template slot="option" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title">
+                      <template slot="option" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title" :disabled="busyLoading">
                         <div class="option__desc"><span class="option__title">{{ props.option.title }}</span><span class="option__small">{{ props.option.desc }}</span></div>
                       </template>
                     </multiselect>
                   </div>
-                  <button class="btn btn-outline-primary stream-post-post float-right" v-on:click="savePost">{{ $t('button.post') }}</button>
-                  <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
+                  <button class="btn btn-outline-primary stream-post-post float-right" v-on:click="savePost" :disabled="this.bodyText.length < 1 || busyLoading">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm" :disabled="busyLoading">{{ $t('button.cancel') }}</button>
                 </div>
               </transition>
             </div>
@@ -77,7 +92,11 @@ export default {
       // resizing post relevant for edit mode only
       if (this.editPost) {
         let dragzoneHeight = parseFloat(this.$refs.vueDropZome.$el.style.height)
-        this.$parent.$el.querySelector('.stream-post').style.height = (150 + dragzoneHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        let attachmentsHeight = 0
+        if (this.$refs.postAttachmentList) {
+          attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
+        }
+        this.$parent.$el.querySelector('.stream-post').style.height = (150 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
       }
     },
     resizeTextareaElement (textarea) {
@@ -85,6 +104,8 @@ export default {
       textarea.style.height = (textarea.scrollHeight) + 'px'
     },
     savePost () {
+      this.busyLoading = true
+
       let self = this
 
       let nodeData = {}
@@ -93,6 +114,7 @@ export default {
 
       if (this.editPost) {
         let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
+
         // edit post => update
         Vue.axios.post(apiNodeUpdateUrl, nodeData, {withCredentials: true}).then((response) => {
           // ?? close form before request
@@ -119,12 +141,23 @@ export default {
 
         // TODO show spinner
         Vue.axios.post(apiNodeAddUrl, nodeData, {withCredentials: true}).then((response) => {
-          self.resetForm()
-
           if (response.data.status === 1) {
             // post added successfully
             let nodeData = response.data.nodeData
             self.$emit('stream-post-added', nodeData)
+
+            // check for queued uploads
+            if (self.$refs.vueDropZome.getQueuedFiles().length > 0) {
+              // set editPost to update dropzone url
+              // self.editPost = nodeData
+              self.$refs.vueDropZome.setOption('url', self.getPostUploadUrl(nodeData))
+
+              self.dropzoneResetAfterComplete = true
+              // start uploading attachments
+              self.$refs.vueDropZome.processQueue()
+            } else {
+              self.resetForm()
+            }
           } else {
             // an error occured
             // TODO error hadling
@@ -137,8 +170,9 @@ export default {
       if (this.editPost) {
         this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-post').style.height = 'auto'
+
         // restore post values
-        this.initializePost()
+        // this.initializePost()
       } else {
         this.formActive = false
         this.bodyText = ''
@@ -149,6 +183,8 @@ export default {
       }
 
       this.$refs.vueDropZome.removeAllFiles()
+
+      this.busyLoading = false
     },
     dragOver (event) {
       // enable editor
@@ -156,14 +192,22 @@ export default {
       this.$nextTick(() => {
         // react on drag over
         if (this.$refs.vueDropZome.$el.style.height !== '250px') {
-          // resize droparea
-          this.$refs.vueDropZome.$el.style.height = '250px'
+          this.resizeDropArea()
           // add label margin
           this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '100px'
           // resize container
           this.resizePostFormContainer()
         }
       })
+    },
+    uploadCompleted () {
+      console.log('completed upload event')
+      this.resetForm()
+      this.dropzoneResetAfterComplete = false
+    },
+    resizeDropArea () {
+      // resize droparea
+      this.$refs.vueDropZome.$el.style.height = '250px'
     },
     updateAuthor () {
       this.author = this.streamOptions.loggedInUser
@@ -209,8 +253,42 @@ export default {
           // init attachments
           this.$refs.vueDropZome.$el.style.height = '50px'
           this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '10px'
+
+          this.resizePostFormContainer()
         })
       }
+    },
+    getPostUploadUrl (nodeData) {
+      let returnUrl = ''
+      if (!nodeData) {
+        nodeData = this.editPost
+      }
+      if (nodeData) {
+        returnUrl = this.$config.get('api.apiPostAttachmentUploadUrl').replace('%node', nodeData.nid).replace('%token', this.streamOptions.token)
+      } else {
+        returnUrl = this.$config.get('api.apiPostAttachmentUploadUrl').replace('%node', 0).replace('%token', this.streamOptions.token)
+      }
+
+      return returnUrl
+    },
+    getAutoProcessQueue () {
+      if (this.editPost) {
+        return true
+      } else {
+        return false
+      }
+    },
+    getDropZomeRemoveLabel () {
+      if (this.editPost) {
+        // hide because auto submitting updates
+        return this.$t('label.nmDictHideFile')
+      } else {
+        // remove because files not updated yet
+        return this.$t('label.dictRemoveFile')
+      }
+    },
+    onAttachmentDeleteConf (attachment) {
+      this.$emit('post-form-onAttachmentDeleteConf', attachment)
     }
   },
   watch: {
@@ -269,14 +347,30 @@ export default {
       formActive: false,
       bodyText: '',
       privacyValue: null,
+      dropzoneResetAfterComplete: false,
       files: null,
+      busyLoading: false,
+      busyLoadingColor: '#888',
+      busyLoadingSize: '12px',
       dropzoneOptions: {
-        url: 'nirvana',
+        url: this.getPostUploadUrl(),
         createImageThumbnails: false,
+        autoProcessQueue: this.getAutoProcessQueue(),
         addRemoveLinks: true,
         maxFilesize: 20,
-        headers: {'My-Awesome-Header': 'header value'},
-        dictDefaultMessage: "<i class='fa fa-cloud-upload'></i> " + this.$t('label.upload_files')
+        dictDefaultMessage: this.$t('label.dictDefaultMessage'),
+        dictFallbackMessage: this.$t('label.dictFallbackMessage'),
+        // dictFallbackText: this.$t('label.dictFallbackText'),
+        dictFileTooBig: this.$t('label.dictFileTooBig'),
+        dictInvalidFileType: this.$t('label.dictInvalidFileType'),
+        // dictResponseError: this.$t('label.dictResponseError'),
+        dictCancelUpload: this.$t('label.dictCancelUpload'),
+        dictUploadCanceled: this.$t('label.dictUploadCanceled'),
+        dictCancelUploadConfirmation: this.$t('label.dictCancelUploadConfirmation'),
+        dictRemoveFile: this.getDropZomeRemoveLabel(),
+        // dictRemoveFileConfirmation: this.$t('label.dictRemoveFileConfirmation'),
+        dictMaxFilesExceeded: this.$t('label.dictMaxFilesExceeded')
+        // dictFileSizeUnits: ''
       }
     }
   }
@@ -442,6 +536,7 @@ export default {
       .dz-file-preview {
         display: block;
         background: none;
+        min-height: 80px;
       }
       .dz-image {
         display: none;
@@ -455,6 +550,10 @@ export default {
       }
       .dz-details {
         background-color: #333;
+        padding: 10px;
+        .dz-size {
+          margin-bottom: 10px;
+        }
       }
       .dz-error-message {
         top: 0;

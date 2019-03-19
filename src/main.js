@@ -19,10 +19,13 @@ import Nl2br from 'vue-nl2br'
 import VueConfig from 'vue-configuration'
 import appConfig from './assets/config.js'
 import infiniteScroll from 'vue-infinite-scroll'
+import VueKeepScrollPosition from 'vue-keep-scroll-position'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
 library.add(faClock, faFile, faTrashAlt)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+Vue.component('pulse-loader', PulseLoader)
 
 Vue.component('multiselect', Multiselect)
 
@@ -36,6 +39,7 @@ Vue.use(VueConfig, {
 })
 Vue.use(infiniteScroll)
 Vue.component('nl2br', Nl2br)
+Vue.use(VueKeepScrollPosition)
 
 const moment = require('moment')
 require('moment/locale/de')

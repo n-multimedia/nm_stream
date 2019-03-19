@@ -43,7 +43,7 @@
       </div>
       <div class="back-delete" ref="backDelete">
         <div class="stream-post card">
-          <h4>{{ $t('warning.delete_comment_action_cannot_be_undone') }}</h4>
+          <h4>{{ $t('warning.delete_comment_really_want_to') }}</h4>
           <br/>
           <p>
             {{ $t('warning.delete_comment_action_cannot_be_undone') }}
@@ -88,10 +88,11 @@ export default {
         this.$refs.streamCommentForm.initializeComment()
         this.$refs.backDelete.classList.add('hide')
         this.$refs.backEdit.classList.remove('hide')
+
+        this.$refs.streamCommentForm.initializeComment()
       }, 200)
     },
     deleteComment (event) {
-      console.log('delete comment')
       // hide comments and show back
       setTimeout(() => {
         this.$el.classList.add('flip-active')

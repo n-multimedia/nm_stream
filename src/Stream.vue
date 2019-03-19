@@ -4,7 +4,7 @@
       :streamOptions="streamOptions"
       v-on:stream-post-added="addPost"
     />
-    <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busyLoading" infinite-scroll-distance="10">
+    <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busyLoading" infinite-scroll-distance="10" v-keep-scroll-position class="stream-post-wrapper">
       <transition-group name="list">
         <stream-post v-for="post in sortedPosts"
                      :key="post.nid"
@@ -18,6 +18,9 @@
         />
       </transition-group>
     </div>
+    <br />
+    <pulse-loader :loading="busyLoadingMore" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
+    <br />
   </div>
 </template>
 
@@ -39,6 +42,8 @@ export default {
       comments: [],
       users: [],
       busyLoadingMore: false,
+      busyLoadingColor: '#888',
+      busyLoadingSize: '16px',
       maxPostsLimitReached: false,
       loggedInUser: 1,
       initialozed: false,
@@ -57,7 +62,6 @@ export default {
   },
   methods: {
     initialize: function () {
-      console.log('initialize')
       this.initializeStream()
     },
     addPost: function (post) {
@@ -107,7 +111,7 @@ export default {
       // wait for initialization
       // do not poll if last poll is still loading
       // do not poll if there is no more new content coming
-      if (!this.initialized || this.busyLoadingMore || self.maxPostsLimitReached) {
+      if (!this.initialized || this.busyLoadingMore || this.maxPostsLimitReached) {
         return false
       }
 
@@ -141,19 +145,27 @@ export default {
     },
     pollUpdate () {
       let self = this
+
+      clearInterval(this.pollingUpdate)
+
       this.pollingUpdate = setInterval(() => {
-        let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow)
+        if (!document.hasFocus()) {
+          // do noting if tab has no focus
+          return
+        }
+        console.log('max post to show')
+        console.log(self.maxPostsToShow)
+
+        let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow).replace('%token', self.streamOptions.token)
         // get update data
         Vue.axios.get(pollUpdateUrl, {withCredentials: true}).then((response) => {
           if (self.busyLoadingMore) {
-            self.maxPostsLimitReached = self.posts.length > response.data.stream.posts.length ||
-              self.users.length > response.data.stream.users.length ||
-              self.comments.length > response.data.stream.comments.length
+            self.maxPostsLimitReached = self.posts.length >= response.data.stream.posts.length
             self.busyLoadingMore = false
           }
-          self.posts = Vue._.merge(self.posts, response.data.stream.posts)
-          self.users = Vue._.merge(self.users, response.data.stream.users)
-          self.comments = Vue._.merge(self.comments, response.data.stream.comments)
+          self.posts = response.data.stream.posts
+          self.users = response.data.stream.users
+          self.comments = response.data.stream.comments
 
           // self.mergeByProperty(self.posts, response.data.stream.posts, 'nid')
           // self.mergeByProperty(self.users, response.data.stream.users, 'nid')
@@ -290,5 +302,9 @@ Flipping
 .back-delete,
 .back-edit {
   transform: rotateY(180deg);
+}
+
+.stream-post-wrapper .v-spinner {
+  position: absolute;
 }
 </style>

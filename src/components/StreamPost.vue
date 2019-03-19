@@ -4,6 +4,11 @@
     <div class="flip">
       <div class="front">
         <div class="stream-post card">
+          <div class="row post-context" v-if="this.streamOptions.containerNID == this.post.container.nid">
+            <div class="col-12">
+              <span class="float-right"> {{ $t('label.postContextFrom') }}: <a :href="this.post.container.link">{{this.post.container.title}}</a> </span>
+            </div>
+          </div>
           <div class="row">
             <div class="col-2">
               <img class="card-img-top rounded-circle" :src="post.user.avatarUrl" :title="post.user.name"/>
@@ -86,6 +91,7 @@
                             :streamOptions="streamOptions"
                             :editPost="post"
                             v-on:form-edit-canceled="editCanceled()"
+                            v-on:post-form-onAttachmentDeleteConf="onAttachmentDeleteConf"
           >
           </stream-post-form>
         </div>
@@ -171,7 +177,6 @@ export default {
       this.$refs.backEdit.classList.remove('hide')
     },
     deletePost (event) {
-      console.log('delete')
       this.showComments = false
       // hide comments and show back
       setTimeout(() => {
@@ -225,7 +230,7 @@ export default {
     onAttachmentDelete () {
       let attachment = this.curDeleteAttachment
       let self = this
-      let apiAttachmentDeleteUrl = this.$config.get('api.apiAttachmentDeleteUrl').replace('%node', self.post.nid).replace('%file', attachment.fid).replace('%token', this.streamOptions.token)
+      let apiAttachmentDeleteUrl = this.$config.get('api.apiPostAttachmentDeleteUrl').replace('%node', self.post.nid).replace('%file', attachment.fid).replace('%token', this.streamOptions.token)
       Vue.axios.get(apiAttachmentDeleteUrl, {withCredentials: true}).then((response) => {
         // success ? response ready ;) - need to recheck
         self.post.attachments.splice(self.post.attachments.indexOf(attachment), 1)
@@ -292,6 +297,12 @@ export default {
       a {
         position: absolute;
         background-color: white;
+      }
+    }
+
+    .post-context {
+      span {
+        border-bottom: 1px solid #efefef;
       }
     }
 

@@ -7,14 +7,15 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="resetForm" v-model="bodyText" v-on:focus="formActive = true" :placeholder="$t('placeholder.your_comment_message')"></textarea>
+        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="resetForm" v-model="bodyText" v-on:focus="formActive = true" :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
         <transition name="fade">
           <div class="row stream-action-2" :key="formActive">
             <div class="col-12">
               <div class="row">
                 <div class="col-12 action-buttons" v-if="formActive">
-                  <button class="btn btn-outline-primary stream-comment-post float-right" v-on:click="saveComment">{{ $t('button.post') }}</button>
-                  <button class="btn btn-outline-secondary stream-comment-cancel float-right" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
+                  <button class="btn btn-outline-primary stream-comment-post float-right" :disabled="this.bodyText.length < 1 || busyLoading" v-on:click="saveComment">{{ $t('button.post') }}</button>
+                  <button class="btn btn-outline-secondary stream-comment-cancel float-right" :disabled="busyLoading" v-on:click="resetForm">{{ $t('button.cancel') }}</button>
+                  <pulse-loader :loading="busyLoading" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
                 </div>
               </div>
             </div>
@@ -34,15 +35,19 @@ export default {
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
+
       this.resizeCommentFormContainer()
     },
     resizeCommentFormContainer () {
       // resizing post relevant for edit mode only
       if (this.editComment) {
-        this.$parent.$el.querySelector('.stream-comment').style.height = (140 + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        this.$parent.$el.querySelector('.stream-comment').style.height = (150 + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        console.log(this.$parent.$el.querySelector('.stream-comment').style.height)
       }
     },
     saveComment () {
+      this.busyLoading = true
+
       let self = this
 
       let commentData = {}
@@ -95,9 +100,6 @@ export default {
       if (this.editComment) {
         this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-comment').style.height = 'auto'
-
-        // restore post values
-        this.initializeComment()
       } else {
         this.bodyText = ''
         this.formActive = false
@@ -105,6 +107,8 @@ export default {
         this.$el.querySelector('textarea.stream-comment-body').blur()
         this.$el.querySelector('textarea.stream-comment-body').style.height = 'auto'
       }
+
+      this.busyLoading = false
     },
     initializeComment () {
       if (this.editComment) {
@@ -114,6 +118,7 @@ export default {
         // resize textarea
         this.$nextTick(() => {
           this.resizeTextareaElement(this.$el.querySelector('textarea'))
+          this.resizeCommentFormContainer()
         })
       }
     },
@@ -150,6 +155,9 @@ export default {
   data () {
     return {
       formActive: false,
+      busyLoading: false,
+      busyLoadingColor: '#888',
+      busyLoadingSize: '12px',
       author: null,
       bodyText: ''
     }

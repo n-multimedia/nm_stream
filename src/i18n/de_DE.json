@@ -7,7 +7,18 @@
     "label": {
       "attachments": "Anhänge",
       "upload_files": "Dateien hochladen",
-      "attachment_delete": "Anhang löschen"
+      "attachment_delete": "Anhang löschen",
+      "dictDefaultMessage": "<i class='fa fa-cloud-upload'></i> Dateien hochladen",
+      "dictFallbackMessage": "Ihr Browser unterstützt leider keinen Upload",
+      "dictFileTooBig": "Die hochgeladene Datei ist zu groß. {{filesize}} / {{maxFilesize}}",
+      "dictInvalidFileType": "Dieser Dateityp wird nicht unterstützt",
+      "dictCancelUpload": "Upload abbrechen",
+      "dictUploadCanceled": "Der Upload wurde abgebrochen",
+      "dictCancelUploadConfirmation": "Upload wirklich abbrechen?",
+      "dictRemoveFile": "Entfernen",
+      "nmDictHideFile": "Verstecken",
+      "dictMaxFilesExceeded": "Das Uploadlimit von {{maxFiles}} wurde überschritten",
+      "postContextFrom": "Beitrag aus"
     },
     "link": {
       "show_x_comments": "{count} Kommentare anzeigen",
