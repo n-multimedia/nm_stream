@@ -62,7 +62,8 @@ export default {
           self.resetForm()
 
           if (response.data.status === 1) {
-            self.editComment.body = commentData.body
+            self.editComment.body_formatted = response.data.commentData.body_formatted
+            self.editComment.body = response.data.commentData.body
 
             // refresh form values
             self.resetForm()
@@ -157,7 +158,7 @@ export default {
       formActive: false,
       busyLoading: false,
       busyLoadingColor: '#888',
-      busyLoadingSize: '12px',
+      busyLoadingSize: '10px',
       author: null,
       bodyText: ''
     }

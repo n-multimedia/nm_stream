@@ -4,7 +4,7 @@
     <div class="flip">
       <div class="front">
         <div class="stream-post card">
-          <div class="row post-context" v-if="this.streamOptions.containerNID == this.post.container.nid">
+          <div class="row post-context" v-if="this.streamOptions.containerNID !== this.post.container.nid">
             <div class="col-12">
               <span class="float-right"> {{ $t('label.postContextFrom') }}: <a :href="this.post.container.link">{{this.post.container.title}}</a> </span>
             </div>
@@ -34,7 +34,7 @@
               </div>
               <div class="row">
                 <div class="col-12 body">
-                  <nl2br tag="p" :text="post.body" />
+                  <p tag="p" v-html="post.body_formatted" />
                 </div>
               </div>
               <div class="row">
@@ -323,12 +323,11 @@ export default {
   .post-actions-dropdown {
     margin: 0 !important;
 
-    &.show {
-      button {
-        background-color: transparent !important;
-        // border: none !important;
-        color: #111 !important;
-      }
+    button.dropdown-toggle {
+      border: 0;
+      background-color: transparent !important;
+      // border: none !important;
+      color: #111 !important;
     }
 
     button {

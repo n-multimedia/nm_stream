@@ -201,9 +201,11 @@ export default {
       })
     },
     uploadCompleted () {
-      console.log('completed upload event')
-      this.resetForm()
-      this.dropzoneResetAfterComplete = false
+      // trigger reset, if not editing only!
+      if (!this.editPost) {
+        this.resetForm()
+        this.dropzoneResetAfterComplete = false
+      }
     },
     resizeDropArea () {
       // resize droparea
@@ -292,23 +294,6 @@ export default {
     }
   },
   watch: {
-    streamOptions: function () {
-      if (!this.privacyValue) {
-        if (this.editPost) {
-          this.privacyOptions = this.loadPrivacyOptions(this.editPost.privacy.privacyOptions)
-          this.privacyDefault = this.editPost.privacy.privacyDefault
-        } else {
-          this.privacyOptions = this.streamOptions.privacyOptions
-          this.privacyDefault = this.streamOptions.privacyDefault
-        }
-        let valueKeyInteger = parseInt(this.privacyDefault)
-        this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
-      }
-      this.loggedInUser = this.streamOptions.loggedInUser
-
-      // set proper author
-      this.updateAuthor()
-    }
   },
   mounted: function () {
     // /////////////////////////////
@@ -328,6 +313,20 @@ export default {
     // /////////////////////////////
     // => edit Post
     // this.initializePost()
+
+    // set privacy value
+    if (!this.privacyValue) {
+      if (this.editPost) {
+        this.privacyOptions = this.loadPrivacyOptions(this.editPost.privacy.privacyOptions)
+        this.privacyDefault = this.editPost.privacy.privacyDefault
+      } else {
+        this.privacyOptions = this.streamOptions.privacyOptions
+        this.privacyDefault = this.streamOptions.privacyDefault
+      }
+      let valueKeyInteger = parseInt(this.privacyDefault)
+      this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
+    }
+    this.loggedInUser = this.streamOptions.loggedInUser
 
     // set post author for edit post or logged in user for the new post
     this.updateAuthor()
@@ -351,7 +350,7 @@ export default {
       files: null,
       busyLoading: false,
       busyLoadingColor: '#888',
-      busyLoadingSize: '12px',
+      busyLoadingSize: '10px',
       dropzoneOptions: {
         url: this.getPostUploadUrl(),
         createImageThumbnails: false,

@@ -24,7 +24,7 @@
               </div>
               <div class="row">
                 <div class="col-12 body">
-                  <nl2br tag="p" :text="comment.body" />
+                  <p tag="p" v-html="comment.body_formatted" />
                 </div>
               </div>
             </div>

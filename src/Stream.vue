@@ -1,6 +1,8 @@
 <template>
   <div id="stream" class="container">
+    <pulse-loader :loading="!initialized" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
     <stream-post-form
+      v-if="initialized && streamOptions.containerNID > 0"
       :streamOptions="streamOptions"
       v-on:stream-post-added="addPost"
     />
@@ -43,14 +45,20 @@ export default {
       users: [],
       busyLoadingMore: false,
       busyLoadingColor: '#888',
-      busyLoadingSize: '16px',
+      busyLoadingSize: '12px',
       maxPostsLimitReached: false,
       loggedInUser: 1,
-      initialozed: false,
+      initialized: false,
       infiniteScrollLimit: 10,
       maxPostsToShow: 10,
       pollingUpdate: null,
+      containerNid: null,
       contentService: new ContentService()
+    }
+  },
+  beforeMount: function () {
+    if (this.$root.$el.attributes['data-container-nid']) {
+      this.containerNid = this.$root.$el.attributes['data-container-nid'].value
     }
   },
   computed: {
@@ -85,7 +93,7 @@ export default {
     },
     initializeStream: function () {
       let self = this
-      Vue.axios.get(this.$config.get('api.apiInitUrl'), {withCredentials: true}).then((response) => {
+      Vue.axios.get(this.$config.get('api.apiInitUrl').replace('%node', this.containerNid), {withCredentials: true}).then((response) => {
         self.posts = response.data.stream.posts
         self.users = response.data.stream.users
         self.comments = response.data.stream.comments
@@ -153,8 +161,6 @@ export default {
           // do noting if tab has no focus
           return
         }
-        console.log('max post to show')
-        console.log(self.maxPostsToShow)
 
         let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow).replace('%token', self.streamOptions.token)
         // get update data
@@ -201,6 +207,22 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+  /deep/ {
+    @import "../node_modules/bootstrap/scss/_functions.scss";
+    @import "../node_modules/bootstrap/scss/_variables.scss";
+    @import "../node_modules/bootstrap/scss/bootstrap.scss";
+    @import "../node_modules/bootstrap/scss/bootstrap-grid.scss";
+    @import "../node_modules/bootstrap/scss/bootstrap-reboot.scss";
+    @import "../node_modules/bootstrap/scss/card.scss";
+    @import "../node_modules/bootstrap/scss/alert.scss";
+    @import "../node_modules/bootstrap/scss/dropdown.scss";
+    @import "../node_modules/bootstrap/scss/modal.scss";
+    @import "../node_modules/bootstrap/scss/buttons.scss";
+  }
+
+</style>
 
 <style lang="scss">
 #stream {
