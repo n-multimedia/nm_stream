@@ -123,6 +123,7 @@ export default {
 
           if (response.data.status === 1) {
             self.editPost.body = nodeData.body
+            self.editPost.body_formatted = nodeData.body_formatted
             self.editPost.privacy.privacyDefault = nodeData.privacy
 
             // refresh form values
