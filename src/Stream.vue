@@ -69,20 +69,30 @@ export default {
   methods: {
     initialize: function () {
       this.initializeStream()
+      let eventUpdate = new Event('nm-stream:update')
+      this.$root.$el.dispatchEvent(eventUpdate)
     },
     addPost: function (post) {
       this.posts.push(post)
+      let eventUpdate = new Event('nm-stream:update')
+      this.$root.$el.dispatchEvent(eventUpdate)
     },
     deletePost: function (post) {
       let postListIndex = this.posts.indexOf(post)
       this.posts.splice(postListIndex, 1)
+      let eventUpdate = new Event('nm-stream:update')
+      this.$root.$el.dispatchEvent(eventUpdate)
     },
     deleteComment: function (comment) {
       let commentListIndex = this.comments.indexOf(comment)
       this.comments.splice(commentListIndex, 1)
+      let eventUpdate = new Event('nm-stream:update')
+      this.$root.$el.dispatchEvent(eventUpdate)
     },
     addComment: function (comment) {
       this.comments.push(comment)
+      let eventUpdate = new Event('nm-stream:update')
+      this.$root.$el.dispatchEvent(eventUpdate)
     },
     addUser: function (user) {
       if (!this.getUser(user.uid)) {

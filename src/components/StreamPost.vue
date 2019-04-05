@@ -49,8 +49,8 @@
                       </li>
                     </ul>
                   </div>
-                  <div class="stream-post-footer">
-                    <div v-if="sortedComments.length > 0">
+                  <div class="stream-post-footer" v-if="sortedComments.length > 0">
+                    <div>
                       <transition name="slide-fade">
                         <a href="#" v-if="!showComments" key="true" v-on:click.prevent="showComments = !showComments">
                           {{ $t('link.show_x_comments', { count: sortedComments.length }) }}
