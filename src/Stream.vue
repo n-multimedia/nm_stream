@@ -70,29 +70,29 @@ export default {
     initialize: function () {
       this.initializeStream()
       let eventUpdate = new Event('nm-stream:update')
-      this.$root.$el.dispatchEvent(eventUpdate)
+      document.dispatchEvent(eventUpdate)
     },
     addPost: function (post) {
       this.posts.push(post)
       let eventUpdate = new Event('nm-stream:update')
-      this.$root.$el.dispatchEvent(eventUpdate)
+      document.dispatchEvent(eventUpdate)
     },
     deletePost: function (post) {
       let postListIndex = this.posts.indexOf(post)
       this.posts.splice(postListIndex, 1)
       let eventUpdate = new Event('nm-stream:update')
-      this.$root.$el.dispatchEvent(eventUpdate)
+      document.dispatchEvent(eventUpdate)
     },
     deleteComment: function (comment) {
       let commentListIndex = this.comments.indexOf(comment)
       this.comments.splice(commentListIndex, 1)
       let eventUpdate = new Event('nm-stream:update')
-      this.$root.$el.dispatchEvent(eventUpdate)
+      document.dispatchEvent(eventUpdate)
     },
     addComment: function (comment) {
       this.comments.push(comment)
       let eventUpdate = new Event('nm-stream:update')
-      this.$root.$el.dispatchEvent(eventUpdate)
+      document.dispatchEvent(eventUpdate)
     },
     addUser: function (user) {
       if (!this.getUser(user.uid)) {
@@ -107,6 +107,7 @@ export default {
         self.comments = response.data.stream.comments
         self.streamOptions = new StreamOptions()
         self.streamOptions.privacyOptions = response.data.stream.privacyOptions
+        self.streamOptions.privacyOptionsAll = response.data.stream.privacyOptionsAll
         self.streamOptions.privacyDefault = response.data.stream.privacyDefault
         self.streamOptions.loggedInUser = this.getUser(response.data.stream.loggedInUser)
         self.streamOptions.token = response.data.stream.token
@@ -186,6 +187,9 @@ export default {
           // self.mergeByProperty(self.comments, response.data.stream.comments, 'nid')
 
           self.streamOptions.timestamp = response.data.stream.timestamp
+
+          let eventUpdate = new Event('nm-stream:update')
+          document.dispatchEvent(eventUpdate)
         })
       }, 5000)
     },

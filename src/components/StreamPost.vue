@@ -161,7 +161,7 @@ export default {
     },
     privacy: function () {
       let valueKeyInteger = parseInt(this.post.privacy.privacyDefault)
-      return Vue._.filter(this.streamOptions.privacyOptions, ['value', valueKeyInteger])[0]
+      return Vue._.filter(this.streamOptions.privacyOptionsAll, ['value', valueKeyInteger])[0]
     }
   },
   methods: {
