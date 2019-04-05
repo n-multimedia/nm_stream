@@ -202,7 +202,7 @@ export default {
           this.$el.classList.remove('flip-active')
         } else {
           // an error occured
-          // TODO error hadling
+          alert(this.$t('warning.error_occured_please_repeat_your_action'))
         }
       })
     },
@@ -272,7 +272,7 @@ export default {
         margin-top: 15px;
         list-style: none;
         padding: 0;
-        margin-bottom: 30px;
+        margin-bottom: 0px;
       }
 
     }
@@ -301,6 +301,7 @@ export default {
     }
 
     .post-context {
+      margin-top: -10px;
       span {
         border-bottom: 1px solid #efefef;
       }

@@ -69,7 +69,7 @@ export default {
             self.resetForm()
           } else {
             // an error occured
-            // TODO error hadling
+            alert(this.$t('warning.error_occured_please_repeat_your_action'))
           }
         })
       } else {
@@ -87,7 +87,7 @@ export default {
             self.$emit('stream-user-added', userData)
           } else {
             // an error occured
-            // TODO error hadling
+            alert(this.$t('warning.error_occured_please_repeat_your_action'))
           }
         })
       }

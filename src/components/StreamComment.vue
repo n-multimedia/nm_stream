@@ -113,7 +113,7 @@ export default {
           this.$el.classList.remove('flip-active')
         } else {
           // an error occured
-          // TODO error hadling
+          alert(this.$t('warning.error_occured_please_repeat_your_action'))
         }
       })
     },
