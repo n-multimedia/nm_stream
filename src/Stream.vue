@@ -31,7 +31,6 @@ import Vue from 'vue'
 import StreamPost from './components/StreamPost'
 import StreamPostForm from './components/StreamPostForm'
 import StreamComment from './components/StreamComment'
-import ContentService from './services/ContentService'
 import StreamOptions from './models/StreamOptions'
 
 export default {
@@ -52,8 +51,7 @@ export default {
       infiniteScrollLimit: 10,
       maxPostsToShow: 10,
       pollingUpdate: null,
-      containerNid: null,
-      contentService: new ContentService()
+      containerNid: null
     }
   },
   beforeMount: function () {
