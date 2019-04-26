@@ -6,7 +6,7 @@
         <div class="stream-post card">
           <div class="row post-context" v-if="this.streamOptions.containerNID !== this.post.container.nid">
             <div class="col-12">
-              <span class="float-right"> {{ $t('label.postContextFrom') }}: <a :href="this.post.container.link">{{this.post.container.title}}</a> </span>
+              <span class="float-right"> {{ $t('label.postContextFrom') }}: <a :href="streamLink">{{this.post.container.title}}</a> </span>
             </div>
           </div>
           <div class="row">
@@ -162,6 +162,9 @@ export default {
     privacy: function () {
       let valueKeyInteger = parseInt(this.post.privacy.privacyDefault)
       return Vue._.filter(this.streamOptions.privacyOptionsAll, ['value', valueKeyInteger])[0]
+    },
+    streamLink: function () {
+      return this.post.container.link + '?streamNode=' + this.post.nid
     }
   },
   methods: {

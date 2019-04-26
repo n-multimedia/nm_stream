@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-post-body" name="body" v-on:keyup.esc="resetForm" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <div class="row stream-action-1">
           <transition name="fade">
             <div class="col-12 stream-attachments" v-if="formActive" :key="formActive">
@@ -25,7 +25,7 @@
                 ref="vueDropZome"
                 id="dropzone"
                 @vdropzone-file-added="resizeDropArea"
-                @vdropzone-complete="uploadCompleted"
+                @vdropzone-queue-complete="queueCompleted"
                 :options="dropzoneOptions" :disabled="busyLoading"></vue-dropzone>
               <div class="stream-post-attachments" ref="postAttachmentList" v-if="editPost && editPost.attachments.length > 0">
                 <font-awesome-icon :icon="['far', 'file']"/>
@@ -119,15 +119,26 @@ export default {
         Vue.axios.post(apiNodeUpdateUrl, nodeData, {withCredentials: true}).then((response) => {
           // ?? close form before request
           // or just show spinner instead
-          self.resetForm()
+          // self.resetForm()
 
           if (response.data.status === 1) {
             self.editPost.body = response.data.nodeData.body
             self.editPost.body_formatted = response.data.nodeData.body_formatted
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
 
-            // refresh form values
-            self.resetForm()
+            // check for queued uploads
+            if (self.$refs.vueDropZome.getQueuedFiles().length > 0) {
+              // set editPost to update dropzone url
+              // self.editPost = nodeData
+              // self.$refs.vueDropZome.setOption('url', self.getPostUploadUrl(nodeData))
+
+              self.dropzoneResetAfterComplete = true
+              // start uploading attachments
+              self.$refs.vueDropZome.processQueue()
+            } else {
+              // refresh form values
+              self.resetForm()
+            }
           } else {
             // an error occured
             alert(this.$t('warning.error_occured_please_repeat_your_action'))
@@ -166,6 +177,12 @@ export default {
         })
       }
     },
+    escPressed () {
+      // prevent accidentally closing
+      if (this.bodyText.length === 0) {
+        this.resetForm()
+      }
+    },
     resetForm () {
       // editPost
       if (this.editPost) {
@@ -192,25 +209,25 @@ export default {
       this.formActive = true
       this.$nextTick(() => {
         // react on drag over
-        if (this.$refs.vueDropZome.$el.style.height !== '250px') {
-          this.resizeDropArea()
-          // add label margin
-          this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '100px'
-          // resize container
-          this.resizePostFormContainer()
-        }
+        this.resizeDropArea()
       })
     },
-    uploadCompleted () {
+    queueCompleted () {
       // trigger reset, if not editing only!
-      if (!this.editPost) {
-        this.resetForm()
-        this.dropzoneResetAfterComplete = false
-      }
+      // if (!this.editPost) {
+      this.resetForm()
+      this.dropzoneResetAfterComplete = false
+      // }
     },
     resizeDropArea () {
       // resize droparea
-      this.$refs.vueDropZome.$el.style.height = '250px'
+      if (this.$refs.vueDropZome.$el.style.height !== '250px') {
+        this.$refs.vueDropZome.$el.style.height = '250px'
+        // add label margin
+        this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '100px'
+        // resize container
+        this.resizePostFormContainer()
+      }
     },
     updateAuthor () {
       this.author = this.streamOptions.loggedInUser
@@ -275,11 +292,12 @@ export default {
       return returnUrl
     },
     getAutoProcessQueue () {
-      if (this.editPost) {
-        return true
-      } else {
-        return false
-      }
+      // if (this.editPost) {
+      //  return true
+      // } else {
+      //  return false
+      // }
+      return false
     },
     getDropZomeRemoveLabel () {
       if (this.editPost) {
