@@ -224,6 +224,8 @@ export default {
   /deep/ {
     @import "../node_modules/bootstrap/scss/_functions.scss";
     @import "../node_modules/bootstrap/scss/_variables.scss";
+    //customize bootstrap to match okl
+    @import "./assets/scss/bootstrap_custom.scss";
     @import "../node_modules/bootstrap/scss/bootstrap.scss";
     @import "../node_modules/bootstrap/scss/bootstrap-grid.scss";
     @import "../node_modules/bootstrap/scss/bootstrap-reboot.scss";
@@ -245,6 +247,7 @@ export default {
   color: #2c3e50;
   margin-top: 60px;
 }
+
 body {
   background-color: #efefef;
 }

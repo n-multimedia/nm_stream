@@ -456,6 +456,9 @@ export default {
 </style>
 
 <style lang="scss" >
+//load the variables
+@import "../assets/scss/bootstrap_custom.scss";
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
   .multiselect {
     > ul,
     .multiselect__content-wrapper {
@@ -477,7 +480,7 @@ export default {
     }
   }
   .multiselect__option.multiselect__option--selected {
-    background-color: #f1f1f1 !important;
+    background-color: #f1f1f1 !important; //hint: hier könnte man generell der wartbarkeit halber einfach die bs-variablen $grey etc nutzen
     color: #333;
   }
   .multiselect__option.multiselect__option--highlight {
@@ -560,7 +563,7 @@ export default {
       }
     }
     .dropzone.dz-drag-hover {
-      border-color: #007bff;
+      border-color: $blue;
     }
   }
 </style>
