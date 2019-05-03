@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="resetForm" v-model="bodyText" v-on:focus="formActive = true" :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
+        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed" v-model="bodyText" v-on:focus="formActive = true" :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
         <transition name="fade">
           <div class="row stream-action-2" :key="formActive">
             <div class="col-12">
@@ -95,6 +95,12 @@ export default {
     resizeTextareaElement (textarea) {
       textarea.style.height = 'auto'
       textarea.style.height = (textarea.scrollHeight) + 'px'
+    },
+    escPressed () {
+      // prevent accidentally closing
+      if (this.bodyText.length === 0) {
+        this.resetForm()
+      }
     },
     resetForm () {
       // editPost

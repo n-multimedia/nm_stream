@@ -21,9 +21,11 @@
               <div v-if="files && files.length > 0">
                 <div class="mt-3" v-for="file in files" :key="file.name">{{file && file.name}}</div>
               </div>-->
+              <!-- TBI @vdropzone-error="dropzoneError" -->
               <vue-dropzone
-                ref="vueDropZome"
+                ref="vueDropZone"
                 id="dropzone"
+                @vdropzone-processing="dropzoneQueueProcess"
                 @vdropzone-file-added="resizeDropArea"
                 @vdropzone-queue-complete="queueCompleted"
                 :options="dropzoneOptions" :disabled="busyLoading"></vue-dropzone>
@@ -91,7 +93,7 @@ export default {
     resizePostFormContainer () {
       // resizing post relevant for edit mode only
       if (this.editPost) {
-        let dragzoneHeight = parseFloat(this.$refs.vueDropZome.$el.style.height)
+        let dragzoneHeight = parseFloat(this.$refs.vueDropZone.$el.style.height)
         let attachmentsHeight = 0
         if (this.$refs.postAttachmentList) {
           attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
@@ -127,14 +129,14 @@ export default {
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
 
             // check for queued uploads
-            if (self.$refs.vueDropZome.getQueuedFiles().length > 0) {
+            if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
               // set editPost to update dropzone url
               // self.editPost = nodeData
-              // self.$refs.vueDropZome.setOption('url', self.getPostUploadUrl(nodeData))
+              // self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
 
               self.dropzoneResetAfterComplete = true
               // start uploading attachments
-              self.$refs.vueDropZome.processQueue()
+              self.$refs.vueDropZone.processQueue()
             } else {
               // refresh form values
               self.resetForm()
@@ -159,14 +161,14 @@ export default {
             self.$emit('stream-post-added', nodeData)
 
             // check for queued uploads
-            if (self.$refs.vueDropZome.getQueuedFiles().length > 0) {
+            if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
               // set editPost to update dropzone url
               // self.editPost = nodeData
-              self.$refs.vueDropZome.setOption('url', self.getPostUploadUrl(nodeData))
+              self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
 
               self.dropzoneResetAfterComplete = true
               // start uploading attachments
-              self.$refs.vueDropZome.processQueue()
+              self.$refs.vueDropZone.processQueue()
             } else {
               self.resetForm()
             }
@@ -200,7 +202,7 @@ export default {
         this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
       }
 
-      this.$refs.vueDropZome.removeAllFiles()
+      this.$refs.vueDropZone.removeAllFiles()
 
       this.busyLoading = false
     },
@@ -212,19 +214,29 @@ export default {
         this.resizeDropArea()
       })
     },
+    // issue https://github.com/enyo/dropzone/issues/578
+    // adding unsupported file triggers function
     queueCompleted () {
       // trigger reset, if not editing only!
       // if (!this.editPost) {
-      this.resetForm()
-      this.dropzoneResetAfterComplete = false
+      if (this.dropzoneQueueProcessing) {
+        this.resetForm()
+        this.dropzoneResetAfterComplete = false
+
+        this.dropzoneQueueProcessing = false
+      }
+
       // }
+    },
+    dropzoneQueueProcess () {
+      this.dropzoneQueueProcessing = true
     },
     resizeDropArea () {
       // resize droparea
-      if (this.$refs.vueDropZome.$el.style.height !== '250px') {
-        this.$refs.vueDropZome.$el.style.height = '250px'
+      if (this.$refs.vueDropZone.$el.style.height !== '250px') {
+        this.$refs.vueDropZone.$el.style.height = '250px'
         // add label margin
-        this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '100px'
+        this.$refs.vueDropZone.$el.querySelector('div.dz-message').style.marginTop = '100px'
         // resize container
         this.resizePostFormContainer()
       }
@@ -271,8 +283,8 @@ export default {
           this.resizeTextareaElement(this.$el.querySelector('textarea'))
 
           // init attachments
-          this.$refs.vueDropZome.$el.style.height = '50px'
-          this.$refs.vueDropZome.$el.querySelector('div.dz-message').style.marginTop = '10px'
+          this.$refs.vueDropZone.$el.style.height = '50px'
+          this.$refs.vueDropZone.$el.querySelector('div.dz-message').style.marginTop = '10px'
 
           this.resizePostFormContainer()
         })
@@ -370,11 +382,13 @@ export default {
       busyLoading: false,
       busyLoadingColor: '#888',
       busyLoadingSize: '10px',
+      dropzoneQueueProcessing: false,
       dropzoneOptions: {
         url: this.getPostUploadUrl(),
         createImageThumbnails: false,
         autoProcessQueue: this.getAutoProcessQueue(),
         addRemoveLinks: true,
+        acceptedFiles: this.streamOptions.acceptedFiles,
         maxFilesize: 20,
         dictDefaultMessage: this.$t('label.dictDefaultMessage'),
         dictFallbackMessage: this.$t('label.dictFallbackMessage'),

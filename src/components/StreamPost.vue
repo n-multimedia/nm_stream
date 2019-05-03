@@ -236,7 +236,8 @@ export default {
       let apiAttachmentDeleteUrl = this.$config.get('api.apiPostAttachmentDeleteUrl').replace('%node', self.post.nid).replace('%file', attachment.fid).replace('%token', this.streamOptions.token)
       Vue.axios.get(apiAttachmentDeleteUrl, {withCredentials: true}).then((response) => {
         // success ? response ready ;) - need to recheck
-        self.post.attachments.splice(self.post.attachments.indexOf(attachment), 1)
+        let index = self.post.attachments.findIndex(x => x.fid === attachment.fid)
+        self.post.attachments.splice(index, 1)
       })
       this.hideModal()
     }

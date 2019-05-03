@@ -8,5 +8,6 @@ export default class StreamOptions {
     this.contextNID = ''
     this.token = ''
     this.timestamp = ''
+    this.acceptedFiles = ''
   }
 }

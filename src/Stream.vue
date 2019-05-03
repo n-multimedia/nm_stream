@@ -114,6 +114,7 @@ export default {
         self.streamOptions.contextNID = response.data.stream.contextNID
         self.streamOptions.containerNID = response.data.stream.containerNID
         self.streamOptions.timestamp = response.data.stream.timestamp
+        self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
 
         self.initialized = true
 
