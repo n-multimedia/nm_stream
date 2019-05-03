@@ -253,33 +253,33 @@ body {
   background-color: #efefef;
 }
 
-.card {
+#stream .card {
   padding: 1em;
   margin-bottom: 1em;
 }
 
 /* Enter and leave animations can use different */
 /* durations and timing functions.              */
-.slide-fade-enter-active {
+#stream .slide-fade-enter-active {
   transition: all .2s ease;
 }
-.slide-fade-leave-active {
+#stream .slide-fade-leave-active {
   transition: all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
-.slide-fade-enter, .slide-fade-leave-to
+#stream .slide-fade-enter, #stream .slide-fade-leave-to
   /* .slide-fade-leave-active below version 2.1.8 */ {
   transform: translateX(10px);
   opacity: 0;
 }
 
-.list-item {
+#stream .list-item {
   display: inline-block;
   margin-right: 10px;
 }
-.list-enter-active, .list-leave-active {
+#stream .list-enter-active, #stream .list-leave-active {
   transition: all 1s;
 }
-.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+#stream .list-enter, #stream .list-leave-to /* .list-leave-active below version 2.1.8 */ {
   opacity: 0;
   transform: translateY(30px);
 }
@@ -287,7 +287,7 @@ body {
 /**
 Flipping
  */
-.card-flip {
+#stream .card-flip {
   perspective: 100vw;
   &.flip-active .flip,
   &.flip-active .flip {
@@ -295,54 +295,54 @@ Flipping
   }
 }
 
-.card-flip,
-.front,
-.back-delete,
-.back-edit {
+#stream .card-flip,
+#stream .front,
+#stream .back-delete,
+#stream .back-edit {
   width: 100%;
   // height: 480px;
 }
 
-.back-delete {
+#stream .back-delete {
   button {
     margin-left: 10px;
   }
 }
 
-.flip {
+#stream .flip {
   transition: 0.6s;
   transform-style: preserve-3d;
   position: relative;
 }
 
-.front,
-.back-delete,
-.back-edit {
+#stream .front,
+#stream .back-delete,
+#stream .back-edit {
   backface-visibility: hidden;
   // position: absolute;
   // top: 0;
   // left: 0;
 }
 
-.back-delete,
-.back-edit {
+#stream .back-delete,
+#stream .back-edit {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 3;
 }
 
-.front {
+#stream .front {
   z-index: 2;
   transform: rotateY(0deg);
 }
 
-.back-delete,
-.back-edit {
+#stream .back-delete,
+#stream .back-edit {
   transform: rotateY(180deg);
 }
 
-.stream-post-wrapper .v-spinner {
+#stream .stream-post-wrapper .v-spinner {
   position: absolute;
 }
 </style>

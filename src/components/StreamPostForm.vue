@@ -488,9 +488,10 @@ export default {
 </style>
 
 <style lang="scss" >
-//load the variables
-@import "../assets/scss/bootstrap_custom.scss";
-@import "../../node_modules/bootstrap/scss/bootstrap.scss";
+  // load the variables
+  @import "../assets/scss/bootstrap_custom.scss";
+  // @import "../../node_modules/bootstrap/scss/bootstrap.scss";
+
   .multiselect {
     > ul,
     .multiselect__content-wrapper {
