@@ -6,6 +6,9 @@
       :streamOptions="streamOptions"
       v-on:stream-post-added="addPost"
     />
+    <div v-if="initialized && posts.length == 0">
+      {{ $t('empty.no_posts_found') }}
+    </div>
     <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busyLoading" infinite-scroll-distance="10" v-keep-scroll-position class="stream-post-wrapper">
       <transition-group name="list">
         <stream-post v-for="post in sortedPosts"
@@ -51,7 +54,8 @@ export default {
       infiniteScrollLimit: 10,
       maxPostsToShow: 10,
       pollingUpdate: null,
-      containerNid: null
+      containerNid: null,
+      streamUpdateOnRerender: false
     }
   },
   beforeMount: function () {
@@ -69,30 +73,32 @@ export default {
   methods: {
     initialize: function () {
       this.initializeStream()
-      let eventUpdate = new Event('nm-stream:update')
-      document.dispatchEvent(eventUpdate)
     },
     addPost: function (post) {
       this.posts.push(post)
-      let eventUpdate = new Event('nm-stream:update')
+      let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
+      this.streamUpdateOnRerender = true
     },
     deletePost: function (post) {
       let postListIndex = this.posts.indexOf(post)
       this.posts.splice(postListIndex, 1)
-      let eventUpdate = new Event('nm-stream:update')
+      let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
+      this.streamUpdateOnRerender = true
     },
     deleteComment: function (comment) {
       let commentListIndex = this.comments.indexOf(comment)
       this.comments.splice(commentListIndex, 1)
-      let eventUpdate = new Event('nm-stream:update')
+      let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
+      this.streamUpdateOnRerender = true
     },
     addComment: function (comment) {
       this.comments.push(comment)
-      let eventUpdate = new Event('nm-stream:update')
+      let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
+      this.streamUpdateOnRerender = true
     },
     addUser: function (user) {
       if (!this.getUser(user.uid)) {
@@ -123,6 +129,17 @@ export default {
 
         // this.$emit('content:updated', response.data.stream)
         // console.log(self.posts)
+      })
+    },
+    updated: function () {
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been re-rendered
+        if (this.streamUpdateOnRerender) {
+          let eventUpdate = new Event('nm-stream:update')
+          document.dispatchEvent(eventUpdate)
+          this.streamUpdateOnRerender = false
+        }
       })
     },
     loadMore: function () {
@@ -189,8 +206,9 @@ export default {
 
           self.streamOptions.timestamp = response.data.stream.timestamp
 
-          let eventUpdate = new Event('nm-stream:update')
+          let eventUpdate = new Event('nm-stream:update-model')
           document.dispatchEvent(eventUpdate)
+          this.streamUpdateOnRerender = true
         })
       }, 5000)
     },

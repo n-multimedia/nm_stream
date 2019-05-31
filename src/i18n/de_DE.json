@@ -39,6 +39,9 @@
       "delete_comment_really_want_to": "Möchten Sie den Kommentar wirklich löschen?",
       "delete_comment_action_cannot_be_undone": "Sie sind dabei einen Kommentar zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
       "error_occured_please_repeat_your_action": "Es ist ein Fehler aufgetreten, bitte wiederholen Sie Ihre letzte Aktion."
+    },
+    "empty": {
+      "no_posts_found": "keine Beiträge gefunden"
     }
   }
 }
