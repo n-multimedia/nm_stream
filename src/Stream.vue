@@ -124,10 +124,6 @@ export default {
           this.streamUpdateOnRerender = true
         }, false)
 
-        document.addEventListener('nm-stream:update', (e) => {
-          this.streamUpdateOnRerender = true
-        }, false)
-
         let eventUpdate = new Event('nm-stream:update-model')
         document.dispatchEvent(eventUpdate)
 
@@ -219,7 +215,7 @@ export default {
   },
   updated: function () {
     if (this.streamUpdateOnRerender) {
-      this.$nextTick(function () {
+      this.$nextTick(() => {
         // Code that will run only after the
         // entire view has been re-rendered
         let eventUpdate = new Event('nm-stream:update')

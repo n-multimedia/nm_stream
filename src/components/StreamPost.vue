@@ -181,10 +181,13 @@ export default {
     },
     toggleComments (show) {
       this.showComments = !this.showComments
+
       if (this.showComments) {
         // let external modules know about new visible content
-        let eventUpdate = new Event('nm-stream:update')
-        document.dispatchEvent(eventUpdate)
+        this.$nextTick(() => {
+          let eventUpdate = new Event('nm-stream:update')
+          document.dispatchEvent(eventUpdate)
+        })
       }
     },
     deletePost (event) {

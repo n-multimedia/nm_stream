@@ -128,6 +128,9 @@ export default {
             self.editPost.body_formatted = response.data.nodeData.body_formatted
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
 
+            let eventUpdate = new Event('nm-stream:update-model')
+            document.dispatchEvent(eventUpdate)
+
             // check for queued uploads
             if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
               // set editPost to update dropzone url
