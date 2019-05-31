@@ -120,12 +120,16 @@ export default {
 
         self.initialized = true
 
-        let eventUpdate = new Event('nm-stream:update-model')
-        document.dispatchEvent(eventUpdate)
-
         document.addEventListener('nm-stream:update-model', (e) => {
           this.streamUpdateOnRerender = true
         }, false)
+
+        document.addEventListener('nm-stream:update', (e) => {
+          this.streamUpdateOnRerender = true
+        }, false)
+
+        let eventUpdate = new Event('nm-stream:update-model')
+        document.dispatchEvent(eventUpdate)
 
         // start polling
         self.pollUpdate()
