@@ -124,22 +124,13 @@ export default {
 
         self.initialized = true
 
+        this.streamUpdateOnRerender = true
+
         // start polling
         self.pollUpdate()
 
         // this.$emit('content:updated', response.data.stream)
         // console.log(self.posts)
-      })
-    },
-    updated: function () {
-      this.$nextTick(function () {
-        // Code that will run only after the
-        // entire view has been re-rendered
-        if (this.streamUpdateOnRerender) {
-          let eventUpdate = new Event('nm-stream:update')
-          document.dispatchEvent(eventUpdate)
-          this.streamUpdateOnRerender = false
-        }
       })
     },
     loadMore: function () {
@@ -219,6 +210,19 @@ export default {
         })
         // If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
         arr1obj ? Vue._.extend(arr1obj, arr2obj) : arr1.push(arr2obj)
+      })
+    }
+  },
+  updated: function () {
+    console.log('updated')
+    if (this.streamUpdateOnRerender) {
+      console.log('next tick')
+      this.$nextTick(function () {
+        // Code that will run only after the
+        // entire view has been re-rendered
+        let eventUpdate = new Event('nm-stream:update')
+        document.dispatchEvent(eventUpdate)
+        this.streamUpdateOnRerender = false
       })
     }
   },
