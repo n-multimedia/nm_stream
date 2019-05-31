@@ -52,7 +52,7 @@
                   <div class="stream-post-footer" v-if="sortedComments.length > 0">
                     <div>
                       <transition name="slide-fade">
-                        <a href="#" v-if="!showComments" key="true" v-on:click.prevent="showComments = !showComments">
+                        <a href="#" v-if="!showComments" key="true" v-on:click.prevent="toggleComments">
                           {{ $t('link.show_x_comments', { count: sortedComments.length }) }}
                         </a>
                         <a href="#" v-else key="false" v-on:click.prevent="showComments = !showComments">{{ $t('link.hide_x_comments', { count: sortedComments.length }) }}</a>
@@ -178,6 +178,13 @@ export default {
 
       this.$refs.backDelete.classList.add('hide')
       this.$refs.backEdit.classList.remove('hide')
+    },
+    toggleComments (show) {
+      this.showComments = !this.showComments
+      if (this.showComments) {
+        let eventUpdate = new Event('nm-stream:update-model')
+        document.dispatchEvent(eventUpdate)
+      }
     },
     deletePost (event) {
       this.showComments = false

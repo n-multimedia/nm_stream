@@ -78,27 +78,23 @@ export default {
       this.posts.push(post)
       let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
-      this.streamUpdateOnRerender = true
     },
     deletePost: function (post) {
       let postListIndex = this.posts.indexOf(post)
       this.posts.splice(postListIndex, 1)
       let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
-      this.streamUpdateOnRerender = true
     },
     deleteComment: function (comment) {
       let commentListIndex = this.comments.indexOf(comment)
       this.comments.splice(commentListIndex, 1)
       let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
-      this.streamUpdateOnRerender = true
     },
     addComment: function (comment) {
       this.comments.push(comment)
       let eventUpdate = new Event('nm-stream:update-model')
       document.dispatchEvent(eventUpdate)
-      this.streamUpdateOnRerender = true
     },
     addUser: function (user) {
       if (!this.getUser(user.uid)) {
@@ -124,7 +120,12 @@ export default {
 
         self.initialized = true
 
-        this.streamUpdateOnRerender = true
+        let eventUpdate = new Event('nm-stream:update-model')
+        document.dispatchEvent(eventUpdate)
+
+        document.addEventListener('nm-stream:update-model', (e) => {
+          this.streamUpdateOnRerender = true
+        }, false)
 
         // start polling
         self.pollUpdate()
@@ -199,7 +200,6 @@ export default {
 
           let eventUpdate = new Event('nm-stream:update-model')
           document.dispatchEvent(eventUpdate)
-          this.streamUpdateOnRerender = true
         })
       }, 5000)
     },
@@ -214,9 +214,7 @@ export default {
     }
   },
   updated: function () {
-    console.log('updated')
     if (this.streamUpdateOnRerender) {
-      console.log('next tick')
       this.$nextTick(function () {
         // Code that will run only after the
         // entire view has been re-rendered
