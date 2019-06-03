@@ -26,7 +26,7 @@
     },
     "button": {
       "cancel": "Abbrechen",
-      "post": "Teilen",
+      "post": "Speichern",
       "edit": "Bearbeiten",
       "delete": "Löschen",
       "select_privacy": "Sichtbarkeit festlegen",
@@ -41,7 +41,7 @@
       "error_occured_please_repeat_your_action": "Es ist ein Fehler aufgetreten, bitte wiederholen Sie Ihre letzte Aktion."
     },
     "empty": {
-      "no_posts_found": "keine Beiträge gefunden"
+      "no_posts_found": "Keine Beiträge"
     }
   }
 }
