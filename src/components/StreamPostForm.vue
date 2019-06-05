@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <div class="row stream-action-1">
           <transition name="fade">
             <div class="col-12 stream-attachments" v-if="formActive" :key="formActive">
@@ -186,6 +186,12 @@ export default {
       // prevent accidentally closing
       if (this.bodyText.length === 0) {
         this.resetForm()
+      }
+    },
+    submitOnCtrlEnter (e) {
+      // prüfe auf STRG
+      if (e.ctrlKey) {
+        this.savePost()
       }
     },
     resetForm () {

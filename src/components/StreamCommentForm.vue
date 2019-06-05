@@ -7,7 +7,7 @@
         </transition>
       </div>
       <div class="col-10">
-        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed" v-model="bodyText" v-on:focus="formActive = true" :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
+        <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-on:focus="formActive = true" :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
         <transition name="fade">
           <div class="row stream-action-2" :key="formActive">
             <div class="col-12">
@@ -116,6 +116,12 @@ export default {
       }
 
       this.busyLoading = false
+    },
+    submitOnCtrlEnter (e) {
+      // prüfe auf STRG
+      if (e.ctrlKey) {
+        this.saveComment()
+      }
     },
     initializeComment () {
       if (this.editComment) {
