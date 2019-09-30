@@ -402,7 +402,7 @@ export default {
         dictDefaultMessage: this.$t('label.dictDefaultMessage'),
         dictFallbackMessage: this.$t('label.dictFallbackMessage'),
         // dictFallbackText: this.$t('label.dictFallbackText'),
-        dictFileTooBig: this.$t('label.dictFileTooBig'),
+        dictFileTooBig: this.$t('label.customdictFileTooBig'),
         dictInvalidFileType: this.$t('label.dictInvalidFileType'),
         // dictResponseError: this.$t('label.dictResponseError'),
         dictCancelUpload: this.$t('label.dictCancelUpload'),
