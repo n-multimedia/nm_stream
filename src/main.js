@@ -10,6 +10,7 @@ import VueLodash from 'vue-lodash'
 import { Multiselect } from 'vue-multiselect'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faClock, faFile, faTrashAlt } from '@fortawesome/free-regular-svg-icons'
+import { faAnchor } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueI18n from 'vue-i18n'
 import de from './i18n/de_DE'
@@ -22,7 +23,7 @@ import infiniteScroll from 'vue-infinite-scroll'
 import VueKeepScrollPosition from 'vue-keep-scroll-position'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 
-library.add(faClock, faFile, faTrashAlt)
+library.add(faClock, faFile, faTrashAlt, faAnchor)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.component('pulse-loader', PulseLoader)

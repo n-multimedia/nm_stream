@@ -3,25 +3,21 @@
     <div class="row">
       <div class="col-2">
         <transition name="fade">
-          <img v-if="formActive" class="card-img-top rounded-circle" :src="author.avatarUrl" :key="formActive" :title="author.name"/>
+          <img v-if="formActive" class="card-img-top rounded-circle" :src="author.avatarUrl" :key="formActive"
+               :title="author.name"/>
         </transition>
       </div>
       <div class="col-10">
         <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        <!-- plugins -->
+        <div class="row" v-if="formActive">
+          <div class="col-12 plugins">
+            <plugin-sticky :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
+          </div>
+        </div>
         <div class="row stream-action-1">
           <transition name="fade">
             <div class="col-12 stream-attachments" v-if="formActive" :key="formActive">
-              <!--<input class="stream-post-attachment" type="file" name="files[]">-->
-              <!-- PostTools -->
-              <!-- Styled -->
-              <!--<span class="stream-attachment-dummybutton">
-                <span><font-awesome-icon :icon="['fa', 'PlusSquare']"/> t('Add Attachment')</span>
-                <b-form-file v-model="files" multiple></b-form-file>
-              </span>
-              <div v-if="files && files.length > 0">
-                <div class="mt-3" v-for="file in files" :key="file.name">{{file && file.name}}</div>
-              </div>-->
-              <!-- TBI @vdropzone-error="dropzoneError" -->
               <vue-dropzone
                 ref="vueDropZone"
                 id="dropzone"
@@ -76,11 +72,12 @@
 import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+import PluginSticky from './plugins/PluginSticky'
 
 export default {
   props: ['streamOptions', 'editPost'],
   name: 'stream-post-form',
-  components: {vueDropzone: vue2Dropzone},
+  components: {vueDropzone: vue2Dropzone, PluginSticky},
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
@@ -113,6 +110,7 @@ export default {
       let nodeData = {}
       nodeData.body = this.bodyText
       nodeData.privacy = this.privacyValue.value
+      nodeData.sticky = this.stickyValue
 
       if (this.editPost) {
         let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
@@ -127,6 +125,7 @@ export default {
             self.editPost.body = response.data.nodeData.body
             self.editPost.body_formatted = response.data.nodeData.body_formatted
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
+            self.editPost.sticky = response.data.nodeData.sticky
 
             let eventUpdate = new Event('nm-stream:update-model')
             document.dispatchEvent(eventUpdate)
@@ -205,6 +204,7 @@ export default {
       } else {
         this.formActive = false
         this.bodyText = ''
+        this.stickyValue = 0
         let valueKeyInteger = parseInt(this.privacyDefault)
         this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
         this.$el.querySelector('textarea.stream-post-body').blur()
@@ -279,6 +279,7 @@ export default {
         // console.log('editpost', this.editPost)
         this.formActive = true
         this.bodyText = this.editPost.body
+        this.stickyValue = parseInt(this.editPost.sticky)
 
         // override privacy options
         this.privacyDefault = this.editPost.privacy.privacyDefault
@@ -386,6 +387,7 @@ export default {
       formActive: false,
       bodyText: '',
       privacyValue: null,
+      stickyValue: 0,
       dropzoneResetAfterComplete: false,
       files: null,
       busyLoading: false,
@@ -607,5 +609,9 @@ export default {
     .dropzone.dz-drag-hover {
       border-color: $blue;
     }
+  }
+
+  .plugins {
+    padding-right: 17px;
   }
 </style>

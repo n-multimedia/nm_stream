@@ -4,6 +4,7 @@
     <stream-post-form
       v-if="initialized && streamOptions.containerNID > 0"
       :streamOptions="streamOptions"
+      :streamPlugins="streamPlugins"
       v-on:stream-post-added="addPost"
     />
     <div v-if="initialized && posts.length == 0">
@@ -65,7 +66,9 @@ export default {
   },
   computed: {
     sortedPosts: function () {
-      let sortedPosts = Vue._.orderBy(this.posts, 'created', 'desc')
+      // sort by created and sticky
+      let sortedPosts = Vue._.chain(this.posts).sortBy('created').sortBy('sticky').reverse().value()
+
       let slicedPosts = sortedPosts.slice(0, this.maxPostsToShow)
       return slicedPosts
     }
@@ -117,6 +120,8 @@ export default {
         self.streamOptions.containerNID = response.data.stream.containerNID
         self.streamOptions.timestamp = response.data.stream.timestamp
         self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
+
+        self.streamPlugins = []
 
         self.initialized = true
 
