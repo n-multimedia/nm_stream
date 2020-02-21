@@ -122,7 +122,6 @@ export default {
         self.streamOptions.timestamp = response.data.stream.timestamp
         self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
 
-
         self.streamPlugins = []
 
         self.initialized = true
