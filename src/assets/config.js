@@ -1,6 +1,5 @@
 export default {
 
-  /*
   api: {
     apiInitUrl: '/api/v2.0/nm_stream/node/%node/initialize',
     apiPollUpdateUrl: '/api/v2.0/nm_stream/node/%node/poll_update/%offset/%limit/%token',
@@ -13,8 +12,8 @@ export default {
     apiCommentAddUrl: '/api/v2.0/nm_stream/node/%node/comment/add/%token',
     apiCommentDeleteUrl: '/api/v2.0/nm_stream/comment/%comment/delete/%token'
   }
-  */
 
+/*
   api: {
     apiInitUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/initialize',
     apiPollUpdateUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/poll_update/%offset/%limit/%token',
@@ -27,5 +26,5 @@ export default {
     apiCommentAddUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/node/%node/comment/add/%token',
     apiCommentDeleteUrl: 'https://dev1.div.onlinekurslabor.de/api/v2.0/nm_stream/comment/%comment/delete/%token'
   }
-
+*/
 }

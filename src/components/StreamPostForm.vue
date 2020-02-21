@@ -12,7 +12,7 @@
         <!-- plugins -->
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
-            <plugin-sticky :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
+            <plugin-sticky  v-if="canSetSticky"  :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
           </div>
         </div>
         <div class="row stream-action-1">
@@ -414,6 +414,15 @@ export default {
         // dictRemoveFileConfirmation: this.$t('label.dictRemoveFileConfirmation'),
         dictMaxFilesExceeded: this.$t('label.dictMaxFilesExceeded')
         // dictFileSizeUnits: ''
+      }
+    }
+  },
+  computed: {
+    canSetSticky: function () {
+      if (this.editPost) {
+        return this.editPost.permissions.canSetSticky
+      } else {
+        return this.streamOptions.permissions.canCreateStickyPost
       }
     }
   }

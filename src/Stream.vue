@@ -2,7 +2,7 @@
   <div id="stream" class="container">
     <pulse-loader :loading="!initialized" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
     <stream-post-form
-      v-if="initialized && streamOptions.containerNID > 0"
+      v-if="initialized && streamOptions.containerNID > 0 && streamOptions.permissions.canCreatePost"
       :streamOptions="streamOptions"
       :streamPlugins="streamPlugins"
       v-on:stream-post-added="addPost"
@@ -114,12 +114,15 @@ export default {
         self.streamOptions.privacyOptions = response.data.stream.privacyOptions
         self.streamOptions.privacyOptionsAll = response.data.stream.privacyOptionsAll
         self.streamOptions.privacyDefault = response.data.stream.privacyDefault
+        self.streamOptions.permissions = response.data.stream.permissions
         self.streamOptions.loggedInUser = this.getUser(response.data.stream.loggedInUser)
         self.streamOptions.token = response.data.stream.token
         self.streamOptions.contextNID = response.data.stream.contextNID
         self.streamOptions.containerNID = response.data.stream.containerNID
         self.streamOptions.timestamp = response.data.stream.timestamp
         self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
+
+        console.log(self.streamOptions)
 
         self.streamPlugins = []
 

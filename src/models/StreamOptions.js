@@ -3,6 +3,7 @@ export default class StreamOptions {
     this.privacyDefault = ''
     this.privacyOptions = []
     this.privacyOptionsAll = []
+    this.permissions = []
     this.loggedInUser = ''
     this.containerNID = ''
     this.contextNID = ''
