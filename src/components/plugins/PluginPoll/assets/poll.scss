@@ -26,6 +26,7 @@ input[type="text"] {
 .poll-trash-delete {
   color: $red;
   margin-top: 12px;
+  cursor: pointer;
   display: inline-block;
 
   &:hover {

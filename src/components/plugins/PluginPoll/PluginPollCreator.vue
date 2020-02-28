@@ -3,7 +3,7 @@
     <div class="col-12">
       <div class="row poll-title">
         <div class="col-12">
-          <h3>{{ $t('plugins.poll.new_poll') }}</h3>
+          <h4>{{ $t('plugins.poll.new_poll') }}</h4>
         </div>
       </div>
       <div class="row poll-container">
@@ -18,26 +18,27 @@
                  :style="{zIndex: poll.answers.length - index}">
               <div class="col-10">
                 <input :placeholder="$t('plugins.poll.answer') + ' ' + (index + 1)" ref="PollAnswerOptions" @input="createNewInput(index)" @focus="createNewInput(index)" v-on:keyup.enter="nextInput(index)"
-                       v-model="poll.answers[index].answer" type="text">
+                       v-model="poll.answers[index].text" type="text">
               </div>
               <div class="col-2">
-                <a tabindex="2" href="#" :title="$t('plugins.poll.delete')" class="poll-trash-delete" @click="deleteInput(index)">
+                <span tabindex="2" :title="$t('plugins.poll.delete')" class="poll-trash-delete" @click="deleteInput(index)">
                   <font-awesome-icon :icon="['far', 'trash-alt']"/>
-                </a>
+                </span>
               </div>
             </div>
           </div>
           <div class="row poll-options">
             <div class="col-12">
               <div class="custom-control custom-checkbox">
-                <input tabindex="1" v-model="poll.multipleVotes" type="checkbox" class="checked custom-control-input" id="cb-multiple-votes">
+                <input tabindex="1" v-model="poll.multiple" type="checkbox" class="checked custom-control-input" id="cb-multiple-votes">
                 <label class="custom-control-label" for="cb-multiple-votes">{{ $t('plugins.poll.allow_multiple_votes') }}</label>
               </div>
             </div>
           </div>
           <div class="row poll-actions">
             <div class="col-12">
-              <button @click="createPoll" class="btn btn-outline-primary ">{{ $t('plugins.poll.create') }}</button>
+              <button v-if="editPoll" @click="createPoll" class="btn btn-outline-primary ">{{ $t('plugins.poll.save') }}</button>
+              <button v-if="!editPoll" @click="createPoll" class="btn btn-outline-primary ">{{ $t('plugins.poll.create') }}</button>
               <button @click="closePoll" class="btn btn-outline-secondary  ">{{ $t('plugins.poll.cancel') }}</button>
             </div>
           </div>
@@ -55,10 +56,9 @@
 </template>
 
 <script>
-import Vue from 'vue'
 
 export default {
-  name: 'poll-creator',
+  name: 'plugin-poll-creator',
   props: {
     savePollUrl: {
       type: String
@@ -66,6 +66,10 @@ export default {
     demo: {
       type: Boolean,
       default: false
+    },
+    editPost: {
+      type: Object,
+      default: null
     }
   },
   data () {
@@ -73,24 +77,35 @@ export default {
       poll: {
         question: '',
         answers: [
-          {answer: ''}
+          {text: ''},
+          {text: ''},
+          {text: ''}
         ],
-        multipleVotes: false
+        multiple: false
       },
       isValid: false,
-      success: null
+      success: null,
+      editPoll: null
     }
   },
   mounted () {
+    if (this.editPost && this.editPost.poll) {
+      this.poll = this.editPost.poll
+      this.editPoll = this.editPost.poll // flag editing existing poll
+    }
+
     if (this.poll.answers.length === 0) {
-      this.poll.answers.push({answer: ''})
+      this.addEntry('')
     }
   },
   methods: {
+    addEntry (text) {
+      this.poll.answers.push({text})
+    },
     createNewInput (index, ignoreLastEmpty) {
       if (this.poll.answers.length - 1 === index) {
-        if (ignoreLastEmpty || this.poll.answers[index].answer) {
-          this.poll.answers.push({answer: ''})
+        if (ignoreLastEmpty || this.poll.answers[index].text) {
+          this.addEntry('')
         }
       }
     },
@@ -112,11 +127,11 @@ export default {
       // console.log(event.target.closest('div.row').nextElementSibling)
       // event.target.closest('div.row').nextElementSibling.focus()
     },
-    closePoll() {
+    closePoll () {
       this.$root.$emit('plugins:poll:creator:close')
       this.$emit('close')
     },
-    createPoll() {
+    createPoll () {
       this.validate()
       if (this.isValid) {
         // this.$root.$emit('plugins:poll:creator:create', this.poll)
@@ -128,18 +143,17 @@ export default {
       }
     },
     resetPoll () {
-      this.poll.multipleVotes = false
+      this.poll.multiple = false
       this.poll.answers = []
-      this.poll.answers.push({answer: ''})
-      this.poll.answers.push({answer: ''})
-      this.poll.answers.push({answer: ''})
-      this.poll.answers.push({answer: ''})
+      this.addEntry('')
+      this.addEntry('')
+      this.addEntry('')
       this.poll.question = ''
       this.isValid = false
     },
     validate () {
       this.poll.answers = this.poll.answers.filter((answer) => {
-        if (answer.answer.length > 0) {
+        if (answer.text.length > 0) {
           return answer
         }
       })
@@ -148,6 +162,7 @@ export default {
         this.isValid = true
       } else {
         this.isValid = false
+        this.addEntry('')
       }
     },
     alert (success) {

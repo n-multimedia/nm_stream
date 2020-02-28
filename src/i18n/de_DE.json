@@ -54,11 +54,15 @@
         "your_question": "Die Frage..",
         "answer": "Antwort",
         "allow_multiple_votes": "Mehrere Antworten erlauben",
+        "submit": "Abstimmen",
+        "save": "Speichern",
         "create": "Erstellen",
         "delete": "Löschen",
         "cancel": "Abbrechen",
         "status_created": "Erstellt",
-        "status_error": "Fehler"
+        "status_error": "Fehler",
+        "vote": "Stimme",
+        "votes": "Stimmen"
       }
     }
   }

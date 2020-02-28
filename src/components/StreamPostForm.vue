@@ -10,7 +10,7 @@
       <!-- Plugin -->
       <div class="active-plugin-content col-10" v-if="currentPluginTemplate">
         <keep-alive>
-          <component v-bind:is="currentPluginTemplate" @close="pluginCloseDialog"></component>
+          <component v-bind:is="currentPluginTemplate" :editPost="editPost"  @close="pluginCloseDialog"></component>
         </keep-alive>
       </div>
       <!-- Post Content -->
@@ -20,7 +20,7 @@
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
             <plugin-sticky  v-if="canSetSticky"  :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
-            <plugin-poll :param1="currentPluginTemplate" @interface="currentPluginTemplate = $event" ></plugin-poll>
+            <plugin-poll :param1="editPost" @interface="currentPluginTemplate = $event" ></plugin-poll>
           </div>
         </div>
         <div class="row stream-action-1">
@@ -99,7 +99,7 @@ export default {
     },
     resizePostFormContainer () {
       // resizing post relevant for edit mode only
-      if (this.editPost) {
+      if (this.editPost && this.$refs.vueDropZone) { // catch poll editing errors
         let dragzoneHeight = parseFloat(this.$refs.vueDropZone.$el.style.height)
         let attachmentsHeight = 0
         if (this.$refs.postAttachmentList) {
@@ -344,13 +344,11 @@ export default {
       this.$emit('post-form-onAttachmentDeleteConf', attachment)
     },
     pluginCloseDialog () {
-      console.log('pluginCloseDialog')
       this.currentPluginTemplate = ''
 
       this.$nextTick(() => {
         this.resizeTextareaElement(this.$el.querySelector('textarea'))
       })
-
     }
   },
   watch: {

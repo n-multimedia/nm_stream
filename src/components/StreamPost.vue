@@ -35,6 +35,7 @@
               <div class="row">
                 <div class="col-12 body">
                   <p tag="p" v-html="post.body_formatted" />
+                  <plugin-poll-view v-once v-if="post.poll" v-bind="post.poll" @addvote="pollAddVote"/>
                 </div>
                 <div v-if="post.sticky == 1" class="post-sticky" :title="$t('plugins.sticky.status_title')"><font-awesome-icon :icon="['fa', 'anchor']" /></div>
               </div>
@@ -133,10 +134,11 @@ import Vue from 'vue'
 import StreamComment from './StreamComment'
 import StreamCommentForm from './StreamCommentForm'
 import StreamPostForm from './StreamPostForm'
+import PluginPollView from './plugins/PluginPoll/PluginPollView'
 
 export default {
   props: ['streamOptions', 'post', 'comments'],
-  components: {StreamComment, StreamCommentForm, StreamPostForm},
+  components: {StreamComment, StreamCommentForm, StreamPostForm, PluginPollView},
   name: 'stream-post',
   data () {
     return {
@@ -252,6 +254,9 @@ export default {
         self.post.attachments.splice(index, 1)
       })
       this.hideModal()
+    },
+    pollAddVote (obj) {
+      console.log('tbi vote answer')
     }
   }
 }
