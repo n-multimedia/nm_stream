@@ -47,6 +47,18 @@
       "sticky": {
         "title": "Beitrag anheften",
         "status_title": "Beitrag angeheftet"
+      },
+      "poll": {
+        "title": "Umfrage starten",
+        "new_poll": "Neue Umfrage starten",
+        "your_question": "Die Frage..",
+        "answer": "Antwort",
+        "allow_multiple_votes": "Mehrere Antworten erlauben",
+        "create": "Erstellen",
+        "delete": "Löschen",
+        "cancel": "Abbrechen",
+        "status_created": "Erstellt",
+        "status_error": "Fehler"
       }
     }
   }

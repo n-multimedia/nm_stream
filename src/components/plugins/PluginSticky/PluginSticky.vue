@@ -1,5 +1,5 @@
 <script>
-import Plugin from './Plugin'
+import Plugin from '../Plugin'
 import { faAnchor } from '@fortawesome/free-solid-svg-icons'
 
 export default {

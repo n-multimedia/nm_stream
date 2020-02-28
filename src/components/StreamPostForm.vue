@@ -7,12 +7,20 @@
                :title="author.name"/>
         </transition>
       </div>
-      <div class="col-10">
+      <!-- Plugin -->
+      <div class="active-plugin-content col-10" v-if="currentPluginTemplate">
+        <keep-alive>
+          <component v-bind:is="currentPluginTemplate" @close="pluginCloseDialog"></component>
+        </keep-alive>
+      </div>
+      <!-- Post Content -->
+      <div class="col-10" v-if="!currentPluginTemplate">
         <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <!-- plugins -->
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
             <plugin-sticky  v-if="canSetSticky"  :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
+            <plugin-poll :param1="currentPluginTemplate" @interface="currentPluginTemplate = $event" ></plugin-poll>
           </div>
         </div>
         <div class="row stream-action-1">
@@ -72,12 +80,14 @@
 import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
-import PluginSticky from './plugins/PluginSticky'
+import PluginSticky from './plugins/PluginSticky/PluginSticky'
+import PluginPoll from './plugins/PluginPoll/PluginPoll'
+import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
 
 export default {
   props: ['streamOptions', 'editPost'],
   name: 'stream-post-form',
-  components: {vueDropzone: vue2Dropzone, PluginSticky},
+  components: {vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator},
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
@@ -332,6 +342,15 @@ export default {
     },
     onAttachmentDeleteConf (attachment) {
       this.$emit('post-form-onAttachmentDeleteConf', attachment)
+    },
+    pluginCloseDialog () {
+      console.log('pluginCloseDialog')
+      this.currentPluginTemplate = ''
+
+      this.$nextTick(() => {
+        this.resizeTextareaElement(this.$el.querySelector('textarea'))
+      })
+
     }
   },
   watch: {
@@ -380,6 +399,7 @@ export default {
   },
   data () {
     return {
+      currentPluginTemplate: '',
       loggedInUser: null,
       author: null,
       privacyOptions: null,
@@ -419,8 +439,10 @@ export default {
   },
   computed: {
     canSetSticky: function () {
+      // for existing posts
       if (this.editPost) {
         return this.editPost.permissions.canSetSticky
+      // new posts
       } else {
         return this.streamOptions.permissions.canCreateStickyPost
       }
