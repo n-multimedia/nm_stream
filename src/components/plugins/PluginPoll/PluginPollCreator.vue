@@ -67,7 +67,7 @@ export default {
       type: Boolean,
       default: false
     },
-    editPost: {
+    param1: {
       type: Object,
       default: null
     }
@@ -89,9 +89,9 @@ export default {
     }
   },
   mounted () {
-    if (this.editPost && this.editPost.poll) {
-      this.poll = this.editPost.poll
-      this.editPoll = this.editPost.poll // flag editing existing poll
+    if (this.param1) {
+      this.poll = this.param1
+      this.editPoll = this.poll // flag editing existing poll
     }
 
     if (this.poll.answers.length === 0) {
@@ -129,14 +129,33 @@ export default {
     },
     closePoll () {
       this.$root.$emit('plugins:poll:creator:close')
-      this.$emit('close')
+      this.$emit('dialogClose')
     },
     createPoll () {
       this.validate()
       if (this.isValid) {
         // this.$root.$emit('plugins:poll:creator:create', this.poll)
         // create poll
-        console.log('create poll ', this.poll)
+        // console.log('create poll ', this.poll)
+
+        let pollObject = {
+          multiple: this.poll.multiple,
+          question: this.poll.question,
+          answers: []
+        }
+
+        this.poll.answers.forEach((val, index) => {
+          let answer = {
+            value: index,
+            text: val.text,
+            votes: 0,
+            selected: false
+          }
+          pollObject.answers.push(answer)
+        })
+
+        this.$emit('dialogSubmit', pollObject)
+        this.$root.$emit('plugins:poll:creator:save', pollObject)
         this.closePoll()
       } else {
         this.alert(false)
@@ -158,7 +177,7 @@ export default {
         }
       })
       var count = this.poll.answers.length
-      if (count > 1) {
+      if (count > 0) {
         this.isValid = true
       } else {
         this.isValid = false

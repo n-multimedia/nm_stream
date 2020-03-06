@@ -10,7 +10,7 @@
       <!-- Plugin -->
       <div class="active-plugin-content col-10" v-if="currentPluginTemplate">
         <keep-alive>
-          <component v-bind:is="currentPluginTemplate" :editPost="editPost"  @close="pluginCloseDialog"></component>
+          <component v-bind:is="currentPluginTemplate" :param1="poll"  @dialogSubmit="pluginSubmitDialog($event)" @dialogClose="pluginCloseDialog()"></component>
         </keep-alive>
       </div>
       <!-- Post Content -->
@@ -121,6 +121,7 @@ export default {
       nodeData.body = this.bodyText
       nodeData.privacy = this.privacyValue.value
       nodeData.sticky = this.stickyValue
+      nodeData.poll = this.poll
 
       if (this.editPost) {
         let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
@@ -290,6 +291,7 @@ export default {
         this.formActive = true
         this.bodyText = this.editPost.body
         this.stickyValue = parseInt(this.editPost.sticky)
+        this.poll = this.editPost.poll
 
         // override privacy options
         this.privacyDefault = this.editPost.privacy.privacyDefault
@@ -342,6 +344,11 @@ export default {
     },
     onAttachmentDeleteConf (attachment) {
       this.$emit('post-form-onAttachmentDeleteConf', attachment)
+    },
+    pluginSubmitDialog (poll) {
+      this.poll = poll
+
+      this.pluginCloseDialog()
     },
     pluginCloseDialog () {
       this.currentPluginTemplate = ''
@@ -404,6 +411,7 @@ export default {
       privacyDefault: null,
       formActive: false,
       bodyText: '',
+      poll: null,
       privacyValue: null,
       stickyValue: 0,
       dropzoneResetAfterComplete: false,
