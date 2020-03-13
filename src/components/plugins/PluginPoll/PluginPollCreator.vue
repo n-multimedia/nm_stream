@@ -46,7 +46,7 @@
               </div>
             </div>
           </div>
-          <div class="row poll-actions">
+          <div class="row poll-options">
             <div class="col-10">
               <VueCtkDateTimePicker tabindex="1" locale="$i18n.locale" v-model="endDate"
                                     :label="$t('plugins.poll.pollEndDateLabel')"/>
