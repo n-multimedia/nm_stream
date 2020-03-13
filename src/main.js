@@ -22,6 +22,8 @@ import appConfig from './assets/config.js'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueKeepScrollPosition from 'vue-keep-scroll-position'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
+import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
 library.add(faClock, faFile, faTrashAlt, faAnchor, faPoll)
 
@@ -48,6 +50,8 @@ require('moment/locale/de')
 Vue.use(require('vue-moment'), {
   moment
 })
+
+Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker)
 
 // Create VueI18n instance with options
 const i18n = new VueI18n({

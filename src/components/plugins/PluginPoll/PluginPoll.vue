@@ -10,8 +10,7 @@ export default {
       icon: faPoll,
       activePluginComponent: '',
       title: this.$t('plugins.poll.title'),
-      editPost: this.param1,
-      editPoll: false
+      editPoll: this.param1
     }
   },
   computed: {
@@ -31,9 +30,6 @@ export default {
     }
   },
   mounted () {
-    if (this.editPost && this.editPost.poll) {
-      this.editPoll = this.editPost.poll // flag editing existing poll
-    }
   }
 }
 </script>

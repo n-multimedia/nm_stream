@@ -14,18 +14,29 @@
             </div>
           </div>
           <div class="poll-answers">
-            <div v-for="(answer, index) in poll.answers" :key="index" class="row answer"
-                 :style="{zIndex: poll.answers.length - index}">
-              <div class="col-10">
-                <input :placeholder="$t('plugins.poll.answer') + ' ' + (index + 1)" ref="PollAnswerOptions" @input="createNewInput(index)" @focus="createNewInput(index)" v-on:keyup.enter="nextInput(index)"
-                       v-model="poll.answers[index].text" type="text">
+            <draggable tag="div" :list="poll.answers" class="" handle=".handle">
+              <div
+                class="row"
+                v-for="(answer, index) in poll.answers"
+                :key="answer.value"
+              >
+                <div class="col-10">
+                  <i class="handle"><span></span></i>
+
+                  <span class="text">{{ answer.name }} </span>
+
+                  <input :placeholder="$t('plugins.poll.answer') + ' ' + (index + 1)"
+                         ref="PollAnswerOptions"
+                         @input="createNewInput(index)"
+                         @focus="createNewInput(index)" v-on:keyup.enter="nextInput(index)"
+                         v-model="poll.answers[index].text" type="text">
+                </div>
+
+                <div class="col-2">
+                  <i class="close" @click="deleteInput(index)"></i>
+                </div>
               </div>
-              <div class="col-2">
-                <span tabindex="2" :title="$t('plugins.poll.delete')" class="poll-trash-delete" @click="deleteInput(index)">
-                  <font-awesome-icon :icon="['far', 'trash-alt']"/>
-                </span>
-              </div>
-            </div>
+            </draggable>
           </div>
           <div class="row poll-options">
             <div class="col-12">
@@ -36,12 +47,25 @@
             </div>
           </div>
           <div class="row poll-actions">
-            <div class="col-12">
-              <button v-if="editPoll" @click="createPoll" class="btn btn-outline-primary ">{{ $t('plugins.poll.save') }}</button>
-              <button v-if="!editPoll" @click="createPoll" class="btn btn-outline-primary ">{{ $t('plugins.poll.create') }}</button>
-              <button @click="closePoll" class="btn btn-outline-secondary  ">{{ $t('plugins.poll.cancel') }}</button>
+            <div class="col-10">
+              <VueCtkDateTimePicker tabindex="1" locale="$i18n.locale" v-model="endDate"
+                                    :label="$t('plugins.poll.pollEndDateLabel')"/>
+
+              <small class="form-text text-muted">{{ $t('plugins.poll.pollEndDateDescription') }}</small>
+            </div>
+            <div class="col-2">
+
             </div>
           </div>
+          <div class="row poll-actions">
+            <div class="col-12">
+              <button v-if="editPoll" @click="createPoll" class="btn btn-outline-primary" :disabled="!validate()">{{ $t('plugins.poll.save') }}</button>
+              <button v-if="!editPoll" @click="createPoll" class="btn btn-outline-primary" :disabled="!validate()">{{ $t('plugins.poll.create') }}</button>
+              <button @click="closePoll" class="btn btn-outline-secondary">{{ $t('plugins.poll.cancel') }}</button>
+              <button @click="deletePoll" class="btn btn-outline-danger" :disabled="!editPoll">{{ $t('plugins.poll.delete') }}</button>
+            </div>
+          </div>
+          <!--
           <div class="row poll-info" :class="{'success' : success === true, 'error' : success === false}"
                v-if="success !== null">
             <div class="col-12">
@@ -49,6 +73,7 @@
               <div v-if="success === false">{{ $t('plugins.poll.status_error') }}</div>
             </div>
           </div>
+          -->
         </div>
       </div>
     </div>
@@ -56,9 +81,13 @@
 </template>
 
 <script>
+import draggable from 'vuedraggable'
 
 export default {
   name: 'plugin-poll-creator',
+  components: {
+    draggable
+  },
   props: {
     savePollUrl: {
       type: String
@@ -77,20 +106,22 @@ export default {
       poll: {
         question: '',
         answers: [
-          {text: ''},
-          {text: ''},
-          {text: ''}
+          {value: 0, text: ''},
+          {value: 1, text: ''},
+          {value: 2, text: ''}
         ],
         multiple: false
       },
       isValid: false,
       success: null,
-      editPoll: null
+      editPoll: null,
+      endDate: null
     }
   },
   mounted () {
     if (this.param1) {
       this.poll = this.param1
+      this.endDate = this.param1.endDate ? this.param1.endDate : null
       this.editPoll = this.poll // flag editing existing poll
     }
 
@@ -100,7 +131,8 @@ export default {
   },
   methods: {
     addEntry (text) {
-      this.poll.answers.push({text})
+      const max = Math.max.apply(Math, this.poll.answers.map(function (o) { return o.value }))
+      this.poll.answers.push({ value: max + 1, text: text })
     },
     createNewInput (index, ignoreLastEmpty) {
       if (this.poll.answers.length - 1 === index) {
@@ -131,22 +163,31 @@ export default {
       this.$root.$emit('plugins:poll:creator:close')
       this.$emit('dialogClose')
     },
+    deletePoll () {
+      this.$root.$emit('plugins:poll:creator:close')
+      this.$emit('dialogSubmit', null)
+      this.closePoll()
+    },
     createPoll () {
       this.validate()
       if (this.isValid) {
-        // this.$root.$emit('plugins:poll:creator:create', this.poll)
-        // create poll
-        // console.log('create poll ', this.poll)
+        // delete empty answers
+        this.poll.answers = this.poll.answers.filter((answer) => {
+          if (answer.text.length > 0) {
+            return answer
+          }
+        })
 
         let pollObject = {
           multiple: this.poll.multiple,
           question: this.poll.question,
+          endDate: this.endDate,
           answers: []
         }
 
         this.poll.answers.forEach((val, index) => {
-          let answer = {
-            value: index,
+          const answer = {
+            value: val.value,
             text: val.text,
             votes: 0,
             selected: false
@@ -171,18 +212,22 @@ export default {
       this.isValid = false
     },
     validate () {
-      this.poll.answers = this.poll.answers.filter((answer) => {
+      let answers = this.poll.answers.filter((answer) => {
         if (answer.text.length > 0) {
           return answer
         }
       })
-      var count = this.poll.answers.length
+      var count = answers.length
       if (count > 0) {
         this.isValid = true
       } else {
         this.isValid = false
-        this.addEntry('')
       }
+
+      return this.isValid
+    },
+    resetEndDate () {
+      this.endDate = null
     },
     alert (success) {
       this.success = success

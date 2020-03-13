@@ -20,7 +20,7 @@
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
             <plugin-sticky  v-if="canSetSticky"  :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
-            <plugin-poll :param1="editPost" @interface="currentPluginTemplate = $event" ></plugin-poll>
+            <plugin-poll :param1="poll" @interface="currentPluginTemplate = $event" ></plugin-poll>
           </div>
         </div>
         <div class="row stream-action-1">
@@ -105,7 +105,11 @@ export default {
         if (this.$refs.postAttachmentList) {
           attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
         }
-        this.$parent.$el.querySelector('.stream-post').style.height = (150 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+      }
+
+      if (this.currentPluginTemplate) {
+        this.$parent.$el.querySelector('.stream-post').style.height = (90 + this.$el.querySelector('.active-plugin-content').offsetHeight) + 'px'
       }
     },
     resizeTextareaElement (textarea) {
@@ -121,7 +125,7 @@ export default {
       nodeData.body = this.bodyText
       nodeData.privacy = this.privacyValue.value
       nodeData.sticky = this.stickyValue
-      nodeData.poll = this.poll
+      nodeData.poll = this.poll ? this.poll : undefined
 
       if (this.editPost) {
         let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
@@ -137,6 +141,7 @@ export default {
             self.editPost.body_formatted = response.data.nodeData.body_formatted
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
             self.editPost.sticky = response.data.nodeData.sticky
+            self.editPost.poll = response.data.nodeData.poll
 
             let eventUpdate = new Event('nm-stream:update-model')
             document.dispatchEvent(eventUpdate)
@@ -209,17 +214,17 @@ export default {
       if (this.editPost) {
         this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-post').style.height = 'auto'
-
-        // restore post values
-        // this.initializePost()
       } else {
         this.formActive = false
         this.bodyText = ''
-        this.stickyValue = 0
         let valueKeyInteger = parseInt(this.privacyDefault)
         this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
         this.$el.querySelector('textarea.stream-post-body').blur()
         this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
+
+        // Plugins Todo move to responsible Plugin
+        this.stickyValue = 0
+        this.poll = null
       }
 
       this.$refs.vueDropZone.removeAllFiles()
@@ -253,7 +258,7 @@ export default {
     },
     resizeDropArea () {
       // resize droparea
-      if (this.$refs.vueDropZone.$el.style.height !== '250px') {
+      if (this.$refs.vueDropZone && this.$refs.vueDropZone.$el.style.height !== '250px') {
         this.$refs.vueDropZone.$el.style.height = '250px'
         // add label margin
         this.$refs.vueDropZone.$el.querySelector('div.dz-message').style.marginTop = '100px'

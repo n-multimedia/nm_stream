@@ -53,3 +53,86 @@ input[type="text"] {
 .custom-control-label::after {
   top: 0;
 }
+
+.custom-checkbox {
+  cursor: pointer;
+  label,
+  input {
+    cursor: pointer;
+  }
+}
+
+.vue-poll {
+  &.ans {
+    color: #fff;
+  }
+}
+
+.poll-answers .handle {
+  cursor: pointer;
+  position: absolute;
+  display: inline-block;
+  width: 25px;
+  height: 11px;
+  opacity: 0.3;
+  left: 17px;
+  top: 8px;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+
+.poll-answers .handle span,
+.poll-answers .handle span:before,
+.poll-answers .handle span:after {
+  border-radius: 1px;
+  height: 2px;
+  width: 20px;
+  background: #000;
+  position: absolute;
+  display: block;
+  content: '';
+}
+.poll-answers .handle span:before {
+  bottom: -5px;
+}
+.poll-answers .handle span:after {
+  bottom: -10px;
+}
+
+
+.poll-answers input[type="text"] {
+  display: inline-block !important;
+  width: calc(100% - 40px);
+  margin-left: 40px;
+}
+
+
+.poll-answers .close {
+  top: 7px;
+  position: relative;
+  display: inline-block;
+  float: left;
+  opacity: 0.3;
+  height: 25px;
+  width: 25px;
+}
+.poll-answers .close:hover {
+  opacity: 1;
+}
+.poll-answers .close:before, .close:after {
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  content: ' ';
+  height: 15px;
+  width: 2px;
+  background-color: #333;
+}
+.poll-answers .close:before {
+  transform: rotate(45deg);
+}
+.poll-answers .close:after {
+  transform: rotate(-45deg);
+}
