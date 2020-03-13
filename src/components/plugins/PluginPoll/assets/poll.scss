@@ -72,11 +72,11 @@ input[type="text"] {
   cursor: pointer;
   position: absolute;
   display: inline-block;
-  width: 25px;
+  width: 20px;
   height: 11px;
   opacity: 0.3;
-  left: 17px;
-  top: 8px;
+  left: 25px;
+  top: 12px;
   &:hover {
     opacity: 0.5;
   }
@@ -87,18 +87,18 @@ input[type="text"] {
 .poll-answers .handle span:before,
 .poll-answers .handle span:after {
   border-radius: 1px;
-  height: 2px;
-  width: 20px;
+  height: 1px;
+  width: 13px;
   background: #000;
   position: absolute;
   display: block;
   content: '';
 }
 .poll-answers .handle span:before {
-  bottom: -5px;
+  bottom: -4px;
 }
 .poll-answers .handle span:after {
-  bottom: -10px;
+  bottom: -8px;
 }
 
 
@@ -115,8 +115,8 @@ input[type="text"] {
   display: inline-block;
   float: left;
   opacity: 0.3;
-  height: 25px;
-  width: 25px;
+  height: 20px;
+  width: 20px;
 }
 .poll-answers .close:hover {
   opacity: 1;
@@ -126,7 +126,7 @@ input[type="text"] {
   left: 10px;
   top: 5px;
   content: ' ';
-  height: 15px;
+  height: 10px;
   width: 2px;
   background-color: #333;
 }
