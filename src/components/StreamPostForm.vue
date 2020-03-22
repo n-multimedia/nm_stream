@@ -15,7 +15,13 @@
       </div>
       <!-- Post Content -->
       <div class="col-10" v-if="!currentPluginTemplate">
-        <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        <at-ta :members="mentionMembers" name-key="name">
+          <template slot="item" slot-scope="s">
+            <img :src="s.item.avatar" class="rounded-circle">
+            <span v-text="s.item.realname"></span>
+          </template>
+          <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" v-model.lazy="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
+        </at-ta>
         <!-- plugins -->
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
@@ -83,11 +89,13 @@ import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import PluginSticky from './plugins/PluginSticky/PluginSticky'
 import PluginPoll from './plugins/PluginPoll/PluginPoll'
 import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
+import AtTa from 'vue-at/dist/vue-at-textarea' // for textarea
+import MentionService from './plugins/PluginMention/services/mention.service'
 
 export default {
   props: ['streamOptions', 'editPost'],
   name: 'stream-post-form',
-  components: {vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator},
+  components: {vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
@@ -150,6 +158,7 @@ export default {
             if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
               // set editPost to update dropzone url
               // self.editPost = nodeData
+              // self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
               // self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
 
               self.dropzoneResetAfterComplete = true
@@ -365,7 +374,7 @@ export default {
   },
   watch: {
   },
-  mounted: function () {
+  mounted: async function () {
     // /////////////////////////////
     // new post
     // /////////////////////////////
@@ -400,6 +409,9 @@ export default {
 
     // set post author for edit post or logged in user for the new post
     this.updateAuthor()
+
+    // fetch mention opions
+    this.mentionMembers = await MentionService.getMentionMembers(this.streamOptions.contextNID)
   },
   beforeDestroy () {
     this.$el.removeEventListener('input', this.resizeTextarea)
@@ -425,6 +437,7 @@ export default {
       busyLoadingColor: '#888',
       busyLoadingSize: '10px',
       dropzoneQueueProcessing: false,
+      mentionMembers: null,
       dropzoneOptions: {
         url: this.getPostUploadUrl(),
         createImageThumbnails: false,
@@ -656,4 +669,15 @@ export default {
   .plugins {
     padding-right: 17px;
   }
+
+  .atwho-ul {
+    img {
+      max-height: 100%;
+      margin-right: 5px;
+    }
+    .atwho-li{
+      padding: 3px 10px;
+    }
+  }
+
 </style>
