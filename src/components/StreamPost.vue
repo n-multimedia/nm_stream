@@ -36,6 +36,7 @@
                 <div class="col-12 body">
                   <p tag="p" v-html="post.body_formatted" />
                 </div>
+                <div v-if="post.sticky == 1" class="post-sticky" :title="$t('plugins.sticky.status_title')"><font-awesome-icon :icon="['fa', 'anchor']" /></div>
               </div>
               <div class="row">
                 <div class="col-12">
@@ -45,7 +46,7 @@
                       <li :key="attachment.fid" v-for="attachment in post.attachments">
                         <span v-html="attachment.download_link"></span>
                         <!-- todo delete attachment action -->
-                        <a href="#"  :title="$t('button.delete_attachment')" class="attachment-trash-delete" v-if="attachment.permissions.canDelete" v-on:click.prevent="onAttachmentDeleteConf(attachment)"><font-awesome-icon :icon="['far', 'trash-alt']" /></a>
+                        <a href="#" :title="$t('button.delete_attachment')" class="attachment-trash-delete" v-if="attachment.permissions.canDelete" v-on:click.prevent="onAttachmentDeleteConf(attachment)"><font-awesome-icon :icon="['far', 'trash-alt']" /></a>
                       </li>
                     </ul>
                   </div>
@@ -336,6 +337,12 @@ export default {
 </style>
 
 <style lang="scss">
+  .post-sticky {
+    position: absolute;
+    bottom: 0;
+    right: 15px;
+  }
+
   .post-actions-dropdown {
     margin: 0 !important;
 

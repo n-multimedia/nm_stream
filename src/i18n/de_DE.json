@@ -42,6 +42,12 @@
     },
     "empty": {
       "no_posts_found": "Keine Beiträge"
+    },
+    "plugins": {
+      "sticky": {
+        "title": "Beitrag anheften",
+        "status_title": "Beitrag angeheftet"
+      }
     }
   }
 }
