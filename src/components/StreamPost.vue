@@ -89,13 +89,13 @@
       </div>
       <div class="back-edit" ref="backEdit">
         <div class="stream-post card">
-          <stream-post-form ref="streamPostForm"
-                            :streamOptions="streamOptions"
-                            :editPost="post"
-                            v-on:form-edit-canceled="editCanceled()"
-                            v-on:post-form-onAttachmentDeleteConf="onAttachmentDeleteConf"
-          >
-          </stream-post-form>
+          <component v-bind:is="streamPostFormComponent"
+                     ref="streamPostForm"
+                     :streamOptions="streamOptions"
+                     :editPost="post"
+                     v-on:form-edit-canceled="editCanceled()"
+                     v-on:post-form-onAttachmentDeleteConf="onAttachmentDeleteConf">
+          </component>
         </div>
       </div>
       <div class="back-delete" ref="backDelete">
@@ -144,8 +144,10 @@ export default {
   data () {
     return {
       pollViewRenderOnceKey: 1,
+      initializeForm: false,
       showComments: false,
-      curDeleteAttachment: null
+      curDeleteAttachment: null,
+      streamPostFormComponent: ''
     }
   },
   computed: {
@@ -180,6 +182,8 @@ export default {
   },
   methods: {
     editPost (event) {
+      this.initializeForm = true
+
       this.showComments = false
       // hide comments and show back
       this.$el.classList.add('flip-active')
@@ -265,6 +269,14 @@ export default {
     },
     pollAddVote (obj) {
       PollService.addVote(this.post.nid, obj, this.streamOptions.token)
+    }
+  },
+  watch: {
+    initializeForm: function (newValue, oldValue) {
+      console.log('watch', oldValue, newValue)
+      if (newValue === true) {
+        this.streamPostFormComponent = 'StreamPostForm'
+      }
     }
   }
 }

@@ -16,13 +16,13 @@ export default {
     let requestData = votes.arSelected
 
     // edit post => update
-    Vue.axios.post(apiNodePollAddVoteUrl, requestData, {withCredentials: true}).then((response) => {
-      if (response.data.status === 1) {
-        return response.data
-      } else {
-        // an error occured
-        alert(this.$t('warning.error_occured_please_repeat_your_action'))
-      }
-    })
+    let response = await Vue.axios.post(apiNodePollAddVoteUrl, requestData, {withCredentials: true})
+
+    if (response.data.status === 1) {
+      return response.data
+    } else {
+      // an error occured
+      alert(this.$t('warning.error_occured_please_repeat_your_action'))
+    }
   }
 }
