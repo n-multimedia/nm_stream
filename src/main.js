@@ -10,7 +10,7 @@ import VueLodash from 'vue-lodash'
 import { Multiselect } from 'vue-multiselect'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faClock, faFile, faTrashAlt } from '@fortawesome/free-regular-svg-icons'
-import { faAnchor } from '@fortawesome/free-solid-svg-icons'
+import { faAnchor, faPoll } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueI18n from 'vue-i18n'
 import de from './i18n/de_DE'
@@ -22,8 +22,10 @@ import appConfig from './assets/config.js'
 import infiniteScroll from 'vue-infinite-scroll'
 import VueKeepScrollPosition from 'vue-keep-scroll-position'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
+import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
-library.add(faClock, faFile, faTrashAlt, faAnchor)
+library.add(faClock, faFile, faTrashAlt, faAnchor, faPoll)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.component('pulse-loader', PulseLoader)
@@ -49,6 +51,8 @@ Vue.use(require('vue-moment'), {
   moment
 })
 
+Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker)
+
 // Create VueI18n instance with options
 const i18n = new VueI18n({
   locale: 'de', // set locale
@@ -70,5 +74,3 @@ window.stream = new Vue({
     }
   }
 })
-
-// window.stream.loadJsonSample()

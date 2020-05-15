@@ -7,12 +7,20 @@
                :title="author.name"/>
         </transition>
       </div>
-      <div class="col-10">
+      <!-- Plugin -->
+      <div class="active-plugin-content col-10" v-if="currentPluginTemplate">
+        <keep-alive>
+          <component v-bind:is="currentPluginTemplate" :param1="poll"  @dialogSubmit="pluginSubmitDialog($event)" @dialogClose="pluginCloseDialog()"></component>
+        </keep-alive>
+      </div>
+      <!-- Post Content -->
+      <div class="col-10" v-if="!currentPluginTemplate">
         <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed" v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading" v-on:focus="formActive = true" v-model="bodyText" :placeholder="$t('placeholder.your_post_message')"></textarea>
         <!-- plugins -->
         <div class="row" v-if="formActive">
           <div class="col-12 plugins">
             <plugin-sticky  v-if="canSetSticky"  :param1="stickyValue" @interface="stickyValue = $event"></plugin-sticky>
+            <plugin-poll :param1="poll" @interface="currentPluginTemplate = $event" ></plugin-poll>
           </div>
         </div>
         <div class="row stream-action-1">
@@ -72,12 +80,14 @@
 import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
-import PluginSticky from './plugins/PluginSticky'
+import PluginSticky from './plugins/PluginSticky/PluginSticky'
+import PluginPoll from './plugins/PluginPoll/PluginPoll'
+import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
 
 export default {
   props: ['streamOptions', 'editPost'],
   name: 'stream-post-form',
-  components: {vueDropzone: vue2Dropzone, PluginSticky},
+  components: {vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator},
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
@@ -89,13 +99,17 @@ export default {
     },
     resizePostFormContainer () {
       // resizing post relevant for edit mode only
-      if (this.editPost) {
+      if (this.editPost && this.$refs.vueDropZone) { // catch poll editing errors
         let dragzoneHeight = parseFloat(this.$refs.vueDropZone.$el.style.height)
         let attachmentsHeight = 0
         if (this.$refs.postAttachmentList) {
           attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
         }
-        this.$parent.$el.querySelector('.stream-post').style.height = (150 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+        this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+      }
+
+      if (this.currentPluginTemplate) {
+        this.$parent.$el.querySelector('.stream-post').style.height = (90 + this.$el.querySelector('.active-plugin-content').offsetHeight) + 'px'
       }
     },
     resizeTextareaElement (textarea) {
@@ -111,6 +125,7 @@ export default {
       nodeData.body = this.bodyText
       nodeData.privacy = this.privacyValue.value
       nodeData.sticky = this.stickyValue
+      nodeData.poll = this.poll ? this.poll : undefined
 
       if (this.editPost) {
         let apiNodeUpdateUrl = this.$config.get('api.apiPostUpdateUrl').replace('%node', this.editPost.nid).replace('%token', this.streamOptions.token)
@@ -126,6 +141,7 @@ export default {
             self.editPost.body_formatted = response.data.nodeData.body_formatted
             self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
             self.editPost.sticky = response.data.nodeData.sticky
+            self.editPost.poll = response.data.nodeData.poll
 
             let eventUpdate = new Event('nm-stream:update-model')
             document.dispatchEvent(eventUpdate)
@@ -198,17 +214,17 @@ export default {
       if (this.editPost) {
         this.$emit('form-edit-canceled')
         this.$parent.$el.querySelector('.stream-post').style.height = 'auto'
-
-        // restore post values
-        // this.initializePost()
       } else {
         this.formActive = false
         this.bodyText = ''
-        this.stickyValue = 0
         let valueKeyInteger = parseInt(this.privacyDefault)
         this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
         this.$el.querySelector('textarea.stream-post-body').blur()
         this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
+
+        // Plugins Todo move to responsible Plugin
+        this.stickyValue = 0
+        this.poll = null
       }
 
       this.$refs.vueDropZone.removeAllFiles()
@@ -242,7 +258,7 @@ export default {
     },
     resizeDropArea () {
       // resize droparea
-      if (this.$refs.vueDropZone.$el.style.height !== '250px') {
+      if (this.$refs.vueDropZone && this.$refs.vueDropZone.$el.style.height !== '250px') {
         this.$refs.vueDropZone.$el.style.height = '250px'
         // add label margin
         this.$refs.vueDropZone.$el.querySelector('div.dz-message').style.marginTop = '100px'
@@ -280,6 +296,7 @@ export default {
         this.formActive = true
         this.bodyText = this.editPost.body
         this.stickyValue = parseInt(this.editPost.sticky)
+        this.poll = this.editPost.poll
 
         // override privacy options
         this.privacyDefault = this.editPost.privacy.privacyDefault
@@ -332,6 +349,18 @@ export default {
     },
     onAttachmentDeleteConf (attachment) {
       this.$emit('post-form-onAttachmentDeleteConf', attachment)
+    },
+    pluginSubmitDialog (poll) {
+      this.poll = poll
+
+      this.pluginCloseDialog()
+    },
+    pluginCloseDialog () {
+      this.currentPluginTemplate = ''
+
+      this.$nextTick(() => {
+        this.resizeTextareaElement(this.$el.querySelector('textarea'))
+      })
     }
   },
   watch: {
@@ -380,12 +409,14 @@ export default {
   },
   data () {
     return {
+      currentPluginTemplate: '',
       loggedInUser: null,
       author: null,
       privacyOptions: null,
       privacyDefault: null,
       formActive: false,
       bodyText: '',
+      poll: null,
       privacyValue: null,
       stickyValue: 0,
       dropzoneResetAfterComplete: false,
@@ -419,8 +450,10 @@ export default {
   },
   computed: {
     canSetSticky: function () {
+      // for existing posts
       if (this.editPost) {
         return this.editPost.permissions.canSetSticky
+      // new posts
       } else {
         return this.streamOptions.permissions.canCreateStickyPost
       }

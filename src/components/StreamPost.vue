@@ -35,6 +35,7 @@
               <div class="row">
                 <div class="col-12 body">
                   <p tag="p" v-html="post.body_formatted" />
+                  <plugin-poll-view :key="pollViewRenderOnceKey" v-if="post.poll" v-bind="post.poll" @addvote="pollAddVote"/>
                 </div>
                 <div v-if="post.sticky == 1" class="post-sticky" :title="$t('plugins.sticky.status_title')"><font-awesome-icon :icon="['fa', 'anchor']" /></div>
               </div>
@@ -133,13 +134,16 @@ import Vue from 'vue'
 import StreamComment from './StreamComment'
 import StreamCommentForm from './StreamCommentForm'
 import StreamPostForm from './StreamPostForm'
+import PluginPollView from './plugins/PluginPoll/PluginPollView'
+import PollService from './plugins/PluginPoll/services/poll.service'
 
 export default {
   props: ['streamOptions', 'post', 'comments'],
-  components: {StreamComment, StreamCommentForm, StreamPostForm},
+  components: {StreamComment, StreamCommentForm, StreamPostForm, PluginPollView},
   name: 'stream-post',
   data () {
     return {
+      pollViewRenderOnceKey: 1,
       showComments: false,
       curDeleteAttachment: null
     }
@@ -167,6 +171,12 @@ export default {
     streamLink: function () {
       return this.post.container.link + '?streamNode=' + this.post.nid
     }
+  },
+  mounted: function () {
+    // force poll to rerender after edit
+    this.$root.$on('plugins:poll:creator:save', () => {
+      this.pollViewRenderOnceKey++
+    })
   },
   methods: {
     editPost (event) {
@@ -252,6 +262,9 @@ export default {
         self.post.attachments.splice(index, 1)
       })
       this.hideModal()
+    },
+    pollAddVote (obj) {
+      PollService.addVote(this.post.nid, obj, this.streamOptions.token)
     }
   }
 }

@@ -1,0 +1,138 @@
+@import "../../../../assets/scss/bootstrap_custom.scss";
+
+input[type="text"] {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid #aaa;
+  outline-style: none;
+  resize: none;
+  overflow: hidden;
+  transition: 0.5s;
+  width: 100%;
+  height: 30px;
+  padding: 5px 0;
+
+  &:hover,
+  &:active,
+  &:focus {
+    border-bottom: 2px solid #333;
+  }
+}
+
+.poll-title {
+  margin-bottom: 20px;
+}
+
+.poll-trash-delete {
+  color: $red;
+  margin-top: 12px;
+  cursor: pointer;
+  display: inline-block;
+
+  &:hover {
+    color: $red;
+    filter: brightness(125%);
+  }
+}
+
+.poll-question {
+  input {
+    font-weight: bold;
+  }
+}
+
+.poll-options {
+  margin-top: 20px;
+}
+
+.poll-actions {
+  margin-top: 30px;
+}
+
+.custom-control-label::before,
+.custom-control-label::after {
+  top: 0;
+}
+
+.custom-checkbox {
+  cursor: pointer;
+  label,
+  input {
+    cursor: pointer;
+  }
+}
+
+.vue-poll {
+  &.ans {
+    color: #fff;
+  }
+}
+
+.poll-answers .handle {
+  cursor: pointer;
+  position: absolute;
+  display: inline-block;
+  width: 20px;
+  height: 11px;
+  opacity: 0.3;
+  left: 25px;
+  top: 12px;
+  &:hover {
+    opacity: 0.5;
+  }
+}
+
+
+.poll-answers .handle span,
+.poll-answers .handle span:before,
+.poll-answers .handle span:after {
+  border-radius: 1px;
+  height: 1px;
+  width: 13px;
+  background: #000;
+  position: absolute;
+  display: block;
+  content: '';
+}
+.poll-answers .handle span:before {
+  bottom: -4px;
+}
+.poll-answers .handle span:after {
+  bottom: -8px;
+}
+
+
+.poll-answers input[type="text"] {
+  display: inline-block !important;
+  width: calc(100% - 40px);
+  margin-left: 40px;
+}
+
+
+.poll-answers .close {
+  top: 7px;
+  position: relative;
+  display: inline-block;
+  float: left;
+  opacity: 0.3;
+  height: 20px;
+  width: 20px;
+}
+.poll-answers .close:hover {
+  opacity: 1;
+}
+.poll-answers .close:before, .close:after {
+  position: absolute;
+  left: 10px;
+  top: 5px;
+  content: ' ';
+  height: 10px;
+  width: 2px;
+  background-color: #333;
+}
+.poll-answers .close:before {
+  transform: rotate(45deg);
+}
+.poll-answers .close:after {
+  transform: rotate(-45deg);
+}

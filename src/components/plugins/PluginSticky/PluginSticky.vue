@@ -1,5 +1,5 @@
 <script>
-import Plugin from './Plugin'
+import Plugin from '../Plugin'
 import { faAnchor } from '@fortawesome/free-solid-svg-icons'
 
 export default {
@@ -32,5 +32,9 @@ export default {
 </script>
 
 <style lang="scss">
-
+  .plugin-sticky {
+    .plugin-toolbar-btn {
+      margin-left: 10px;
+    }
+  }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="plugin plugin-abstract">
+  <div class="plugin plugin-abstract" v-bind:class="name">
     <span class="plugin-toolbar-btn" v-bind:class="{ active: isActive }" v-on:click="onClickCallback" :title="title">
       <font-awesome-icon :icon="icon"/>
     </span>
@@ -16,11 +16,14 @@ export default {
     return {
       icon: faChessQueen,
       label: 'Not implemented yet',
-      title: 'Not implemented yet'
+      title: 'Not implemented yet',
+      name: this.$options._componentTag
     }
   },
   computed: {
-    isActive: false
+    isActive: function () {
+      return false
+    }
   },
   methods: {
     onClickCallback () {
