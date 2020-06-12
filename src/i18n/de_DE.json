@@ -66,6 +66,14 @@
         "pollEndDateLabel": "Ende der Umfrage festlegen",
         "pollEndDateDescription": "Wird dieses Feld gesetzt, so ist ab diesem Zeitpunkt keine Abstimmung mehr möglich. Es wird das Umfrageergebnis angezeigt."
       }
+    },
+    "filter": {
+      "placeholder": {
+        "context": "Kurs/Lehrtext",
+        "username": "Person",
+        "privacy": "Privatsphäre"
+      }
+
     }
   }
 }

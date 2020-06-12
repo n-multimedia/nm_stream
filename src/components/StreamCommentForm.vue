@@ -184,12 +184,13 @@ export default {
   }
   .stream-comment-from {
     text-align: left;
+    &.card {
+      background-color: transparent;
+      border: 0;
+      height: auto !important;
+    }
   }
-  .card {
-    background-color: transparent;
-    border: 0;
-    height: auto !important;
-  }
+
   textarea {
     background: none;
     border: 0;

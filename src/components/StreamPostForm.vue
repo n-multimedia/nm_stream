@@ -1,5 +1,5 @@
 <template>
-  <div class="stream-post-from card" v-on:dragover="dragOver">
+  <div class="stream-post-form card" v-on:dragover="dragOver">
     <div class="row">
       <div class="col-2">
         <transition name="fade">
@@ -240,7 +240,7 @@ export default {
 
       this.busyLoading = false
     },
-    dragOver (event) {
+    dragOver () {
       // enable editor
       this.formActive = true
       this.$nextTick(() => {
@@ -476,15 +476,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+
   .stream-post-body {
     width: 100%;
   }
-  .stream-post-from {
+  .stream-post-form {
     text-align: left;
     // min-height: 190px;
     overflow: visible !important;
     position: relative;
     z-index: 1000;
+    &.card {
+      background-color: transparent;
+      border: 0;
+      height: auto !important;
+    }
   }
 
   .stream-action-1 {
@@ -507,31 +513,32 @@ export default {
 
   .stream-action-2 {
     text-align: left;
+
     div.stream-post-privacy-settings {
       position: relative;
-      width: 250px;
+      width: 245px;
+
       .multiselect {
         cursor: pointer;
         position: relative;
+
         .option__desc {
           display: inline-block;
         }
       }
     }
+
     div.stream-post-privacy-settings,
     div.stream-post-cancel,
     div.stream-post-post {
       display: inline-block;
     }
+
     .action-buttons {
       text-align: right;
     }
   }
-  .card {
-    background-color: transparent;
-    border: 0;
-    height: auto !important;
-  }
+
   textarea {
     background: none;
     border: 0;
@@ -571,6 +578,9 @@ export default {
         visibility: visible;
       }
     }
+    .multiselect__single {
+      background-color: transparent;
+    }
     .multiselect__single,
     .multiselect__option {
       img {
@@ -594,6 +604,7 @@ export default {
 
   .multiselect__tags {
     padding-top: 7px;
+    background-color: transparent;
   }
 
   .stream-action-1 {

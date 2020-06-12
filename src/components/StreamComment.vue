@@ -80,7 +80,7 @@ export default {
     }
   },
   methods: {
-    editComment (event) {
+    editComment () {
       this.$el.classList.add('flip-active')
       // hide comments and show back
       setTimeout(() => {
@@ -92,7 +92,7 @@ export default {
         this.$refs.streamCommentForm.initializeComment()
       }, 200)
     },
-    deleteComment (event) {
+    deleteComment () {
       // hide comments and show back
       setTimeout(() => {
         this.$el.classList.add('flip-active')
@@ -101,7 +101,7 @@ export default {
         this.$refs.backDelete.classList.remove('hide')
       }, 200)
     },
-    onDelete (event) {
+    onDelete () {
       let self = this
       let apiCommentDeleteUrl = this.$config.get('api.apiCommentDeleteUrl').replace('%comment', this.comment.cid).replace('%token', this.streamOptions.token)
 
@@ -117,10 +117,10 @@ export default {
         }
       })
     },
-    onDeleteCancel (event) {
+    onDeleteCancel () {
       this.$el.classList.remove('flip-active')
     },
-    editCanceled (event) {
+    editCanceled () {
       this.$el.classList.remove('flip-active')
     }
   }

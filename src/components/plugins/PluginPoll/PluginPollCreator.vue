@@ -185,7 +185,7 @@ export default {
           answers: []
         }
 
-        this.poll.answers.forEach((val, index) => {
+        this.poll.answers.forEach((val) => {
           const answer = {
             value: val.value,
             text: val.text,

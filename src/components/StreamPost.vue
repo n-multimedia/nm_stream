@@ -110,7 +110,6 @@
             <button class="btn btn-outline-danger float-right" v-on:click="onDeleteSubmit">{{ $t('button.delete') }}</button>
             <button class="btn btn-outline-secondary float-right" v-on:click="onDeleteCancel">{{ $t('button.cancel') }}</button>
           </div>
-
         </div>
       </div>
     </div>
@@ -119,12 +118,14 @@
       <div class="d-block">Hello From My Modal!</div>
       <b-btn>Close Me</b-btn>
     </b-modal>-->
-    <b-modal ref="postDeleteAttachmentConf" hide-footer :title="$t('label.attachment_delete')">
+    <b-modal id="bv-modal-delete-attachment" ref="postDeleteAttachmentConf" centered hide-footer :title="$t('label.attachment_delete')">
       <div class="d-block text-center">
         {{ $t('warning.delete_attachment_really_want_to') }}
+        <br />
+        <br />
       </div>
       <b-button class="mt-3" variant="" block @click="hideModal">{{ $t('button.cancel') }}</b-button>
-      <b-button class="mt-3" variant="outline-danger" block @click="onAttachmentDelete()">{{ $t('button.delete') }}</b-button>
+      <b-button class="mt-3" variant="danger" block @click="onAttachmentDelete()">{{ $t('button.delete') }}</b-button>
     </b-modal>
   </div>
 </template>
@@ -181,7 +182,7 @@ export default {
     })
   },
   methods: {
-    editPost (event) {
+    editPost () {
       this.initializeForm = true
 
       this.showComments = false
@@ -194,7 +195,7 @@ export default {
       this.$refs.backDelete.classList.add('hide')
       this.$refs.backEdit.classList.remove('hide')
     },
-    toggleComments (show) {
+    toggleComments () {
       this.showComments = !this.showComments
 
       if (this.showComments) {
@@ -205,7 +206,7 @@ export default {
         })
       }
     },
-    deletePost (event) {
+    deletePost () {
       this.showComments = false
       // hide comments and show back
       setTimeout(() => {
@@ -216,7 +217,7 @@ export default {
         this.$refs.backDelete.classList.remove('hide')
       }, 200)
     },
-    editCanceled (event) {
+    editCanceled () {
       this.$el.classList.remove('flip-active')
     },
     onDeleteSubmit () {
@@ -260,7 +261,7 @@ export default {
       let attachment = this.curDeleteAttachment
       let self = this
       let apiAttachmentDeleteUrl = this.$config.get('api.apiPostAttachmentDeleteUrl').replace('%node', self.post.nid).replace('%file', attachment.fid).replace('%token', this.streamOptions.token)
-      Vue.axios.get(apiAttachmentDeleteUrl, {withCredentials: true}).then((response) => {
+      Vue.axios.get(apiAttachmentDeleteUrl, {withCredentials: true}).then(() => {
         // success ? response ready ;) - need to recheck
         let index = self.post.attachments.findIndex(x => x.fid === attachment.fid)
         self.post.attachments.splice(index, 1)
@@ -314,6 +315,10 @@ export default {
         list-style: none;
         padding: 0;
         margin-bottom: 0px;
+      }
+
+      .attachment-trash-delete {
+        margin-left: 5px;
       }
 
     }
