@@ -5,8 +5,8 @@ import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
 import { Multiselect } from 'vue-multiselect'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faClock, faFile, faTrashAlt } from '@fortawesome/free-regular-svg-icons'
-import { faAnchor, faPoll } from '@fortawesome/free-solid-svg-icons'
+import { faClock, faFile, faTrashAlt} from '@fortawesome/free-regular-svg-icons'
+import { faAnchor, faPoll, faFilter, faTimes} from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import VueI18n from 'vue-i18n'
 import axios from 'axios'
@@ -25,7 +25,7 @@ import 'vue-ctk-date-time-picker/dist/vue-ctk-date-time-picker.css'
 
 Vue.config.productionTip = false
 
-library.add(faClock, faFile, faTrashAlt, faAnchor, faPoll)
+library.add(faClock, faFile, faTrashAlt, faAnchor, faPoll, faFilter, faTimes)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.component('pulse-loader', PulseLoader)

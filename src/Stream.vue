@@ -1,7 +1,9 @@
 <template>
   <div id="stream" class="container">
-    <stream-filter></stream-filter>
-    <pulse-loader :loading="!initialized" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
+    <transition name="fade">
+      <stream-filter v-if="initialized" :streamOptions="streamOptions"></stream-filter>
+    </transition>
+    <pulse-loader :loading="!initialized || busyLoading" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
     <stream-post-form
       v-if="initialized && streamOptions.containerNID > 0 && streamOptions.permissions.canCreatePost"
       :streamOptions="streamOptions"
@@ -35,7 +37,7 @@ import Vue from 'vue'
 import StreamPost from './components/StreamPost'
 import StreamPostForm from './components/StreamPostForm'
 import StreamOptions from './models/StreamOptions'
-import StreamFilter from './components/StreamFilter'
+import StreamFilter from './components/widgets/StreamFilter'
 
 export default {
   name: 'Stream',
@@ -50,6 +52,7 @@ export default {
       streamOptions: [],
       comments: [],
       users: [],
+      busyLoading: false,
       busyLoadingMore: false,
       busyLoadingColor: '#888',
       busyLoadingSize: '12px',
@@ -60,7 +63,8 @@ export default {
       maxPostsToShow: 10,
       pollingUpdate: null,
       containerNid: null,
-      streamUpdateOnRerender: false
+      streamUpdateOnRerender: false,
+      streamFilter: null
     }
   },
   beforeMount: function () {
@@ -180,6 +184,23 @@ export default {
       post.user = this.getUser(post.uid)
       return post
     },
+    getFilterParams() {
+      const params = new URLSearchParams();
+
+      if(this.streamFilter) {
+        if(this.streamFilter.context) {
+          params.append('context_nid', this.streamFilter.context);
+        }
+        if(this.streamFilter.username) {
+          params.append('user_uid', this.streamFilter.username);
+        }
+        if(this.streamFilter.privacy) {
+          params.append('privacy_key', this.streamFilter.privacy);
+        }
+      }
+
+      return params;
+    },
     pollUpdate () {
       let self = this
 
@@ -191,9 +212,15 @@ export default {
           return
         }
 
+        // pass filter parameters
+        const params = this.getFilterParams();
+
         let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow).replace('%token', self.streamOptions.token)
         // get update data
-        Vue.axios.get(pollUpdateUrl, {withCredentials: true}).then((response) => {
+        Vue.axios.get(pollUpdateUrl, {
+          params: params,
+          withCredentials: true
+        }).then((response) => {
           if (self.busyLoadingMore) {
             self.maxPostsLimitReached = self.posts.length >= response.data.stream.posts.length
             self.busyLoadingMore = false
@@ -207,6 +234,8 @@ export default {
           // self.mergeByProperty(self.comments, response.data.stream.comments, 'nid')
 
           self.streamOptions.timestamp = response.data.stream.timestamp
+
+          this.busyLoading = false;
 
           let eventUpdate = new Event('nm-stream:update-model')
           document.dispatchEvent(eventUpdate)
@@ -244,6 +273,12 @@ export default {
       e = e || event
       e.preventDefault()
     }, false)
+
+    this.$root.$on('widgets:filter:filter', (filter) => {
+      this.busyLoading = true;
+      this.pollUpdate()
+      this.streamFilter = filter
+    })
   },
   beforeDestroy: function () {
     clearInterval(this.pollingUpdate)

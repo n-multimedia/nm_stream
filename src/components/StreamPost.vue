@@ -53,12 +53,10 @@
                   </div>
                   <div class="stream-post-footer" v-if="sortedComments.length > 0">
                     <div>
-                      <transition name="slide-fade">
                         <a href="#" v-if="!showComments" key="true" v-on:click.prevent="toggleComments">
                           {{ $t('link.show_x_comments', { count: sortedComments.length }) }}
                         </a>
                         <a href="#" v-else key="false" v-on:click.prevent="showComments = !showComments">{{ $t('link.hide_x_comments', { count: sortedComments.length }) }}</a>
-                      </transition>
                     </div>
                   </div>
                 </div>
@@ -412,5 +410,6 @@ export default {
   .hide {
     display: none;
   }
+
 
 </style>

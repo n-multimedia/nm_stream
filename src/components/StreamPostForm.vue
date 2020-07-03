@@ -40,7 +40,7 @@
                 @vdropzone-queue-complete="queueCompleted"
                 :options="dropzoneOptions" :disabled="busyLoading"></vue-dropzone>
               <div class="stream-post-attachments" ref="postAttachmentList" v-if="editPost && editPost.attachments.length > 0">
-                <font-awesome-icon :icon="['far', 'file']"/>
+                <font-awesome-icon :icon="['fa', 'file']"/>
                 {{ $t('label.attachments') }}
                 <div :key="attachment.fid" v-for="attachment in editPost.attachments">
                   <span v-html="attachment.download_link"></span>
@@ -60,16 +60,7 @@
             <div class="row">
               <transition name="fade">
                 <div class="col-12 action-buttons" v-if="formActive" :key="formActive">
-                  <div class="stream-post-privacy-settings" v-if="privacyOptions.length > 0">
-                    <multiselect v-model="privacyValue" :options="privacyOptions" track-by="value" :option-height="104" :searchable="false" :show-labels="false" :allow-empty="false" :placeholder="$t('button.select_privacy')" :disabled="busyLoading">
-                      <template slot="singleLabel" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title">
-                        <span class="option__desc"><span class="option__title">{{ props.option.title }}</span></span>
-                      </template>
-                      <template slot="option" slot-scope="props"><img class="option__image" :src="props.option.img" :alt="props.option.title" :disabled="busyLoading">
-                        <div class="option__desc"><span class="option__title">{{ props.option.title }}</span><span class="option__small">{{ props.option.desc }}</span></div>
-                      </template>
-                    </multiselect>
-                  </div>
+                  <stream-privacy-widget :privacyOptions="privacyOptions" :privacyValue="privacyValue" @interface="privacyValue = $event"></stream-privacy-widget>
                   <button class="btn btn-outline-primary stream-post-post float-right" v-on:click="savePost" :disabled="this.bodyText.length < 1 || busyLoading">{{ $t('button.post') }}</button>
                   <button class="btn btn-outline-secondary stream-post-cancel float-right" v-on:click="resetForm" :disabled="busyLoading">{{ $t('button.cancel') }}</button>
                 </div>
@@ -86,6 +77,7 @@
 import Vue from 'vue'
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
+import StreamPrivacyWidget from './widgets/StreamPrivacyWidget'
 import PluginSticky from './plugins/PluginSticky/PluginSticky'
 import PluginPoll from './plugins/PluginPoll/PluginPoll'
 import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
@@ -95,7 +87,7 @@ import MentionService from './plugins/PluginMention/services/mention.service'
 export default {
   props: ['streamOptions', 'editPost'],
   name: 'stream-post-form',
-  components: {vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
+  components: {StreamPrivacyWidget, vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
   methods: {
     resizeTextarea (event) {
       this.resizeTextareaElement(event.target)
@@ -514,21 +506,6 @@ export default {
   .stream-action-2 {
     text-align: left;
 
-    div.stream-post-privacy-settings {
-      position: relative;
-      width: 245px;
-
-      .multiselect {
-        cursor: pointer;
-        position: relative;
-
-        .option__desc {
-          display: inline-block;
-        }
-      }
-    }
-
-    div.stream-post-privacy-settings,
     div.stream-post-cancel,
     div.stream-post-post {
       display: inline-block;
