@@ -41,6 +41,7 @@
         context: null,
         username: null,
         privacyValue: null,
+        filterActive: null,
         privacyOptions: this.streamOptions.privacyOptions,
       }
     },
@@ -48,14 +49,22 @@
       filterClick () {
         const pv = (!this.privacyValue) ? null: this.privacyValue.value;
         const filter = {"context": this.context, "username": this.username, "privacy": pv}
-        //emit filter event
-        this.$root.$emit('widgets:filter:filter', filter)
+        if(this.context || this.username || pv) {
+          this.filterActive = true
+          //emit filter event
+          this.$root.$emit('widgets:filter:filter', filter)
+        }
       },
       resetClick () {
         this.context = null
         this.username = null
         this.privacyValue = null
-        this.$root.$emit('widgets:filter:filter', null)
+
+        if(this.filterActive) {
+          this.$root.$emit('widgets:filter:filter', null)
+          this.filterActive = null
+        }
+
       }
     },
   }
