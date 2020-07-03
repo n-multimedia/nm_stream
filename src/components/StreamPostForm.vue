@@ -402,8 +402,14 @@ export default {
     // set post author for edit post or logged in user for the new post
     this.updateAuthor()
 
+    let contextNID = null
+    if (this.editPost) {
+      contextNID = this.editPost.context.nid
+    } else {
+      contextNID = this.streamOptions.contextNID
+    }
     // fetch mention opions
-    this.mentionMembers = await MentionService.getMentionMembers(this.streamOptions.contextNID)
+    this.mentionMembers = await MentionService.getMentionMembers(contextNID)
   },
   beforeDestroy () {
     this.$el.removeEventListener('input', this.resizeTextarea)
@@ -663,7 +669,8 @@ export default {
       max-height: 100%;
       margin-right: 5px;
     }
-    .atwho-li{
+
+    .atwho-li {
       padding: 3px 10px;
     }
   }

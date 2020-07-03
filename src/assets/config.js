@@ -10,6 +10,7 @@ export default {
     apiCommentUpdateUrl: '/api/v2.0/nm_stream/comment/%comment/update/%token',
     apiCommentAddUrl: '/api/v2.0/nm_stream/node/%node/comment/add/%token',
     apiCommentDeleteUrl: '/api/v2.0/nm_stream/comment/%comment/delete/%token',
-    apiNodePollAddVote: '/api/v2.0/nm_stream/node/%node/poll/add_vote/%token'
+    apiNodePollAddVote: '/api/v2.0/nm_stream/node/%node/poll/add_vote/%token',
+    apiUserMentionMembers: '/api/v2.0/nm_stream/node/%node/get/mention_members'
   }
 }

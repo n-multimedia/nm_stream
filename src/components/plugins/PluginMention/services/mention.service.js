@@ -8,13 +8,8 @@ export default {
 
     let requestData = {}
 
-    console.log('starting req')
-    console.log(requestData)
-
     // edit post => update
     let response = await Vue.axios.post(apiNodeMentionUrl, requestData, { withCredentials: true })
-
-    console.log(response)
 
     if (response.data.status === 1) {
       return response.data.mention_members
