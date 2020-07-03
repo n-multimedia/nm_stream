@@ -272,7 +272,6 @@ export default {
   },
   watch: {
     initializeForm: function (newValue, oldValue) {
-      console.log('watch', oldValue, newValue)
       if (newValue === true) {
         this.streamPostFormComponent = 'StreamPostForm'
       }

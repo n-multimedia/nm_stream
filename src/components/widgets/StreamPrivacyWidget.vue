@@ -21,11 +21,6 @@
         allowEmpty: null
       }
     },
-    updated: function () {
-      console.log("mounted");
-      console.log(this.privacyOptions);
-      console.log(this.privacyValue);
-    },
     watch: {
       privacyValue: function (val) {
         // passt new value as soon as value has been changed

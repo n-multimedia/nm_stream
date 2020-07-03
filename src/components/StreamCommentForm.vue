@@ -42,7 +42,6 @@ export default {
       // resizing post relevant for edit mode only
       if (this.editComment) {
         this.$parent.$el.querySelector('.stream-comment').style.height = (150 + this.$el.querySelector('textarea').scrollHeight) + 'px'
-        console.log(this.$parent.$el.querySelector('.stream-comment').style.height)
       }
     },
     saveComment () {
