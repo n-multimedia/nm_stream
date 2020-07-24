@@ -47,6 +47,7 @@ input[type="text"] {
 
 .poll-actions {
   margin-top: 30px;
+
   button {
     margin-right: 5px;
   }
@@ -59,6 +60,7 @@ input[type="text"] {
 
 .custom-checkbox {
   cursor: pointer;
+
   label,
   input {
     cursor: pointer;
@@ -80,6 +82,7 @@ input[type="text"] {
   opacity: 0.3;
   left: 25px;
   top: 12px;
+
   &:hover {
     opacity: 0.5;
   }
@@ -97,9 +100,11 @@ input[type="text"] {
   display: block;
   content: '';
 }
+
 .poll-answers .handle span:before {
   bottom: -4px;
 }
+
 .poll-answers .handle span:after {
   bottom: -8px;
 }
@@ -121,9 +126,11 @@ input[type="text"] {
   height: 20px;
   width: 20px;
 }
+
 .poll-answers .close:hover {
   opacity: 1;
 }
+
 .poll-answers .close:before, .close:after {
   position: absolute;
   left: 10px;
@@ -133,9 +140,11 @@ input[type="text"] {
   width: 2px;
   background-color: #333;
 }
+
 .poll-answers .close:before {
   transform: rotate(45deg);
 }
+
 .poll-answers .close:after {
   transform: rotate(-45deg);
 }

@@ -15,7 +15,7 @@
       "dictUploadCanceled": "Der Upload wurde abgebrochen",
       "dictCancelUploadConfirmation": "Upload wirklich abbrechen?",
       "dictRemoveFile": "Entfernen",
-	  "customdictFileTooBig": "Diese Datei ist zu groß. Maximale Größe: {{maxFilesize}} MB.",
+      "customdictFileTooBig": "Diese Datei ist zu groß. Maximale Größe: {{maxFilesize}} MB.",
       "nmDictHideFile": "Verstecken",
       "dictMaxFilesExceeded": "Das Uploadlimit von {{maxFiles}} wurde überschritten",
       "postContextFrom": "Beitrag aus"
@@ -73,7 +73,6 @@
         "username": "Person",
         "privacy": "Privatsphäre"
       }
-
     }
   }
 }

@@ -3,11 +3,11 @@ import Stream from './Stream.vue'
 import BootstrapVue from 'bootstrap-vue'
 import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
-import { Multiselect } from 'vue-multiselect'
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faClock, faFile, faTrashAlt} from '@fortawesome/free-regular-svg-icons'
-import { faAnchor, faPoll, faFilter, faTimes} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import {Multiselect} from 'vue-multiselect'
+import {library} from '@fortawesome/fontawesome-svg-core'
+import {faClock, faFile, faTrashAlt} from '@fortawesome/free-regular-svg-icons'
+import {faAnchor, faPoll, faFilter, faTimes} from '@fortawesome/free-solid-svg-icons'
+import {FontAwesomeIcon} from '@fortawesome/vue-fontawesome'
 import VueI18n from 'vue-i18n'
 import axios from 'axios'
 import VueAxios from 'vue-axios'
@@ -34,11 +34,11 @@ Vue.component('multiselect', Multiselect)
 
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
-Vue.use(VueLodash, { name: 'custom' , lodash: lodash })
+Vue.use(VueLodash, {name: 'custom', lodash: lodash})
 Vue.use(VueI18n)
 Vue.use(VueAxios, axios)
 Vue.use(VueConfig, {
-  config: appConfig
+    config: appConfig
 })
 Vue.use(infiniteScroll)
 Vue.component('nl2br', Nl2br)
@@ -48,19 +48,19 @@ const moment = require('moment')
 require('moment/locale/de')
 
 Vue.use(require('vue-moment'), {
-  moment
+    moment
 })
 
 Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker)
 
 // Create VueI18n instance with options
 const i18n = new VueI18n({
-  locale: 'de', // set locale
-  messages: de
+    locale: 'de', // set locale
+    messages: de
 })
 
 
 window.stream = new Vue({
-  i18n,
-  render: h => h(Stream),
+    i18n,
+    render: h => h(Stream),
 }).$mount('#stream')
