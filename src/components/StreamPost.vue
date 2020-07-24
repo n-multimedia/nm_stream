@@ -169,6 +169,7 @@
         name: 'stream-post',
         data() {
             return {
+                pollViewRenderUpdateFlag: false,
                 pollViewRenderOnceKey: 1,
                 initializeForm: false,
                 showComments: false,
@@ -203,7 +204,14 @@
         mounted: function () {
             // force poll to rerender after edit
             this.$root.$on('plugins:poll:creator:save', () => {
-                this.pollViewRenderOnceKey++
+                this.pollViewRenderUpdateFlag = true
+            })
+
+            this.$root.$on('nm-stream:node:save', () => {
+                if (this.pollViewRenderUpdateFlag) {
+                    this.pollViewRenderUpdateFlag = false
+                    this.pollViewRenderOnceKey++
+                }
             })
         },
         methods: {

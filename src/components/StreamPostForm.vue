@@ -161,6 +161,8 @@
                             let eventUpdate = new Event('nm-stream:update-model')
                             document.dispatchEvent(eventUpdate)
 
+                            this.$root.$emit('nm-stream:node:save', self.editPost)
+
                             // check for queued uploads
                             if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
                                 // set editPost to update dropzone url

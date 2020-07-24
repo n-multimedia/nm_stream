@@ -2,29 +2,26 @@
     <div class="vue-poll">
         <h4 class="qst" v-html="question"></h4>
         <div class="ans-cnt">
-            <template v-if="!finalResults">
+            <template v-if="!finalResults && !visibleResults">
+                final result
                 <div v-for="(a, index) in answersOptions" :key="index"
                      :class="{ ans: true, [a.custom_class]: (a.custom_class) }">
-                    <div v-if="!visibleResults" :class="{ 'ans-no-vote noselect': true, active: a.selected }"
+                    <div :class="{ 'ans-no-vote noselect': true, active: a.selected }"
                          @click.prevent="handleVote(a)">
                         <span class="txt" v-html="a.text"></span>
                     </div>
-                    <div v-else :class="{ 'ans-voted': true, selected: a.selected }">
-                        <span v-if="a.percent" class="percent" v-text="a.percent"></span>
-                        <span class="txt" v-html="a.text"></span>
-                    </div>
-
-                    <span class="bg" :style="{ width: visibleResults ? a.percent : '0%' }"></span>
                 </div>
             </template>
             <template v-else>
+                else
                 <div v-for="(a, index) in calcAnswers" :key="index"
                      :class="{ ans: true, [a.custom_class]: (a.custom_class) }">
-                    <div class="ans-voted final">
+                    <div class="ans-voted" :class="{ final: finalResults, 'ans-voted': true, selected: a.selected }" >
                         <span v-if="a.percent" class="percent" v-text="a.percent"></span>
                         <span class="txt" v-html="a.text"></span>
                     </div>
-                    <span :class="{ bg: true, selected: mostVotes == a.votes }" :style="{ width: a.percent }"></span>
+                    <span v-if="finalResults" :class="{ bg: finalResults, selected: mostVotes == a.votes }" :style="{ width: a.percent }"></span>
+                    <span v-else class="bg" :style="{ width: visibleResults ? a.percent : '0%' }"></span>
                 </div>
             </template>
         </div>
@@ -87,7 +84,7 @@
         computed: {
             totalVotes() {
                 let totalVotes = 0
-                this.answersOptions.filter(a => {
+                this.answers.filter(a => {
                     if (!isNaN(a.votes) && a.votes > 0) {
                         totalVotes += parseInt(a.votes)
                     }
@@ -106,7 +103,7 @@
             },
             mostVotes() {
                 let max = 0
-                this.answersOptions.filter(a => {
+                this.answers.filter(a => {
                     if (!isNaN(a.votes) && a.votes > 0 && a.votes >= max) {
                         max = a.votes
                     }
@@ -116,14 +113,14 @@
             },
             calcAnswers() {
                 if (this.totalVotes === 0) {
-                    return this.answersOptions.map(a => {
+                    return this.answers.map(a => {
                         a.percent = '0%'
                         return a
                     })
                 }
 
                 // Calculate percent
-                return this.answersOptions.filter(a => {
+                return this.answers.filter(a => {
                     if (!isNaN(a.votes) && a.votes > 0) {
                         a.percent = (Math.round((parseInt(a.votes) / this.totalVotes) * 100)) + '%'
                     } else {
@@ -154,9 +151,6 @@
                 return a
             })
 
-            //10.07.2020 - 12:46 - SN
-            // doesnt work
-            this.answersOptions = JSON.parse(JSON.stringify(this.answersOptions))
         },
         methods: {
             handleSubmit() {
@@ -176,7 +170,9 @@
                     obj.customId = this.customId
                 }
 
-                this.finalResults = true
+
+                // show instant result
+                this.answers = this.answersOptions
 
                 this.$emit('addvote', obj)
             },
