@@ -3,7 +3,6 @@
         <h4 class="qst" v-html="question"></h4>
         <div class="ans-cnt">
             <template v-if="!finalResults && !visibleResults">
-                final result
                 <div v-for="(a, index) in answersOptions" :key="index"
                      :class="{ ans: true, [a.custom_class]: (a.custom_class) }">
                     <div :class="{ 'ans-no-vote noselect': true, active: a.selected }"
@@ -13,7 +12,6 @@
                 </div>
             </template>
             <template v-else>
-                else
                 <div v-for="(a, index) in calcAnswers" :key="index"
                      :class="{ ans: true, [a.custom_class]: (a.custom_class) }">
                     <div class="ans-voted" :class="{ final: finalResults, 'ans-voted': true, selected: a.selected }" >
