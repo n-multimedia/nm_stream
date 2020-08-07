@@ -404,7 +404,8 @@
         .post-privacy-wrapper {
         }
 
-        .post-privacy {
+        .post-privacy,
+        .post-sticky {
             top: 5px;
             position: relative;
         }
