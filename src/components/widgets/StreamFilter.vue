@@ -2,66 +2,119 @@
     <form class="stream-filter-form">
         <div class="row">
             <div class="col-md-10 stream-filter-input-wrapper">
-                <div class="row">
-                    <div class="col" v-if="!streamOptions.contextNID">
-                        <input type="text" v-model="context" class="stream-filter-context form-control"
-                               :placeholder="$t('filter.placeholder.context')">
+                <transition name="fade">
+                    <div class="row" v-if="filterWidgetVisible">
+                        <div class="col-md-4" v-if="!streamOptions.contextNID">
+                            <vue-typeahead-bootstrap
+                                    :class="{'is-invalid': isInValidContext()}"
+                                    class="stream-filter-context"
+                                    v-model="contextSearch"
+                                    :placeholder="$t('filter.placeholder.context')"
+                                    :serializer="s => s.title"
+                                    :data="contexts"
+                                    @hit="contextSelected = $event"
+                            />
+                        </div>
+                        <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
+                            <vue-typeahead-bootstrap
+                                    :class="{'is-invalid': isInValidUser()}"
+                                    class="stream-filter-context"
+                                    v-model="userSearch"
+                                    :placeholder="$t('filter.placeholder.username')"
+                                    :serializer="s => s.realname"
+                                    :data="users"
+                                    @hit="userSelected = $event"
+                            />
+                        </div>
+                        <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
+                            <stream-privacy-widget :privacyValue="privacyValue" :privacyOptions="privacyOptions"
+                                                   @interface="privacyValue = $event"></stream-privacy-widget>
+                        </div>
                     </div>
-                    <div class="col">
-                        <input type="text" v-model="username" class="stream-filter-username form-control"
-                               :placeholder="$t('filter.placeholder.username')">
-                    </div>
-                    <div class="col">
-                        <stream-privacy-widget :privacyValue="privacyValue" :privacyOptions="privacyOptions"
-                                               @interface="privacyValue = $event"></stream-privacy-widget>
-                    </div>
-                </div>
+                </transition>
             </div>
             <div class="col-md-2 stream-filter-action-wrapper">
                 <transition name="fade">
-                    <a v-if="context || username || privacyValue" class="stream-filter-reset" href="#"
+                    <button v-if="contextSearch || userSearch || privacyValue" class="stream-filter-reset" href="#"
                        v-on:click="resetClick()">
                         <font-awesome-icon :icon="['fa', 'times']"/>
-                    </a>
+                    </button>
                 </transition>
-                <a class="stream-filter-submit" href="#" v-on:click="filterClick()">
+                <button class="stream-filter-submit" v-on:click="filterClick()"
+                      :disabled="(isInValidContext() || isInValidUser() || (!contextSearch && !userSearch && !privacyValue)) && filterWidgetVisible">
                     <font-awesome-icon :icon="['fa', 'filter']"/>
-                </a>
+                </button>
             </div>
         </div>
     </form>
 </template>
 
 <script>
+    import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap'
     import StreamPrivacyWidget from './StreamPrivacyWidget'
 
     export default {
         name: 'StreamFilter',
         props: ['streamOptions'],
-        components: {StreamPrivacyWidget},
+        components: {StreamPrivacyWidget, VueTypeaheadBootstrap},
         data() {
             return {
-                context: null,
+                contextSearch: null,
+                contextSelected: null,
+                contexts: this.streamOptions.filterAvailableContexts,
+                userSearch: null,
+                userSelected: null,
+                users: this.streamOptions.filterAvailableUsers,
                 username: null,
                 privacyValue: null,
                 filterActive: null,
+                filterWidgetVisible: false,
                 privacyOptions: this.streamOptions.privacyOptions,
             }
         },
         methods: {
             filterClick() {
+                // show filter widget on first click
+                if (!this.filterWidgetVisible) {
+                    this.filterWidgetVisible = true;
+                    return;
+                }
                 const pv = (!this.privacyValue) ? null : this.privacyValue.value;
-                const filter = {"context": this.context, "username": this.username, "privacy": pv}
-                if (this.context || this.username || pv) {
+
+                let filter = {}
+                if (this.contextSelected) {
+                    if (this.contextSearch == this.contextSelected.title) {
+                        filter.context = this.contextSelected.nid;
+                    }
+                }
+                if (this.userSelected) {
+                    if (this.userSearch == this.userSelected.realname) {
+                        filter.user = this.userSelected.uid;
+                    }
+                }
+                if (pv) {
+                    filter.privacy = pv;
+                }
+
+                if (this.contextSelected || this.userSelected || pv) {
                     this.filterActive = true
                     //emit filter event
                     this.$root.$emit('widgets:filter:filter', filter)
                 }
             },
+            isInValidContext() {
+                return !!(this.contextSearch && (!this.contextSelected || this.contextSearch != this.contextSelected.title))
+            },
+            isInValidUser() {
+                return !!(this.userSearch && (!this.userSelected || this.userSearch != this.userSelected.realname))
+            },
             resetClick() {
-                this.context = null
-                this.username = null
+                this.contextSelected = null
+                this.userSelected = null
                 this.privacyValue = null
+
+                this.contextSearch = ''
+                this.userSearch = ''
 
                 if (this.filterActive) {
                     this.$root.$emit('widgets:filter:filter', null)
@@ -73,18 +126,78 @@
     }
 </script>
 
+
+<style lang="scss">
+    .stream-filter-input-wrapper {
+        padding: 0 !important;
+        min-height: 38px;
+
+        a.list-group-item {
+            text-align: left;
+            font-size: 1rem;
+        }
+
+        .form-control {
+            min-height: 38px;
+            margin-bottom: 5px !important;
+        }
+
+        .is-invalid {
+            input.form-control {
+                border-color: #d14836 !important;
+            }
+        }
+    }
+
+    .vbt-autcomplete-list {
+        z-index: 1001 !important;
+    }
+</style>
+
 <style scoped lang="scss">
     .stream-filter-form {
         margin-bottom: 15px;
+
+        div.stream-post-privacy-settings {
+            width: 100%;
+        }
     }
 
-    a.stream-filter-submit {
+    .stream-filter-submit {
+        cursor: pointer;
         font-size: 2rem;
+        border: 0;
+        box-shadow: none;
+        border: none;
+        background: none;
+        color: #337ab7;
+
+        &:focus {
+            color: #23527c;
+        }
+
+        &[disabled=disabled] {
+            color: #ccc;
+        }
     }
 
-    a.stream-filter-reset {
+    .stream-filter-reset {
         font-size: 1.8rem;
         margin-right: 1.3rem;
+        cursor: pointer;
+        border: 0;
+        box-shadow: none;
+        border: none;
+        background: none;
+        color: #337ab7;
+
+        &:focus {
+            color: #23527c;
+        }
+
+        &[disabled=disabled] {
+            color: #ccc;
+        }
     }
 
     .stream-filter-input-wrapper {
@@ -97,11 +210,34 @@
     }
 
     .stream-filter-form {
-        .col:first-child,
-        .col:last-child {
+        .col-md-4 {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .col-md-4:first-child,
+        .col-md-4:last-child {
             padding: 0;
         }
+
+        .col-md-6:first-child {
+            padding: 0;
+        }
+        .col-md-6:last-child {
+            padding-left: 15px;
+        }
+
     }
+
+    @media (max-width: 768px) {
+        .stream-filter-form {
+            .col-md-4,
+            .col-md-6 {
+                padding: 0 !important;
+            }
+        }
+    }
+
 
     .fade-enter-active, .fade-leave-active {
         transition: opacity .3s;
@@ -111,4 +247,6 @@
     {
         opacity: 0;
     }
+
+
 </style>

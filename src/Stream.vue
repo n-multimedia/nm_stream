@@ -131,6 +131,8 @@
                     self.streamOptions.containerNID = response.data.stream.containerNID
                     self.streamOptions.timestamp = response.data.stream.timestamp
                     self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
+                    self.streamOptions.filterAvailableContexts = response.data.stream.filterAvailableContexts
+                    self.streamOptions.filterAvailableUsers = response.data.stream.filterAvailableUsers
 
                     self.streamPlugins = []
 
@@ -193,8 +195,8 @@
                     if (this.streamFilter.context) {
                         params.append('context_nid', this.streamFilter.context);
                     }
-                    if (this.streamFilter.username) {
-                        params.append('user_uid', this.streamFilter.username);
+                    if (this.streamFilter.user) {
+                        params.append('user_uid', this.streamFilter.user);
                     }
                     if (this.streamFilter.privacy) {
                         params.append('privacy_key', this.streamFilter.privacy);

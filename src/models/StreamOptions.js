@@ -10,5 +10,7 @@ export default class StreamOptions {
         this.token = ''
         this.timestamp = ''
         this.acceptedFiles = ''
+        this.filterAvailableContexts = []
+        this.filterAvailableUsers = []
     }
 }

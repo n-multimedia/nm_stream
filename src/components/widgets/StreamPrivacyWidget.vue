@@ -34,6 +34,25 @@
         }
     }
 </script>
+<style lang="scss">
+    div.stream-post-privacy-settings {
+        .multiselect__tags {
+            border-radius: 0;
+            border-color: #ced4da;
+            white-space: nowrap;
+            min-height: 38px;
+        }
+
+        .multiselect__placeholder {
+            width: calc(100% - 15px);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            margin-bottom: 0px;
+        }
+
+    }
+</style>
 
 <style scoped lang="scss">
     div.stream-post-privacy-settings {

@@ -17,6 +17,7 @@ import infiniteScroll from 'vue-infinite-scroll'
 import VueKeepScrollPosition from 'vue-keep-scroll-position'
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
 import VueCtkDateTimePicker from 'vue-ctk-date-time-picker'
+import VueTypeaheadBootstrap from 'vue-typeahead-bootstrap'
 
 import 'vue-multiselect/dist/vue-multiselect.min.css'
 import de from './i18n/de_DE'
@@ -52,6 +53,8 @@ Vue.use(require('vue-moment'), {
 })
 
 Vue.component('VueCtkDateTimePicker', VueCtkDateTimePicker)
+
+Vue.component('vue-typeahead-bootstrap', VueTypeaheadBootstrap)
 
 // Create VueI18n instance with options
 const i18n = new VueI18n({
