@@ -411,7 +411,12 @@
                     this.privacyDefault = this.streamOptions.privacyDefault
                 }
                 let valueKeyInteger = parseInt(this.privacyDefault)
+
                 this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
+                // fallback to first/only private
+                if(!this.privacyValue) {
+                    this.privacyValue = this.privacyOptions[0];
+                }
             }
             this.loggedInUser = this.streamOptions.loggedInUser
 
