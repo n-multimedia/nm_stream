@@ -21,6 +21,10 @@
                                         <img class="post-privacy" :src="privacy.img" :alt="privacy.title"
                                              :title="privacy.title">
                                     </div>
+                                    <div v-if="post.sticky == 1" class="post-sticky"
+                                         :title="$t('plugins.sticky.status_title')">
+                                        <font-awesome-icon :icon="['fa', 'anchor']"/>
+                                    </div>
                                     <div v-if="canEdit || canDelete">
                                         <b-dropdown text="..." class="post-actions-dropdown m-md-2 float-right"
                                                     offset="-120">
@@ -45,10 +49,6 @@
                                     <p tag="p" v-html="post.body_formatted"/>
                                     <plugin-poll-view :key="pollViewRenderOnceKey" v-if="post.poll" v-bind="post.poll"
                                                       @addvote="pollAddVote"/>
-                                </div>
-                                <div v-if="post.sticky == 1" class="post-sticky"
-                                     :title="$t('plugins.sticky.status_title')">
-                                    <font-awesome-icon :icon="['fa', 'anchor']"/>
                                 </div>
                             </div>
                             <div class="row">
@@ -414,9 +414,9 @@
 
 <style lang="scss">
     .post-sticky {
-        position: absolute;
-        bottom: 0;
-        right: 15px;
+        font-size: 0.97em;
+        float: right;
+        margin-right: 10px;
     }
 
     .post-actions-dropdown {
