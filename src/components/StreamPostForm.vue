@@ -416,6 +416,7 @@
                 // fallback to first/only private
                 if(!this.privacyValue) {
                     this.privacyValue = this.privacyOptions[0];
+                    this.privacyDefault = this.privacyValue.value;
                 }
             }
             this.loggedInUser = this.streamOptions.loggedInUser
