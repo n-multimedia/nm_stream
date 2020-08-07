@@ -219,14 +219,17 @@
                 this.initializeForm = true
 
                 this.showComments = false
-                // hide comments and show back
-                this.$el.classList.add('flip-active')
+
+
                 setTimeout(() => {
+                    // hide comments and show back
+                    this.$el.classList.add('flip-active')
+
                     this.$refs.streamPostForm.initializePost()
+                    this.$refs.backDelete.classList.add('hide')
+                    this.$refs.backEdit.classList.remove('hide')
                 }, 200)
 
-                this.$refs.backDelete.classList.add('hide')
-                this.$refs.backEdit.classList.remove('hide')
             },
             toggleComments() {
                 this.showComments = !this.showComments
@@ -329,7 +332,7 @@
     }
 
     .stream-post {
-        transition: 0.3s;
+        transition: 0.1s;
 
         &:hover {
             border: 1px solid #bbb;

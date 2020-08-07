@@ -336,11 +336,11 @@
     /* Enter and leave animations can use different */
     /* durations and timing functions.              */
     #stream .slide-fade-enter-active {
-        transition: all .2s ease;
+        transition: all .1s ease;
     }
 
     #stream .slide-fade-leave-active {
-        transition: all .2s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+        transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
     }
 
     #stream .slide-fade-enter, #stream .slide-fade-leave-to
