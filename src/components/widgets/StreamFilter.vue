@@ -1,46 +1,48 @@
 <template>
-    <form class="stream-filter-form">
+    <form class="stream-filter-form" @submit.prevent="onSubmit">
         <div class="row">
             <div class="col-md-10 stream-filter-input-wrapper">
                 <transition name="fade">
-                    <div class="row" v-if="filterWidgetVisible">
-                        <div class="col-md-4" v-if="!streamOptions.contextNID">
-                            <vue-typeahead-bootstrap
-                                    :class="{'is-invalid': isInValidContext()}"
-                                    class="stream-filter-context"
-                                    v-model="contextSearch"
-                                    :placeholder="$t('filter.placeholder.context')"
-                                    :serializer="s => s.title"
-                                    :data="contexts"
-                                    @hit="contextSelected = $event"
-                            />
+                        <div class="row" v-if="filterWidgetVisible">
+                            <div class="col-md-4" v-if="!streamOptions.contextNID">
+                                <vue-typeahead-bootstrap
+                                        ref="context"
+                                        :class="{'is-invalid': isInValidContext()}"
+                                        class="stream-filter-context"
+                                        v-model="contextSearch"
+                                        :placeholder="$t('filter.placeholder.context')"
+                                        :serializer="s => s.title"
+                                        :data="contexts"
+                                        @hit="contextSelected = $event"
+                                />
+                            </div>
+                            <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
+                                <vue-typeahead-bootstrap
+                                        ref="username"
+                                        :class="{'is-invalid': isInValidUser()}"
+                                        class="stream-filter-context"
+                                        v-model="userSearch"
+                                        :placeholder="$t('filter.placeholder.username')"
+                                        :serializer="s => s.realname"
+                                        :data="users"
+                                        @hit="userSelected = $event"
+                                />
+                            </div>
+                            <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
+                                <stream-privacy-widget :privacyValue="privacyValue" :privacyOptions="privacyOptions"
+                                                       @interface="privacyValue = $event"></stream-privacy-widget>
+                            </div>
                         </div>
-                        <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
-                            <vue-typeahead-bootstrap
-                                    :class="{'is-invalid': isInValidUser()}"
-                                    class="stream-filter-context"
-                                    v-model="userSearch"
-                                    :placeholder="$t('filter.placeholder.username')"
-                                    :serializer="s => s.realname"
-                                    :data="users"
-                                    @hit="userSelected = $event"
-                            />
-                        </div>
-                        <div :class="{'col-md-6': streamOptions.contextNID, 'col-md-4': !streamOptions.contextNID}">
-                            <stream-privacy-widget :privacyValue="privacyValue" :privacyOptions="privacyOptions"
-                                                   @interface="privacyValue = $event"></stream-privacy-widget>
-                        </div>
-                    </div>
                 </transition>
             </div>
             <div class="col-md-2 stream-filter-action-wrapper">
                 <transition name="fade">
-                    <button v-if="contextSearch || userSearch || privacyValue" class="stream-filter-reset" href="#"
+                    <button type="reset" v-if="contextSearch || userSearch || privacyValue" class="stream-filter-reset" href="#"
                        v-on:click="resetClick()">
                         <font-awesome-icon :icon="['fa', 'times']"/>
                     </button>
                 </transition>
-                <button class="stream-filter-submit" v-on:click="filterClick()"
+                <button type="submit" class="stream-filter-submit" v-on:click="filterClick()"
                       :disabled="(isInValidContext() || isInValidUser() || (!contextSearch && !userSearch && !privacyValue)) && filterWidgetVisible">
                     <font-awesome-icon :icon="['fa', 'filter']"/>
                 </button>
@@ -73,6 +75,9 @@
             }
         },
         methods: {
+            onSubmit() {
+
+            },
             filterClick() {
                 // show filter widget on first click
                 if (!this.filterWidgetVisible) {
