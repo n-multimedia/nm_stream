@@ -8,9 +8,15 @@
                 </transition>
             </div>
             <div class="col-10">
-                <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed"
-                          v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-on:focus="formActive = true"
-                          :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
+                <at-ta :members="mentionMembers" name-key="name">
+                    <template slot="item" slot-scope="s">
+                        <img :src="s.item.avatar" class="rounded-circle">
+                        <span v-text="s.item.realname"></span>
+                    </template>
+                    <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed"
+                              v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-on:focus="formActive = true"
+                              :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
+                </at-ta>
                 <transition name="fade">
                     <div class="row stream-action-2" :key="formActive">
                         <div class="col-12">
@@ -37,10 +43,11 @@
 <script>
 
     import Vue from 'vue'
-
+    import AtTa from 'vue-at/dist/vue-at-textarea'
     export default {
-        props: ['streamOptions', 'post', 'editComment'],
+        props: ['streamOptions', 'post', 'editComment', 'mentionMembers'],
         name: 'stream-comment-form',
+        components: {AtTa},
         methods: {
             resizeTextarea(event) {
                 this.resizeTextareaElement(event.target)
@@ -154,7 +161,7 @@
         },
         mounted: function () {
             this.$nextTick(() => {
-                this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight) + 'px;overflow-y:hidden;')
+                this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight) + 'px;')
                 this.$el.addEventListener('input', this.resizeTextarea)
             })
 
@@ -207,7 +214,7 @@
         border-bottom: 2px solid #aaa;
         outline-style: none;
         resize: none;
-        overflow: hidden;
+        overflow: hidden !important;
         height: 30px;
         transition: 0.5s;
     }

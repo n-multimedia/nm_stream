@@ -8,7 +8,7 @@
         <stream-post-form
                 v-if="initialized && streamOptions.containerNID > 0 && streamOptions.permissions.canCreatePost"
                 :streamOptions="streamOptions"
-                :streamPlugins="streamPlugins"
+                :mentionMembers="getMentionMembers(streamOptions.contextNID)"
                 v-on:stream-post-added="addPost"
         />
         <div v-if="initialized && posts.length == 0">
@@ -22,6 +22,7 @@
                              :post="getLoadedPost(post)"
                              :comments="getNodeComments(post.nid)"
                              :streamOptions="streamOptions"
+                             :mentionMembers="getMentionMembers(post.context.nid)"
                              v-on:stream-post-deleted="deletePost"
                              v-on:stream-comment-deleted="deleteComment"
                              v-on:stream-comment-added="addComment"
@@ -41,6 +42,8 @@
     import StreamOptions from './models/StreamOptions'
     import StreamFilter from './components/widgets/StreamFilter'
 
+    import MentionService from './components/plugins/PluginMention/services/mention.service'
+
     export default {
         name: 'Stream',
         components: {
@@ -52,6 +55,7 @@
             return {
                 posts: [],
                 streamOptions: [],
+                mentionMembers: [],
                 comments: [],
                 users: [],
                 busyLoading: false,
@@ -259,6 +263,24 @@
                     // If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
                     arr1obj ? Vue._.extend(arr1obj, arr2obj) : arr1.push(arr2obj)
                 })
+            },
+            // get mention member asynchronously and cache
+            getMentionMembers: function(contextNID) {
+                if(this.mentionMembers[contextNID]) {
+                    // return cached
+                    return this.mentionMembers[contextNID];
+                }
+                // return empty array
+                this.mentionMembers[contextNID] = [];
+
+                // fetch mention opions
+                this.getMentionMembersAsync(contextNID);
+
+                return this.mentionMembers[contextNID]
+            },
+            async getMentionMembersAsync(contextNID) {
+                // async get options
+                this.mentionMembers[contextNID] = await MentionService.getMentionMembers(contextNID)
             }
         },
         updated: function () {

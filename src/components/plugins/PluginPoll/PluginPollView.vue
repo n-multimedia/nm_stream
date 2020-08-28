@@ -29,7 +29,10 @@
             <button href="#" @click.prevent="handleSubmit" class="btn btn-primary submit-button"
                     v-text="submitButtonText"></button>
         </template>
-
+        <template v-if="canEdit && !finalResults && !visibleResults">
+              <button href="#" @click.prevent="handleViewResults" class="btn btn-primary submit-button"
+                      v-text="viewResultsButtonText"></button>
+        </template>
     </div>
 </template>
 
@@ -63,15 +66,25 @@
                 default: false
             },
             submitButtonText: {
-                type: String,
-                default: function () {
-                    return this.$t('plugins.poll.submit')
-                }
+              type: String,
+              default: function () {
+                return this.$t('plugins.poll.submit')
+              }
+            },
+            viewResultsButtonText: {
+              type: String,
+              default: function () {
+                return this.$t('plugins.poll.viewResults')
+              }
             },
             customId: {
                 type: Number,
                 default: 0
-            }
+            },
+            canEdit: {
+              type: Boolean,
+              default: false
+            },
         },
         data() {
             return {
@@ -168,11 +181,14 @@
                     obj.customId = this.customId
                 }
 
-
                 // show instant result
                 this.answers = this.answersOptions
 
                 this.$emit('addvote', obj)
+            },
+            handleViewResults() {
+              this.visibleResults = true;
+
             },
             deselectAll() {
                 return this.answersOptions.map(a => {
@@ -327,6 +343,7 @@
     .vue-poll .submit-button {
         margin: auto;
         display: block;
+        margin-right: 0.2rem;
     }
 
     .vue-poll .bg.selected {

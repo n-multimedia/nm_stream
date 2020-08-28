@@ -47,7 +47,8 @@
                             <div class="row">
                                 <div class="col-12 body">
                                     <p tag="p" v-html="post.body_formatted"/>
-                                    <plugin-poll-view :key="pollViewRenderOnceKey" v-if="post.poll" v-bind="post.poll"
+                                    <plugin-poll-view :key="pollViewRenderOnceKey" v-if="post.poll"
+                                                      v-bind="post.poll"
                                                       @addvote="pollAddVote"/>
                                 </div>
                             </div>
@@ -89,6 +90,7 @@
                             <stream-comment-form v-if="canCreateComment" v-bind:streamOptions="streamOptions"
                                                  v-on:stream-user-added="addUser"
                                                  v-on:stream-comment-added="addComment"
+                                                 :mentionMembers = "mentionMembers"
                                                  :post="post"></stream-comment-form>
                             <transition name="fade">
                                 <div v-if="sortedComments.length > 0 && showComments === true">
@@ -112,6 +114,7 @@
                                ref="streamPostForm"
                                :streamOptions="streamOptions"
                                :editPost="post"
+                               :mentionMembers="mentionMembers"
                                v-on:form-edit-canceled="editCanceled()"
                                v-on:post-form-onAttachmentDeleteConf="onAttachmentDeleteConf">
                     </component>
@@ -164,7 +167,7 @@
     import PollService from './plugins/PluginPoll/services/poll.service'
 
     export default {
-        props: ['streamOptions', 'post', 'comments'],
+        props: ['streamOptions', 'post', 'comments', 'mentionMembers'],
         components: {StreamComment, StreamCommentForm, StreamPostForm, PluginPollView},
         name: 'stream-post',
         data() {
@@ -201,7 +204,7 @@
                 return this.post.container.link + '?streamNode=' + this.post.nid
             }
         },
-        mounted: function () {
+        mounted: async function () {
             // force poll to rerender after edit
             this.$root.$on('plugins:poll:creator:save', () => {
                 this.pollViewRenderUpdateFlag = true
