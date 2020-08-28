@@ -97,10 +97,9 @@
     import PluginPoll from './plugins/PluginPoll/PluginPoll'
     import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
     import AtTa from 'vue-at/dist/vue-at-textarea' // for textarea
-    import MentionService from './plugins/PluginMention/services/mention.service'
 
     export default {
-        props: ['streamOptions', 'editPost'],
+        props: ['streamOptions', 'editPost', 'mentionMembers'],
         name: 'stream-post-form',
         components: {StreamPrivacyWidget, vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
         methods: {
@@ -391,7 +390,7 @@
             this.loggedInUser = this.streamOptions.loggedInUser
 
             this.$nextTick(() => {
-                this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight) + 'px;overflow-y:hidden;')
+                this.$el.setAttribute('style', 'height:' + (this.$el.scrollHeight) + 'px;')
                 this.$el.addEventListener('input', this.resizeTextarea)
             })
 
@@ -424,14 +423,6 @@
             // set post author for edit post or logged in user for the new post
             this.updateAuthor()
 
-            let contextNID = null
-            if (this.editPost) {
-                contextNID = this.editPost.context.nid
-            } else {
-                contextNID = this.streamOptions.contextNID
-            }
-            // fetch mention opions
-            this.mentionMembers = await MentionService.getMentionMembers(contextNID)
         },
         beforeDestroy() {
             this.$el.removeEventListener('input', this.resizeTextarea)
@@ -457,7 +448,6 @@
                 busyLoadingColor: '#888',
                 busyLoadingSize: '10px',
                 dropzoneQueueProcessing: false,
-                mentionMembers: null,
                 dropzoneOptions: {
                     url: this.getPostUploadUrl(),
                     createImageThumbnails: false,
@@ -553,7 +543,7 @@
         border-bottom: 2px solid #aaa;
         outline-style: none;
         resize: none;
-        overflow: hidden;
+        overflow: hidden !important;
         height: 30px;
         transition: 0.5s;
     }
