@@ -24,7 +24,8 @@
             </template>
         </div>
         <div class="votes" v-if="showTotalVotes && (visibleResults || finalResults)"
-             v-text="totalVotesFormatted + ' ' + labelVotes"></div>
+             v-text="totalVotesFormatted + ' ' + labelVotes + ' (' +  totalParticipantsFormatted + ' ' + labelParticipated + ')' "></div>
+
         <template v-if="!finalResults && !visibleResults && totalSelections > 0">
             <button href="#" @click.prevent="handleSubmit" class="btn btn-primary submit-button"
                     v-text="submitButtonText"></button>
@@ -81,6 +82,10 @@
                 type: Number,
                 default: 0
             },
+            numberParticipants: {
+              type: Number,
+              default: 0
+            },
             canEdit: {
               type: Boolean,
               default: false
@@ -111,6 +116,19 @@
                 } else {
                     return this.$t('plugins.poll.votes')
                 }
+            },
+            totalParticipantsFormatted() {
+              return this.numberParticipants.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+            },
+            labelParticipants() {
+              if (this.numberParticipants === 1) {
+                return this.$t('plugins.poll.participant')
+              } else {
+                return this.$t('plugins.poll.participants')
+              }
+            },
+            labelParticipated() {
+              return this.$t('plugins.poll.participated')
             },
             mostVotes() {
                 let max = 0

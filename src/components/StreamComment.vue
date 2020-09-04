@@ -42,6 +42,7 @@
                     <stream-comment-form ref="streamCommentForm"
                                          :streamOptions="streamOptions"
                                          :editComment="comment"
+                                         :mentionMembers = "mentionMembers"
                                          v-on:form-edit-canceled="editCanceled()"
                     >
                     </stream-comment-form>
@@ -74,7 +75,7 @@
     import Vue from 'vue'
 
     export default {
-        props: ['streamOptions', 'comment', 'user'],
+        props: ['streamOptions', 'comment', 'user', 'mentionMembers'],
         components: {StreamCommentForm},
         name: 'stream-comment',
         data() {

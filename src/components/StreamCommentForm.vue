@@ -8,13 +8,13 @@
                 </transition>
             </div>
             <div class="col-10">
-                <at-ta :members="mentionMembers" name-key="name">
+                <at-ta :members="mentionMembers" name-key="name"  @at="atChanged">
                     <template slot="item" slot-scope="s">
                         <img :src="s.item.avatar" class="rounded-circle">
                         <span v-text="s.item.realname"></span>
                     </template>
                     <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed"
-                              v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-on:focus="formActive = true"
+                              v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-model.lazy="bodyText" v-on:focus="formActive = true"
                               :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
                 </at-ta>
                 <transition name="fade">
@@ -49,6 +49,13 @@
         name: 'stream-comment-form',
         components: {AtTa},
         methods: {
+          atChanged(chunk) {
+            if(chunk) {
+              //trigger changed event to update model
+              var event = new Event('change');
+              this.$el.querySelector('textarea').dispatchEvent(event)
+            }
+          },
             resizeTextarea(event) {
                 this.resizeTextareaElement(event.target)
 

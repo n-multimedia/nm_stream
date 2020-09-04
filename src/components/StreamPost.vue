@@ -99,6 +99,7 @@
                                                         :streamOptions="streamOptions"
                                                         :key="comment.cid"
                                                         :comment="comment"
+                                                        :mentionMembers = "mentionMembers"
                                                         v-on:stream-comment-deleted="deleteComment"
                                                         :user="comment.user"/>
                                     </transition-group>

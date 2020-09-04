@@ -17,7 +17,7 @@
             </div>
             <!-- Post Content -->
             <div class="col-10" v-if="!currentPluginTemplate">
-                <at-ta :members="mentionMembers" name-key="name">
+                <at-ta :members="mentionMembers" name-key="name" @at="atChanged">
                     <template slot="item" slot-scope="s">
                         <img :src="s.item.avatar" class="rounded-circle">
                         <span v-text="s.item.realname"></span>
@@ -103,6 +103,13 @@
         name: 'stream-post-form',
         components: {StreamPrivacyWidget, vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
         methods: {
+            atChanged(chunk) {
+              if(chunk) {
+                //trigger changed event to update model
+                var event = new Event('change');
+                this.$el.querySelector('textarea').dispatchEvent(event)
+              }
+            },
             resizeTextarea(event) {
                 this.resizeTextareaElement(event.target)
                 // console.log(this.$parent.$el.querySelector('.stream-post'))
@@ -309,8 +316,8 @@
             },
             initializePost() {
                 if (this.editPost) {
-                    // console.log('editpost', this.editPost)
                     this.formActive = true
+                    // clone body text to prevent two way binding
                     this.bodyText = this.editPost.body
                     this.stickyValue = parseInt(this.editPost.sticky)
                     this.poll = this.editPost.poll
