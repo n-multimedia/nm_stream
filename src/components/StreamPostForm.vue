@@ -17,16 +17,18 @@
             </div>
             <!-- Post Content -->
             <div class="col-10" v-if="!currentPluginTemplate">
-                <at-ta :members="mentionMembers" name-key="name" @at="atChanged">
-                    <template slot="item" slot-scope="s">
-                        <img :src="s.item.avatar" class="rounded-circle">
-                        <span v-text="s.item.realname"></span>
-                    </template>
-                    <textarea class="stream-post-body" name="body" v-on:keyup.esc="escPressed"
-                              v-on:keyup.enter="submitOnCtrlEnter" :disabled="busyLoading"
-                              v-on:focus="formActive = true" v-model="bodyText" v-model.lazy="bodyText"
-                              :placeholder="$t('placeholder.your_post_message')"></textarea>
-                </at-ta>
+                <stream-textarea
+                    ref="streamTextarea"
+                    @save="savePost"
+                    @reset="resetForm"
+                    @changeBody="changedBodyText"
+                    @changeFormActive="changedFormActive"
+                    :body-text="bodyText"
+                    :mentionMembers="mentionMembers"
+                    :form-active="formActive"
+                    :busyLoading="busyLoading"
+                    :textarea-placeholder="$t('placeholder.your_post_message')"
+                ></stream-textarea>
                 <!-- plugins -->
                 <div class="row" v-if="formActive">
                     <div class="col-12 plugins">
@@ -96,20 +98,13 @@
     import PluginSticky from './plugins/PluginSticky/PluginSticky'
     import PluginPoll from './plugins/PluginPoll/PluginPoll'
     import PluginPollCreator from './plugins/PluginPoll/PluginPollCreator'
-    import AtTa from 'vue-at/dist/vue-at-textarea' // for textarea
+    import StreamTextarea from "@/components/widgets/StreamTextarea"; // for textarea
 
     export default {
         props: ['streamOptions', 'editPost', 'mentionMembers'],
         name: 'stream-post-form',
-        components: {StreamPrivacyWidget, vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, AtTa},
+        components: {StreamPrivacyWidget, vueDropzone: vue2Dropzone, PluginSticky, PluginPoll, PluginPollCreator, StreamTextarea},
         methods: {
-            atChanged(chunk) {
-              if(chunk) {
-                //trigger changed event to update model
-                var event = new Event('change');
-                this.$el.querySelector('textarea').dispatchEvent(event)
-              }
-            },
             resizeTextarea(event) {
                 this.resizeTextareaElement(event.target)
                 // console.log(this.$parent.$el.querySelector('.stream-post'))
@@ -126,7 +121,7 @@
                     if (this.$refs.postAttachmentList) {
                         attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
                     }
-                    this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$el.querySelector('textarea').scrollHeight) + 'px'
+                    this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$refs.streamTextarea.querySelector('textarea').scrollHeight) + 'px'
                 }
 
                 if (this.currentPluginTemplate) {
@@ -243,8 +238,8 @@
                     this.bodyText = ''
                     let valueKeyInteger = parseInt(this.privacyDefault)
                     this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
-                    this.$el.querySelector('textarea.stream-post-body').blur()
-                    this.$el.querySelector('textarea.stream-post-body').style.height = 'auto'
+                    this.$refs.streamTextarea.querySelector('textarea.stream-textbody').blur()
+                    this.$refs.streamTextarea.querySelector('textarea.stream-textbody').style.height = 'auto'
 
                     // Plugins Todo move to responsible Plugin
                     this.stickyValue = 0
@@ -331,7 +326,7 @@
 
                     // resize textarea
                     this.$nextTick(() => {
-                        this.resizeTextareaElement(this.$el.querySelector('textarea'))
+                        this.resizeTextareaElement(this.$refs.streamTextarea.querySelector('textarea'))
 
                         // init attachments
                         this.$refs.vueDropZone.$el.style.height = '50px'
@@ -383,8 +378,14 @@
                 this.currentPluginTemplate = ''
 
                 this.$nextTick(() => {
-                    this.resizeTextareaElement(this.$el.querySelector('textarea'))
+                    this.resizeTextareaElement(this.$refs.streamTextarea.querySelector('textarea'))
                 })
+            },
+            changedBodyText(newVal) {
+              this.bodyText = newVal
+            },
+            changedFormActive(newVal) {
+              this.formActive = newVal
             }
         },
         watch: {},
@@ -494,7 +495,7 @@
 
 <style lang="scss" scoped>
 
-    .stream-post-body {
+    .stream-textbody {
         width: 100%;
     }
 
@@ -542,23 +543,6 @@
         .action-buttons {
             text-align: right;
         }
-    }
-
-    textarea {
-        background: none;
-        border: 0;
-        border-bottom: 2px solid #aaa;
-        outline-style: none;
-        resize: none;
-        overflow: hidden !important;
-        height: 30px;
-        transition: 0.5s;
-    }
-
-    textarea:hover,
-    textarea:active,
-    textarea:focus {
-        border-bottom: 2px solid #333;
     }
 
     button.stream-post-cancel {

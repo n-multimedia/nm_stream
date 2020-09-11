@@ -8,15 +8,17 @@
                 </transition>
             </div>
             <div class="col-10">
-                <at-ta :members="mentionMembers" name-key="name"  @at="atChanged">
-                    <template slot="item" slot-scope="s">
-                        <img :src="s.item.avatar" class="rounded-circle">
-                        <span v-text="s.item.realname"></span>
-                    </template>
-                    <textarea class="stream-comment-body" name="body" v-on:keyup.esc="escPressed"
-                              v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-model.lazy="bodyText" v-on:focus="formActive = true"
-                              :disabled="busyLoading" :placeholder="$t('placeholder.your_comment_message')"></textarea>
-                </at-ta>
+                <stream-textarea
+                    @save="saveComment"
+                    @reset="resetForm"
+                    @changeBody="changedBodyText"
+                    @changeFormActive="changedFormActive"
+                    :body-text="bodyText"
+                    :mentionMembers="mentionMembers"
+                    :form-active="formActive"
+                    :busyLoading="busyLoading"
+                    :textarea-placeholder="$t('placeholder.your_comment_message')"
+                ></stream-textarea>
                 <transition name="fade">
                     <div class="row stream-action-2" :key="formActive">
                         <div class="col-12">
@@ -43,11 +45,11 @@
 <script>
 
     import Vue from 'vue'
-    import AtTa from 'vue-at/dist/vue-at-textarea'
+    import StreamTextarea from "@/components/widgets/StreamTextarea";
     export default {
         props: ['streamOptions', 'post', 'editComment', 'mentionMembers'],
         name: 'stream-comment-form',
-        components: {AtTa},
+        components: {StreamTextarea},
         methods: {
           atChanged(chunk) {
             if(chunk) {
@@ -133,17 +135,11 @@
                     this.bodyText = ''
                     this.formActive = false
 
-                    this.$el.querySelector('textarea.stream-comment-body').blur()
-                    this.$el.querySelector('textarea.stream-comment-body').style.height = 'auto'
+                    this.$el.querySelector('textarea.stream-textbody').blur()
+                    this.$el.querySelector('textarea.stream-textbody').style.height = 'auto'
                 }
 
                 this.busyLoading = false
-            },
-            submitOnCtrlEnter(e) {
-                // prüfe auf STRG
-                if (e.ctrlKey) {
-                    this.saveComment()
-                }
             },
             initializeComment() {
                 if (this.editComment) {
@@ -164,6 +160,12 @@
                 if (this.editComment) {
                     this.author = this.editComment.user
                 }
+            },
+            changedBodyText(newVal) {
+              this.bodyText = newVal
+            },
+            changedFormActive(newVal) {
+              this.formActive = newVal
             }
         },
         mounted: function () {
@@ -201,9 +203,6 @@
 </script>
 
 <style lang="scss" scoped>
-    .stream-comment-body {
-        width: 100%;
-    }
 
     .stream-comment-from {
         text-align: left;
@@ -213,23 +212,6 @@
             border: 0;
             height: auto !important;
         }
-    }
-
-    textarea {
-        background: none;
-        border: 0;
-        border-bottom: 2px solid #aaa;
-        outline-style: none;
-        resize: none;
-        overflow: hidden !important;
-        height: 30px;
-        transition: 0.5s;
-    }
-
-    textarea:hover,
-    textarea:active,
-    textarea:focus {
-        border-bottom: 2px solid #333;
     }
 
     button.stream-comment-cancel {

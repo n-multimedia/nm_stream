@@ -224,7 +224,6 @@
 
                 this.showComments = false
 
-
                 setTimeout(() => {
                     // hide comments and show back
                     this.$el.classList.add('flip-active')
