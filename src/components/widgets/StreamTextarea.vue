@@ -57,11 +57,7 @@ export default {
 
 <style lang="scss">
 
-  .stream-textbody {
-    width: 100%;
-  }
-
-  textarea {
+  textarea.stream-textbody {
     background: none;
     border: 0;
     border-bottom: 2px solid #aaa;
@@ -70,11 +66,12 @@ export default {
     overflow: hidden !important;
     height: 30px;
     transition: 0.5s;
+    width: 100%;
   }
 
-  textarea:hover,
-  textarea:active,
-  textarea:focus {
+  textarea.stream-textbody:hover,
+  textarea.stream-textbody:active,
+  textarea.stream-textbody:focus {
     border-bottom: 2px solid #333;
   }
 </style>
