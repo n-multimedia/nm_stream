@@ -68,5 +68,4 @@ window.stream = new Vue({
     i18n,
     store,
     render: h => h(Stream),
-})
-window.stream.$mount('#stream')
+}).$mount('#stream')
