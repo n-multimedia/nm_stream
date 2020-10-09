@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Stream from './Stream.vue'
+import store from './store'
 import BootstrapVue from 'bootstrap-vue'
 import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
@@ -65,5 +66,7 @@ const i18n = new VueI18n({
 
 window.stream = new Vue({
     i18n,
+    store,
     render: h => h(Stream),
-}).$mount('#stream')
+})
+window.stream.$mount('#stream')

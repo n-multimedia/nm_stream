@@ -104,7 +104,9 @@
                 if (this.contextSelected || this.userSelected || pv) {
                     this.filterActive = true
                     //emit filter event
-                    this.$root.$emit('widgets:filter:filter', filter)
+
+                    // todo: commit store state
+                    //this.$root.$emit('widgets:filter:filter', filter)
                 }
             },
             isInValidContext() {

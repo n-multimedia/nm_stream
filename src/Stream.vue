@@ -19,8 +19,8 @@
             <transition-group name="list">
                 <stream-post v-for="post in sortedPosts"
                              :key="post.nid"
-                             :post="getLoadedPost(post)"
-                             :comments="getNodeComments(post.nid)"
+                             :post="getPost(post.nid)"
+                             :comments="getPostComments(post.nid)"
                              :streamOptions="streamOptions"
                              :mentionMembers="getMentionMembers(post.context.nid)"
                              v-on:stream-post-deleted="deletePost"
@@ -39,10 +39,8 @@
     import Vue from 'vue'
     import StreamPost from './components/StreamPost'
     import StreamPostForm from './components/StreamPostForm'
-    import StreamOptions from './models/StreamOptions'
     import StreamFilter from './components/widgets/StreamFilter'
-
-    import MentionService from './components/plugins/PluginMention/services/mention.service'
+    import {mapActions, mapGetters, mapState} from "vuex";
 
     export default {
         name: 'Stream',
@@ -53,235 +51,70 @@
         },
         data() {
             return {
-                posts: [],
-                streamOptions: [],
                 mentionMembers: [],
-                comments: [],
-                users: [],
-                busyLoading: false,
-                busyLoadingMore: false,
                 busyLoadingColor: '#888',
                 busyLoadingSize: '12px',
                 maxPostsLimitReached: false,
                 loggedInUser: 1,
-                initialized: false,
                 infiniteScrollLimit: 10,
                 maxPostsToShow: 10,
                 pollingUpdate: null,
                 containerNid: null,
                 streamUpdateOnRerender: false,
-                streamFilter: null
             }
         },
         beforeMount: function () {
-            if (this.$root.$el.attributes['data-container-nid']) {
-                this.containerNid = this.$root.$el.attributes['data-container-nid'].value
-            }
+          if (this.$root.$el.attributes['data-container-nid']) {
+            let containerNid = this.$root.$el.attributes['data-container-nid'].value
+            this.$store.commit('setContainerNid', containerNid)
+          }
         },
         computed: {
-            sortedPosts: function () {
-                // sort by created and sticky
-                let sortedPosts = Vue._.chain(this.posts).sortBy('created').sortBy('sticky').reverse().value()
-
-                let slicedPosts = sortedPosts.slice(0, this.maxPostsToShow)
-                return slicedPosts
-            }
+          ...mapState([
+            'posts',
+            'users',
+            'comments',
+            'streamOptions',
+            'filterParams',
+            'initialized',
+            'busyLoading',
+            'busyLoadingMore'
+          ]),
+          ...mapGetters([
+            'sortedPosts',
+            'getUser',
+            'getPost',
+            'getPostComments',
+          ])
         },
         methods: {
+            ...mapActions([
+              'initializeStream',
+              'addPost',
+              'deletePost',
+              'deleteComment',
+              'addComment',
+              'addUser',
+              'loadMore',
+              '',
+            ]),
             initialize: function () {
-                this.initializeStream()
-            },
-            addPost: function (post) {
-                this.posts.push(post)
-                let eventUpdate = new Event('nm-stream:update-model')
-                document.dispatchEvent(eventUpdate)
-            },
-            deletePost: function (post) {
-                let postListIndex = this.posts.indexOf(post)
-                this.posts.splice(postListIndex, 1)
-                let eventUpdate = new Event('nm-stream:update-model')
-                document.dispatchEvent(eventUpdate)
-            },
-            deleteComment: function (comment) {
-                let commentListIndex = this.comments.indexOf(comment)
-                this.comments.splice(commentListIndex, 1)
-                let eventUpdate = new Event('nm-stream:update-model')
-                document.dispatchEvent(eventUpdate)
-            },
-            addComment: function (comment) {
-                this.comments.push(comment)
-                let eventUpdate = new Event('nm-stream:update-model')
-                document.dispatchEvent(eventUpdate)
-            },
-            addUser: function (user) {
-                if (!this.getUser(user.uid)) {
-                    this.users.push(user)
-                }
-            },
-            initializeStream: function () {
-                let self = this
-                Vue.axios.get(this.$config.get('api.apiInitUrl').replace('%node', this.containerNid), {withCredentials: true}).then((response) => {
-                    self.posts = response.data.stream.posts
-                    self.users = response.data.stream.users
-                    self.comments = response.data.stream.comments
-                    self.streamOptions = new StreamOptions()
-                    self.streamOptions.privacyOptions = response.data.stream.privacyOptions
-                    self.streamOptions.privacyOptionsAll = response.data.stream.privacyOptionsAll
-                    self.streamOptions.privacyDefault = response.data.stream.privacyDefault
-                    self.streamOptions.permissions = response.data.stream.permissions
-                    self.streamOptions.loggedInUser = this.getUser(response.data.stream.loggedInUser)
-                    self.streamOptions.token = response.data.stream.token
-                    self.streamOptions.contextNID = response.data.stream.contextNID
-                    self.streamOptions.containerNID = response.data.stream.containerNID
-                    self.streamOptions.timestamp = response.data.stream.timestamp
-                    self.streamOptions.acceptedFiles = response.data.stream.acceptedFiles
-                    self.streamOptions.filterAvailableContexts = response.data.stream.filterAvailableContexts
-                    self.streamOptions.filterAvailableUsers = response.data.stream.filterAvailableUsers
-
-                    self.streamPlugins = []
-
-                    self.initialized = true
-
-                    document.addEventListener('nm-stream:update-model', () => {
-                        this.streamUpdateOnRerender = true
-                    }, false)
-
-                    let eventUpdate = new Event('nm-stream:update-model')
-                    document.dispatchEvent(eventUpdate)
-
-                    // start polling
-                    self.pollUpdate()
-
-                    // this.$emit('content:updated', response.data.stream)
-                    // console.log(self.posts)
-                })
-            },
-            loadMore: function () {
-                // wait for initialization
-                // do not poll if last poll is still loading
-                // do not poll if there is no more new content coming
-                if (!this.initialized || this.busyLoadingMore || this.maxPostsLimitReached) {
-                    return false
-                }
-
-                this.busyLoadingMore = true
-
-                this.maxPostsToShow += this.infiniteScrollLimit
-
-                this.pollUpdate()
-
-                /*
-                setTimeout(() => {
-                  this.busyLoadingMore = false
-                }, 1000)
-                */
-            },
-            getUser: function (uid) {
-                return Vue._.find(this.users, ['uid', uid])
-            },
-            getNodeComments: function (nid) {
-                let result = Vue._.filter(this.comments, ['nid', nid])
-                if (result.length > 0) {
-                    for (let comment in result) {
-                        result[comment].user = this.getUser(result[comment].uid)
-                    }
-                }
-                return result
-            },
-            getLoadedPost(post) {
-                post.user = this.getUser(post.uid)
-                return post
-            },
-            getFilterParams() {
-                const params = new URLSearchParams();
-
-                if (this.streamFilter) {
-                    if (this.streamFilter.context) {
-                        params.append('context_nid', this.streamFilter.context);
-                    }
-                    if (this.streamFilter.user) {
-                        params.append('user_uid', this.streamFilter.user);
-                    }
-                    if (this.streamFilter.privacy) {
-                        params.append('privacy_key', this.streamFilter.privacy);
-                    }
-                }
-
-                return params;
-            },
-            pollUpdate() {
-
-                clearInterval(this.pollingUpdate)
-
-                this.updateStream();
-                this.pollingUpdate = setInterval(() => {
-                    this.updateStream();
-                }, 5000)
-            },
-            updateStream() {
-                let self = this
-
-                if (!document.hasFocus()) {
-                    // do noting if tab has no focus
-                    return
-                }
-
-                // pass filter parameters
-                const params = this.getFilterParams();
-
-                let pollUpdateUrl = this.$config.get('api.apiPollUpdateUrl').replace('%node', this.streamOptions.containerNID).replace('%offset', 0).replace('%limit', self.maxPostsToShow).replace('%token', self.streamOptions.token)
-                // get update data
-                Vue.axios.get(pollUpdateUrl, {
-                    params: params,
-                    withCredentials: true
-                }).then((response) => {
-                    if (self.busyLoadingMore) {
-                        self.maxPostsLimitReached = self.posts.length >= response.data.stream.posts.length
-                        self.busyLoadingMore = false
-                    }
-                    self.posts = response.data.stream.posts
-                    self.users = response.data.stream.users
-                    self.comments = response.data.stream.comments
-
-                    // self.mergeByProperty(self.posts, response.data.stream.posts, 'nid')
-                    // self.mergeByProperty(self.users, response.data.stream.users, 'nid')
-                    // self.mergeByProperty(self.comments, response.data.stream.comments, 'nid')
-
-                    self.streamOptions.timestamp = response.data.stream.timestamp
-
-                    this.busyLoading = false;
-
-                    let eventUpdate = new Event('nm-stream:update-model')
-                    document.dispatchEvent(eventUpdate)
-                })
+              this.initializeStream()
             },
             mergeByProperty(arr1, arr2, prop) {
-                Vue._.each(arr2, function (arr2obj) {
-                    var arr1obj = Vue._.find(arr1, function (arr1obj) {
-                        return arr1obj[prop] === arr2obj[prop]
-                    })
-                    // If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
-                    arr1obj ? Vue._.extend(arr1obj, arr2obj) : arr1.push(arr2obj)
+              Vue._.each(arr2, function (arr2obj) {
+                var arr1obj = Vue._.find(arr1, function (arr1obj) {
+                  return arr1obj[prop] === arr2obj[prop]
                 })
+                // If the object already exist extend it with the new values from arr2, otherwise just add the new object to arr1
+                arr1obj ? Vue._.extend(arr1obj, arr2obj) : arr1.push(arr2obj)
+              })
             },
             // get mention member asynchronously and cache
-            getMentionMembers: function(contextNID) {
-                if(this.mentionMembers[contextNID]) {
-                    // return cached
-                    return this.mentionMembers[contextNID];
-                }
-                // return empty array
-                this.mentionMembers[contextNID] = [];
-
-                // fetch mention opions
-                this.getMentionMembersAsync(contextNID);
-
-                return this.mentionMembers[contextNID]
+            getMentionMembers: function (contextNID) {
+              return this.$store.getters.getMentionMembers(contextNID)
             },
-            async getMentionMembersAsync(contextNID) {
-                // async get options
-                this.mentionMembers[contextNID] = await MentionService.getMentionMembers(contextNID)
-            }
+
         },
         updated: function () {
             if (this.streamUpdateOnRerender) {
@@ -304,12 +137,6 @@
                 e = e || event
                 e.preventDefault()
             }, false)
-
-            this.$root.$on('widgets:filter:filter', (filter) => {
-                this.busyLoading = true;
-                this.streamFilter = filter
-                this.pollUpdate()
-            })
         },
         beforeDestroy: function () {
             clearInterval(this.pollingUpdate)

@@ -4,7 +4,7 @@
         <div class="flip">
             <div class="front">
                 <div class="stream-post card">
-                    <div class="row post-context" v-if="this.streamOptions.containerNID !== this.post.container.nid">
+                    <div class="row post-context" v-if="streamOptions.containerNID !== post.container.nid">
                         <div class="col-12">
                             <span class="float-right"> {{ $t('label.postContextFrom') }}: <a :href="streamLink">{{this.post.container.title}}</a> </span>
                         </div>

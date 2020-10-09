@@ -121,7 +121,9 @@
                     if (this.$refs.postAttachmentList) {
                         attachmentsHeight = parseFloat(this.$refs.postAttachmentList.clientHeight)
                     }
-                    this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$refs.streamTextarea.querySelector('textarea').scrollHeight) + 'px'
+                    if (this.$refs.streamTextarea) {
+                      this.$parent.$el.querySelector('.stream-post').style.height = (170 + dragzoneHeight + attachmentsHeight + this.$refs.streamTextarea.$el.querySelector('textarea').scrollHeight) + 'px'
+                    }
                 }
 
                 if (this.currentPluginTemplate) {
@@ -238,8 +240,8 @@
                     this.bodyText = ''
                     let valueKeyInteger = parseInt(this.privacyDefault)
                     this.privacyValue = Vue._.filter(this.privacyOptions, ['value', valueKeyInteger])[0]
-                    this.$refs.streamTextarea.querySelector('textarea.stream-textbody').blur()
-                    this.$refs.streamTextarea.querySelector('textarea.stream-textbody').style.height = 'auto'
+                    this.$refs.streamTextarea.$el.querySelector('textarea.stream-textbody').blur()
+                    this.$refs.streamTextarea.$el.querySelector('textarea.stream-textbody').style.height = 'auto'
 
                     // Plugins Todo move to responsible Plugin
                     this.stickyValue = 0
@@ -326,13 +328,16 @@
 
                     // resize textarea
                     this.$nextTick(() => {
-                        this.resizeTextareaElement(this.$refs.streamTextarea.querySelector('textarea'))
+                      // todo fix resize bug
+                      if (this.$refs.streamTextarea) {
+                        this.resizeTextareaElement(this.$refs.streamTextarea.$el.querySelector('textarea'))
 
                         // init attachments
                         this.$refs.vueDropZone.$el.style.height = '50px'
                         this.$refs.vueDropZone.$el.querySelector('div.dz-message').style.marginTop = '10px'
 
                         this.resizePostFormContainer()
+                      }
                     })
                 }
             },
@@ -378,7 +383,7 @@
                 this.currentPluginTemplate = ''
 
                 this.$nextTick(() => {
-                    this.resizeTextareaElement(this.$refs.streamTextarea.querySelector('textarea'))
+                    this.resizeTextareaElement(this.$refs.streamTextarea.$el.querySelector('textarea'))
                 })
             },
             changedBodyText(newVal) {
