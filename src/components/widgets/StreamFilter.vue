@@ -103,10 +103,9 @@
 
                 if (this.contextSelected || this.userSelected || pv) {
                     this.filterActive = true
-                    //emit filter event
 
-                    // todo: commit store state
-                    //this.$root.$emit('widgets:filter:filter', filter)
+                    //set filter
+                    this.$store.dispatch('setFilter', filter)
                 }
             },
             isInValidContext() {
@@ -124,7 +123,7 @@
                 this.userSearch = ''
 
                 if (this.filterActive) {
-                    this.$root.$emit('widgets:filter:filter', null)
+                    this.$store.dispatch('setFilter', null)
                     this.filterActive = null
                 }
 

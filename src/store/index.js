@@ -40,7 +40,7 @@ export default new Vuex.Store({
         updateStream({commit, getters, state}) {
             const containerNid = state.containerNid
             const maxPostsToShow = state.maxPostsToShow
-            const token = this.state.streamOptions.token
+            const token = state.streamOptions.token
 
             if(!token) {
                 return
@@ -49,42 +49,31 @@ export default new Vuex.Store({
             // pass filter parameters
             const params = getters.getFilterParams()
 
-            // set busy flag
             streamApi.updateStream({params, maxPostsToShow, containerNid, token}, data => {
                 if (this.busyLoadingMore) {
                     commit('maxPostsLimitReached', state.posts.length >= data.posts.length)
                     commit('busyLoadingMore', false)
                 }
                 commit('setBusy', false)
+                commit('setBusyMore', false)
                 commit('updateStream', data)
             })
         },
         addPost: function ({commit}, post) {
-            this.state.posts.push(post)
-            commit('updatePosts', this.posts)
+            commit('addPost', post)
         },
         deletePost: function ({commit}, post) {
-            let postListIndex = this.state.posts.indexOf(post)
-            if(postListIndex > -1) {
-                this.state.posts.splice(postListIndex, 1)
-            }
-            commit('updatePosts', this.posts)
+            commit('deletePost', post)
         },
         deleteComment: function ({commit}, comment) {
-            let commentListIndex = this.state.comments.indexOf(comment)
-            if(commentListIndex > -1) {
-                this.state.comments.splice(commentListIndex, 1)
-            }
-            commit('updateComments', this.state.comments)
+            commit('deleteComment', comment)
         },
         addComment: function ({commit}, comment) {
-            this.state.comments.push(comment)
-            commit('updateComments', this.state.comments)
+            commit('addComment', comment)
         },
         addUser: function ({commit, getters}, user) {
             if (!getters.getUser(user.uid)) {
-                this.state.users.push(user)
-                commit('updateUsers', this.state.users)
+                commit('addUser', user)
             }
         },
         setFilter({commit, dispatch}, filter) {
@@ -107,9 +96,9 @@ export default new Vuex.Store({
 
         },
         pollUpdate({dispatch, state, commit}) {
-
             clearInterval(state.pollingUpdate)
-
+            // set busy flag
+            commit('setBusy', true)
             dispatch('updateStream')
             const pollingUpdate = setInterval(() => {
                 dispatch('updateStream')
@@ -118,11 +107,12 @@ export default new Vuex.Store({
         },
     },
     getters: {
-        sortedPosts: state => {
+        getSortedPosts: state => {
             // sort by created and sticky
             let sortedPosts = Vue._.chain(state.posts).sortBy('created').sortBy('sticky').reverse().value()
 
             let slicedPosts = sortedPosts.slice(0, state.maxPostsToShow)
+
             return slicedPosts
         },
         getPost: (state, getters) => (nid) => {
@@ -135,11 +125,11 @@ export default new Vuex.Store({
             return state.users.find(user => user.uid === uid)
             //return Vue._.find(state.users, ['uid', uid])
         },
-        getPostComments: (state) => (nid) => {
-            let result = state.comments.find(comment => comment.nid === nid)
+        getPostComments: (state, getters) => (nid) => {
+            let result = state.comments.filter(comment => comment.nid === nid)
             if (result && result.length > 0) {
                 for (let comment in result) {
-                    result[comment].user = this.getUser(result[comment].uid)
+                    result[comment].user = getters.getUser(result[comment].uid)
                 }
             }
             return result
@@ -149,13 +139,13 @@ export default new Vuex.Store({
 
             if (state.filterParams) {
                 if (state.filterParams.context) {
-                    params.append('context_nid', this.state.filterParams.context)
+                    params.append('context_nid', state.filterParams.context)
                 }
                 if (state.filterParams.user) {
-                    params.append('user_uid', this.state.filterParams.user)
+                    params.append('user_uid', state.filterParams.user)
                 }
                 if (state.filterParams.privacy) {
-                    params.append('privacy_key', this.state.filterParams.privacy)
+                    params.append('privacy_key', state.filterParams.privacy)
                 }
             }
 
@@ -197,11 +187,32 @@ export default new Vuex.Store({
             state.comments = data.comments
             state.streamOptions.timestamp = data.timestamp
         },
+        addPost: function(state, post) {
+            state.posts.push(post)
+        },
+        deletePost: function(state, post) {
+            let postListIndex = state.posts.indexOf(post)
+            if(postListIndex > -1) {
+                state.posts.splice(postListIndex, 1)
+            }
+        },
         updatePosts: function (state, posts) {
             state.posts = posts
         },
+        addComment: function (state, comment) {
+            state.comments.push(comment)
+        },
+        deleteComment: function (state, comment) {
+            let commentListIndex = state.comments.indexOf(comment)
+            if(commentListIndex > -1) {
+                state.comments.splice(commentListIndex, 1)
+            }
+        },
         updateComments: function (state, comments) {
-            state.posts = comments
+            state.comments = comments
+        },
+        addUser: function (state, user) {
+            state.users.push(user)
         },
         updateUsers: function (state, users) {
             state.users = users

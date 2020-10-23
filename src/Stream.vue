@@ -11,7 +11,7 @@
                 :mentionMembers="getMentionMembers(streamOptions.contextNID)"
                 v-on:stream-post-added="addPost"
         />
-        <div v-if="initialized && posts.length == 0">
+        <div v-if="initialized && sortedPosts.length == 0">
             {{ $t('empty.no_posts_found') }}
         </div>
         <div v-infinite-scroll="loadMore" infinite-scroll-disabled="busyLoading" infinite-scroll-distance="10"
@@ -81,11 +81,14 @@
             'busyLoadingMore'
           ]),
           ...mapGetters([
-            'sortedPosts',
             'getUser',
+            'getSortedPosts',
             'getPost',
             'getPostComments',
-          ])
+          ]),
+          sortedPosts() {
+            return this.getSortedPosts
+          },
         },
         methods: {
             ...mapActions([
@@ -96,7 +99,6 @@
               'addComment',
               'addUser',
               'loadMore',
-              '',
             ]),
             initialize: function () {
               this.initializeStream()
@@ -126,6 +128,18 @@
                     this.streamUpdateOnRerender = false
                 })
             }
+        },
+        watch: {
+          busyLoading: function (val) {
+            // jump to hash location
+            const hash = location.hash
+            if(this.initialized == true && val == false && hash) {
+              setTimeout(() => {
+                location.hash = ""
+                location.hash = hash
+              }, 100)
+            }
+          },
         },
         mounted: function () {
             this.initialize()

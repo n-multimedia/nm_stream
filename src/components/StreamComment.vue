@@ -119,7 +119,7 @@
                 Vue.axios.get(apiCommentDeleteUrl, {withCredentials: true}).then((response) => {
                     if (response.data.status === 1) {
                         // post deleted successfully
-                        self.$emit('stream-comment-deleted', self.comment)
+                        this.$store.dispatch('deleteComment', self.comment)
                         this.$el.classList.remove('flip-active')
                     } else {
                         // an error occured

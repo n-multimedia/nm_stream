@@ -1,8 +1,8 @@
 import Vue from 'vue'
-import appConfig from '../../../../assets/config.js'
+import config from "@/assets/config";
 
 export default {
-    async addVote(nid, answerObj, token) {
+    async addVote(nid, answerObj, token, cb, errorCb) {
         let votes = {arSelected: []}
 
         if (answerObj.arSelected) {
@@ -11,18 +11,15 @@ export default {
             votes.arSelected = [{value: answerObj.value, votes: answerObj.votes}]
         }
 
-        let apiNodePollAddVoteUrl = appConfig.api.apiNodePollAddVote.replace('%node', nid).replace('%token', token)
+        let apiNodePollAddVoteUrl = config.api.apiNodePollAddVote.replace('%node', nid).replace('%token', token)
 
-        let requestData = votes.arSelected
-
-        // edit post => update
-        let response = await Vue.axios.post(apiNodePollAddVoteUrl, requestData, {withCredentials: true})
-
-        if (response.data.status === 1) {
-            return response.data
-        } else {
-            // an error occured
-            alert(this.$t('warning.error_occured_please_repeat_your_action'))
-        }
+        Vue.axios.get(apiNodePollAddVoteUrl, {withCredentials: true}).then((response) => {
+            if (response.data.status === 1) {
+                return cb(response.data)
+            } else {
+                // an error occured
+                errorCb()
+            }
+        })
     }
 }

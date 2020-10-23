@@ -107,8 +107,10 @@
                             // post added successfully
                             let commentData = response.data.commentData
                             let userData = response.data.userData
+
                             self.$emit('stream-comment-added', commentData)
                             self.$emit('stream-user-added', userData)
+
                         } else {
                             // an error occured
                             alert(this.$t('warning.error_occured_please_repeat_your_action'))

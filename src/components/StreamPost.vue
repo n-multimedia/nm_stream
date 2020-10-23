@@ -1,6 +1,6 @@
 <template>
     <!-- Card Flip -->
-    <div class="card-flip">
+    <div class="card-flip" :id="'streamNode-' + post.nid ">
         <div class="flip">
             <div class="front">
                 <div class="stream-post card">
@@ -202,7 +202,7 @@
                 return Vue._.filter(this.streamOptions.privacyOptionsAll, ['value', valueKeyInteger])[0]
             },
             streamLink: function () {
-                return this.post.container.link + '?streamNode=' + this.post.nid
+                return this.post.container.link + '#streamNode-' + this.post.nid
             }
         },
         mounted: async function () {
@@ -267,7 +267,7 @@
                 Vue.axios.get(apiNodeDeleteUrl, {withCredentials: true}).then((response) => {
                     if (response.data.status === 1) {
                         // post deleted successfully
-                        self.$emit('stream-post-deleted', self.post)
+                        this.$store.dispatch('deletePost', self.post)
                         this.$el.classList.remove('flip-active')
                     } else {
                         // an error occured
@@ -283,14 +283,14 @@
                 this.curDeleteAttachment = attachment
             },
             addUser(user) {
-                this.$emit('stream-user-added', user)
+                this.$store.dispatch('addUser', user)
             },
             addComment(comment) {
                 this.showComments = true
-                this.$emit('stream-comment-added', comment)
+                this.$store.dispatch('addComment', comment)
             },
             deleteComment(comment) {
-                this.$emit('stream-comment-deleted', comment)
+                this.$store.dispatch('deleteComment', comment)
             },
             hideModal() {
                 this.$refs.postDeleteAttachmentConf.hide()
@@ -307,8 +307,14 @@
                 })
                 this.hideModal()
             },
-           async pollAddVote(obj) {
-                PollService.addVote(this.post.nid, obj, this.streamOptions.token)
+           pollAddVote(obj) {
+                PollService.addVote(this.post.nid, obj, this.streamOptions.token, (response) => {
+                  //callback
+                  console.log(response)
+                }, () => {
+                  //error callback
+                  alert(this.$t('warning.error_occured_please_repeat_your_action'))
+                })
             }
         },
         watch: {

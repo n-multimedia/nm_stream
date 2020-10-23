@@ -107,10 +107,6 @@
         methods: {
             resizeTextarea(event) {
                 this.resizeTextareaElement(event.target)
-                // console.log(this.$parent.$el.querySelector('.stream-post'))
-                // console.log('height', this.$parent.$el.style.height + event.target.style.height)
-                // this.$parent.$el.querySelector('.stream-post').style.height = (this.$parent.$el.style.height + event.target.style.height) + 'px'
-                // console.log(this.$parent.$el.querySelector('.stream-post').style.height)
                 this.resizePostFormContainer()
             },
             resizePostFormContainer() {
@@ -161,9 +157,6 @@
                             self.editPost.sticky = response.data.nodeData.sticky
                             self.editPost.poll = response.data.nodeData.poll
 
-                            let eventUpdate = new Event('nm-stream:update-model')
-                            document.dispatchEvent(eventUpdate)
-
                             this.$root.$emit('nm-stream:node:save', self.editPost)
 
                             // check for queued uploads
@@ -197,6 +190,7 @@
                         if (response.data.status === 1) {
                             // post added successfully
                             let nodeData = response.data.nodeData
+
                             self.$emit('stream-post-added', nodeData)
 
                             // check for queued uploads
