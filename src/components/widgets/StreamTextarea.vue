@@ -5,8 +5,8 @@
       <span v-text="s.item.realname"></span>
     </template>
     <textarea class="stream-textbody" name="body" v-on:keyup.esc="escPressed"
-              v-on:keyup.enter="submitOnCtrlEnter" v-model="bodyText" v-model.lazy="bodyText"
-              v-on:focus="formActive = true"
+              v-on:keyup.enter="submitOnCtrlEnter" v-model="localBodyText" v-model.lazy="localBodyText"
+              v-on:focus="localFormActive = true"
               :disabled="busyLoading" :placeholder="textareaPlaceholder"></textarea>
   </at-ta>
 </template>
@@ -20,6 +20,8 @@ export default {
   props: ['mentionMembers', 'textareaPlaceholder', 'busyLoading', 'formActive', 'bodyText'],
   data() {
     return {
+      localBodyText: this.bodyText,
+      localFormActive: this.formActive
     }
   },
   methods: {
@@ -44,10 +46,16 @@ export default {
     },
   },
   watch: {
-    bodyText: function(newVal, oldVal) { // watch it
+    bodyText: function (newVal) {
+      this.localBodyText = newVal
+    },
+    formActive: function (newVal) {
+      this.localFormActive = newVal
+    },
+    localBodyText: function (newVal, oldVal) { // watch it
       this.$emit('changeBody', newVal, oldVal)
     },
-    formActive: function(newVal, oldVal) { // watch it
+    localFormActive: function (newVal, oldVal) { // watch it
       this.$emit('changeFormActive', newVal, oldVal)
     }
   }
@@ -57,21 +65,21 @@ export default {
 
 <style lang="scss">
 
-  textarea.stream-textbody {
-    background: none;
-    border: 0;
-    border-bottom: 2px solid #aaa;
-    outline-style: none;
-    resize: none;
-    overflow: hidden !important;
-    height: 30px;
-    transition: 0.5s;
-    width: 100%;
-  }
+textarea.stream-textbody {
+  background: none;
+  border: 0;
+  border-bottom: 2px solid #aaa;
+  outline-style: none;
+  resize: none;
+  overflow: hidden !important;
+  height: 30px;
+  transition: 0.5s;
+  width: 100%;
+}
 
-  textarea.stream-textbody:hover,
-  textarea.stream-textbody:active,
-  textarea.stream-textbody:focus {
-    border-bottom: 2px solid #333;
-  }
+textarea.stream-textbody:hover,
+textarea.stream-textbody:active,
+textarea.stream-textbody:focus {
+  border-bottom: 2px solid #333;
+}
 </style>

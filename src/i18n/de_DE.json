@@ -18,7 +18,8 @@
       "customdictFileTooBig": "Diese Datei ist zu groß. Maximale Größe: {{maxFilesize}} MB.",
       "nmDictHideFile": "Verstecken",
       "dictMaxFilesExceeded": "Das Uploadlimit von {{maxFiles}} wurde überschritten",
-      "postContextFrom": "Beitrag aus"
+      "postContextFrom": "Beitrag aus",
+      "edited": "bearbeitet"
     },
     "link": {
       "show_x_comments": "{count} Kommentare anzeigen",

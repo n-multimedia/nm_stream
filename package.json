@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "dev": "vue-cli-service build --watch --mode production",
+    "watch": "vue-cli-service build --watch",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
@@ -25,7 +26,6 @@
     "vue-configuration": "^1.0.3",
     "vue-ctk-date-time-picker": "^2.5.0",
     "vue-i18n": "^8.21.1",
-    "vue-infinite-scroll": "^2.0.2",
     "vue-keep-scroll-position": "^0.1.2",
     "vue-lodash": "^2.1.2",
     "vue-moment": "^4.1.0",
@@ -46,7 +46,8 @@
     "eslint-plugin-vue": "^6.2.2",
     "node-sass": "^4.14.1",
     "sass-loader": "^8.0.2",
-    "vue-template-compiler": "^2.6.12"
+    "vue-template-compiler": "^2.6.12",
+    "vue-waypoint": "^3.5.2"
   },
   "eslintConfig": {
     "root": true,

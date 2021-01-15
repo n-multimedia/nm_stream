@@ -9,67 +9,175 @@ const debug = process.env.NODE_ENV !== 'production'
 
 export default new Vuex.Store({
     state: {
-        posts: [],
-        users: [],
-        comments: [],
-        streamOptions: [],
+        containerNID: 0, //0 = global
+        containers: [],
+        containersData: [{'initialized': false}],
+        // attributes - todo move to own class
+        // - visibleInViewPort
+        // - posts
+        // - comments
+        // - busyLoading
+        // - initialized
+        // - busyLoadingMore
+        // maxPostsToShow: 2,
+        // comments: [],
+        // posts: [],
+        // users: [],
+        // streamOptions: [],
         mentionMembers: [],
         filterParams: [],
-        busyLoading: false,
-        busyLoadingMore: false,
-        initialized: false,
-        infiniteScrollLimit: 10,
-        maxPostsToShow: 10,
+        //busyLoading: false,
+        //busyLoadingMore: false, // complete list loading (e.g. container)
+        //initialized: false,
+        infiniteScrollLimit: 3,
+        infiniteScrollLimitAgr: 3, //overrides infiniteScrollLimit in aggr view
         pollingUpdate: false,
-        maxPostsLimitReached: false,
-        containerNid: null,
+        users: []
     },
     strict: debug,
     actions: {
-        initializeStream({commit, dispatch, state}) {
-            const containerNid = state.containerNid
-            streamApi.initializeStream(containerNid, data => {
-                commit('initializeStream', data)
+        setinfiniteScrollLimit({commit}, infiniteScrollLimit) {
+            commit('setinfiniteScrollLimit', infiniteScrollLimit)
+        },
+        initializeStream({commit, dispatch}, containerNID) {
+
+            commit('setBusy', {containerNID: containerNID, busy: true})
+            streamApi.initializeStream(containerNID, data => {
+                commit('initializeStream', {containerNID: containerNID, data: data})
+
+                // expand user array
+                data.users.forEach(user => {
+                    dispatch("addUser", user)
+                })
+
+                commit('setBusy', {containerNID: containerNID, busy: false})
             })
 
-            commit('setBusy', true)
+            // start polling
+            dispatch('pollUpdate', containerNID)
+        },
+        initializeStreamAggregated({state, commit, dispatch}) {
+            // init object
+            state.containersData[0] = {}
+
+            //override scroll limit for aggr view
+
+            commit('setMaxToShow', {containerNID: 0, maxToShow: state.infiniteScrollLimit})
+
+            commit('setBusy', {containerNID: 0, busy: true})
+
+            streamApi.initializeStreamAggregated(data => {
+                commit('initializeStreamAggregated', data)
+                commit('setBusy', {containerNID: 0, busy: false})
+                commit('setBusyMore', {containerNID: 0, busy: false})
+
+            })
 
             // start polling
-            dispatch('pollUpdate')
+            dispatch('pollUpdate', 0)
         },
-        updateStream({commit, getters, state}) {
-            const containerNid = state.containerNid
-            const maxPostsToShow = state.maxPostsToShow
-            const token = state.streamOptions.token
+        updateStreamAggregated({state, commit, getters}) {
+            // abort if container has not been initialized yet
+            if (!state.containersData[0].initialized) {
+                return
+            }
 
-            if(!token) {
+            const token = state.containersData[0].streamOptions.token
+
+            if (!token) {
+                return
+            }
+
+            // pass filter parameters
+            const params = getters.getFilterParams()
+            const maxContainersToShow = state.containersData[0].maxPostsToShow
+
+            commit('setBusy', {containerNID: 0, busy: true})
+            streamApi.updateStreamAggregated({params, maxContainersToShow, token}, data => {
+                commit('updateContainers', data)
+                commit('setBusy', {containerNID: 0, busy: false})
+            })
+        },
+        updateStream({dispatch, commit, getters, state}, containerNID) {
+
+            // abort if container has not been initialized yet
+            if (!state.containersData[containerNID].initialized || !!state.containersData[containerNID].busyLoading || !!state.containersData[containerNID].busyLoadingMore) {
+                return
+            }
+
+            const maxPostsToShow = state.containersData[containerNID].maxPostsToShow
+            const token = state.containersData[containerNID].streamOptions.token
+
+            if (!token) {
                 return
             }
 
             // pass filter parameters
             const params = getters.getFilterParams()
 
-            streamApi.updateStream({params, maxPostsToShow, containerNid, token}, data => {
-                if (this.busyLoadingMore) {
-                    commit('maxPostsLimitReached', state.posts.length >= data.posts.length)
-                    commit('busyLoadingMore', false)
+            //commit('setBusy', {containerNID: containerNID, busy: true})
+
+            streamApi.updateStream({params, maxPostsToShow, containerNID, token}, data => {
+                if (state.containersData[containerNID].busyLoadingMore) {
+                    commit('maxPostsLimitReached', {
+                        containerNID: containerNID,
+                        busy: state.containersData[containerNID].posts.length >= data.posts.length
+                    })
+                    commit('setBusyMore', {containerNID: containerNID, busy: false})
                 }
-                commit('setBusy', false)
-                commit('setBusyMore', false)
-                commit('updateStream', data)
+                commit('setBusy', {containerNID: containerNID, busy: false})
+                commit('setBusyMore', {containerNID: containerNID, busy: false})
+                commit('updateStream', {containerNID: containerNID, data: data})
+
+                // expand user array
+                data.users.forEach(user => {
+                    dispatch("addUser", user)
+                })
+            })
+        },
+        updateContainers({getters, state, commit}) {
+            const maxPostsToShow = state.containersData[0].maxPostsToShow
+            const token = getters.getStreamOptions().token
+
+            if (!token) {
+                return
+            }
+
+            // pass filter parameters
+            const params = getters.getFilterParams()
+
+            streamApi.updateContextsStream({params, maxPostsToShow, token}, data => {
+                if (state.containersData[0].busyLoadingMore) {
+                    commit('maxPostsLimitReached', {
+                        containerNID: 0,
+                        busy: state.containers.length >= data.containers.length
+                    })
+                }
+                commit('setBusy', {containerNID: 0, busy: false})
+                commit('setBusyMore', {containerNID: 0, busy: false})
+                commit('updateContainers', data)
             })
         },
         addPost: function ({commit}, post) {
             commit('addPost', post)
         },
-        deletePost: function ({commit}, post) {
-            commit('deletePost', post)
+        updatePost: function ({commit}, post) {
+            commit('updatePost', post)
         },
-        deleteComment: function ({commit}, comment) {
-            commit('deleteComment', comment)
+        updateAttachments: function ({commit}, post) {
+            commit('updateAttachments', post)
         },
-        addComment: function ({commit}, comment) {
-            commit('addComment', comment)
+        deletePost: function ({commit}, data) {
+            commit('deletePost', data)
+        },
+        deleteComment: function ({commit}, data) {
+            commit('deleteComment', data)
+        },
+        addComment: function ({commit}, data) {
+            commit('addComment', data)
+        },
+        updateComment: function ({commit}, data) {
+            commit('updateComment', data)
         },
         addUser: function ({commit, getters}, user) {
             if (!getters.getUser(user.uid)) {
@@ -78,55 +186,136 @@ export default new Vuex.Store({
         },
         setFilter({commit, dispatch}, filter) {
             commit('setFilter', filter)
-            dispatch('pollUpdate')
+            dispatch('updateStreamAggregated')
         },
-        loadMore({commit, state, dispatch}) {
+        loadMore({commit, state, dispatch}, containerNID) {
             // wait for initialization
             // do not poll if last poll is still loading
             // do not poll if there is no more new content coming
-            if (!state.initialized || state.busyLoadingMore || state.maxPostsLimitReached) {
+            // todo!!
+
+            if (!state.containersData[containerNID] || !state.containersData[containerNID].initialized || state.containersData[containerNID].busyLoadingMore || state.containersData[containerNID].maxPostsLimitReached) {
                 return false
             }
 
-            commit('setBusyMore', true)
-            commit('setMaxToShow', state.maxPostsToShow + state.infiniteScrollLimit)
+            const showMoreNum = state.infiniteScrollLimit
+
+
+            commit('setBusyMore', {containerNID: containerNID, busy: true})
+            commit('setMaxToShow', {
+                containerNID: containerNID,
+                maxToShow: state.containersData[containerNID].maxPostsToShow + showMoreNum
+            })
 
             // trigger a update
-            dispatch('pollUpdate')
+            dispatch('pollUpdate', containerNID)
 
         },
-        pollUpdate({dispatch, state, commit}) {
-            clearInterval(state.pollingUpdate)
-            // set busy flag
-            commit('setBusy', true)
-            dispatch('updateStream')
-            const pollingUpdate = setInterval(() => {
-                dispatch('updateStream')
+        loadMoreContainers({commit, dispatch, state}, containerNID) {
+            // wait for initialization
+            // do not poll if last poll is still loading
+            // do not poll if there is no more new content coming
+            if (!state.containersData[containerNID] || !state.containersData[containerNID].initialized || state.containersData[containerNID].busyLoadingMore || state.containersData[containerNID].busyLoading || state.containersData[containerNID].maxPostsLimitReached) {
+                return false
+            }
+
+            commit('setBusyMore', {containerNID: containerNID, busy: true})
+            commit('setMaxToShow', {
+                containerNID: containerNID,
+                maxToShow: state.containersData[containerNID].maxPostsToShow + state.infiniteScrollLimit
+            })
+
+            // trigger a update
+            dispatch('updateContainers')
+        },
+        pollUpdate({dispatch, state}, containerNID) {
+
+            //console.log('check poll condition')
+            //console.log(state.containersData[containerNID])
+
+            // todo prevent polling overkill in aggregated mode
+            //clearInterval(state.pollingUpdate)
+
+            dispatch('updateStream', containerNID)
+            /*const pollingUpdate = */
+            setInterval(() => {
+                // check if user sees the container in his viewport
+                // check if browser has focus
+                let focused = document.hasFocus()
+                if (!focused || !state.containersData[containerNID].visibleInViewPort) {
+                    return;
+                }
+                console.log(' polling ' + containerNID)
+                dispatch('updateStream', containerNID)
             }, 5000)
-            commit('setPollingUpdate', pollingUpdate)
+            //commit('setPollingUpdate', pollingUpdate)
         },
     },
     getters: {
-        getSortedPosts: state => {
+        getbusyLoading: (state) => (containerNID) => {
+
+            if (!state.containersData[containerNID]) {
+                return false
+            }
+
+            return state.containersData[containerNID].busyLoading
+        },
+        getbusyLoadingMore: (state) => (containerNID) => {
+
+            if (!state.containersData[containerNID]) {
+                return false
+            }
+
+            return state.containersData[containerNID].busyLoadingMore
+        },
+        getInitializedContainer: state => (containerNID) => {
+            if(!state.containersData[containerNID]) {
+                return false
+            }
+
+            return state.containersData[containerNID].initialized
+        },
+        getStreamOptions: state => () => {
+            const containerNID = 0
             // sort by created and sticky
-            let sortedPosts = Vue._.chain(state.posts).sortBy('created').sortBy('sticky').reverse().value()
+            if (state.containersData[containerNID]) {
+                return state.containersData[containerNID].streamOptions
+            }
 
-            let slicedPosts = sortedPosts.slice(0, state.maxPostsToShow)
+            return false
+        },
+        getStreamOptionsContainer: state => (containerNID) => {
+            // sort by created and sticky
+            if (state.containersData[containerNID]) {
+                return state.containersData[containerNID].streamOptions
+            }
 
+            return false
+        },
+        getSortedPosts: state => (containerNID) => {
+            // sort by created and sticky
+            let sortedPosts = Vue._.chain(state.containersData[containerNID].posts).sortBy('created').sortBy('sticky').reverse().value()
+            let slicedPosts = sortedPosts.slice(0, state.containersData[containerNID].maxPostsToShow)
             return slicedPosts
         },
-        getPost: (state, getters) => (nid) => {
-            let result = state.posts.find(post => post.nid === nid)
+        getPost: (state, getters) => (containerNID, nid) => {
+            if (!state.containersData[containerNID].posts) {
+                console.log(state.containersData[containerNID].posts)
+                return null
+            }
+            let result = state.containersData[containerNID].posts.find(post => post.nid === nid)
             let post = result
             post.user = getters.getUser(post.uid)
             return post
         },
         getUser: (state) => (uid) => {
             return state.users.find(user => user.uid === uid)
-            //return Vue._.find(state.users, ['uid', uid])
         },
-        getPostComments: (state, getters) => (nid) => {
-            let result = state.comments.filter(comment => comment.nid === nid)
+        getPostComments: (state, getters) => (containerNID, nid) => {
+            //console.log(containerNID)
+            //console.log(nid)
+            //console.log(state.containersData[containerNID])
+            let result = state.containersData[containerNID].comments.filter(comment => comment.nid === nid)
             if (result && result.length > 0) {
                 for (let comment in result) {
                     result[comment].user = getters.getUser(result[comment].uid)
@@ -152,7 +341,7 @@ export default new Vuex.Store({
             return params
         },
         getMentionMembers: (state) => (contextNID) => {
-            if(state.mentionMembers[contextNID]) {
+            if (state.mentionMembers[contextNID]) {
                 // return cached
                 return state.mentionMembers[contextNID]
             }
@@ -170,46 +359,146 @@ export default new Vuex.Store({
         }
     },
     mutations: {
-        setContainerNid(state, containerNid) {
-            state.containerNid = containerNid
+        setcontainerNID(state, containerNID) {
+            state.containerNID = containerNID
         },
-        initializeStream(state, data) {
-            state.posts = data.posts
-            state.users = data.users
-            state.comments = data.comments
-            state.streamOptions = data.streamOptions
+        initializeStream(state, payload) {
+            const containerNID = payload.containerNID
+            const data = payload.data
+            if (!state.containersData[containerNID]) {
+                state.containersData[containerNID] = {}
+            }
 
-            state.initialized = true
+            state.containersData[containerNID].posts = data.posts
+            state.containersData[containerNID].comments = data.comments
+            state.containersData[containerNID].streamOptions = data.streamOptions
+            // provide default attributes
+            state.containersData[containerNID].initialized = true
+            state.containersData[containerNID].maxPostsToShow = state.infiniteScrollLimit
+
+            // notify vue about deep change
+            state.containersData = state.containersData.slice(0)
         },
-        updateStream(state, data) {
-            state.posts = data.posts
-            state.users = data.users
-            state.comments = data.comments
-            state.streamOptions.timestamp = data.timestamp
+        initializeStreamAggregated(state, data) {
+            state.containers = data.containers.slice(0, state.infiniteScrollLimitAgr)
+
+            state.containersData[0].streamOptions = data.streamOptions
+            state.containersData[0].initialized = true
+
+            // prepare structure
+            /*state.containers.forEach(container => {
+                state.containersData[container.nid] = {}
+                state.containersData[container.nid].initialized = false
+            })*/
+
         },
-        addPost: function(state, post) {
-            state.posts.push(post)
+        updateContainers(state, data) {
+            state.containers = data.containers
+            state.containersData[0].streamOptions.timestamp = data.timestamp
+
+            console.log(state.containers)
+            // prepare structure for new polled containers
+            /*state.containers.forEach(container => {
+                if (!state.containersData[container.nid]) {
+                    state.containersData[container.nid] = {}
+                    state.containersData[container.nid].initialized = false
+                }
+            })*/
+
+
         },
-        deletePost: function(state, post) {
-            let postListIndex = state.posts.indexOf(post)
-            if(postListIndex > -1) {
-                state.posts.splice(postListIndex, 1)
+        updateStream(state, payload) {
+            const containerNID = payload.containerNID
+            const data = payload.data
+
+            state.containersData[containerNID].posts = data.posts
+            state.containersData[containerNID].comments = data.comments
+            state.containersData[containerNID].streamOptions.timestamp = data.timestamp
+
+            state.containersData = state.containersData.slice(0)
+        },
+        addPost: function (state, post) {
+
+            state.containersData[post.container.nid].posts.push(post)
+
+            state.containersData = state.containersData.slice(0)
+        },
+        updatePost: function (state, post) {
+            const containerNID = post.container.nid
+
+            let postListIndex = state.containersData[containerNID].posts.indexOf(post)
+            if (postListIndex > -1) {
+                state.containersData[containerNID].posts[postListIndex] = post
+                state.containersData = state.containersData.slice(0)
+            }
+
+        },
+        updateAttachments: function (state, _post) {
+            const containerNID = _post.container.nid
+
+            let result = state.containersData[containerNID].posts.filter(post => post.nid === _post.nid)[0]
+
+            if (result) {
+                result.attachments = _post.attachments
+                state.containersData = state.containersData.slice(0)
+            }
+
+        },
+        deletePost: function (state, post) {
+            const containerNID = post.container.nid
+
+            let postListIndex = state.containersData[containerNID].posts.indexOf(post)
+            if (postListIndex > -1) {
+                state.containersData[containerNID].posts.splice(postListIndex, 1)
+            }
+
+            state.containersData = state.containersData.slice(0)
+        },
+        updatePosts: function (state, data) {
+            const containerNID = data.containerNID
+            const posts = data.posts
+
+            state.containersData[containerNID].posts = posts
+
+            state.containersData = state.containersData.slice(0)
+        },
+        addComment: function (state, data) {
+            const containerNID = data.containerNID
+            const comment = data.comment
+
+            state.containersData[containerNID].comments.push(comment)
+
+            state.containersData = state.containersData.slice(0)
+        },
+        updateComment: function (state, data) {
+            const containerNID = data.containerNID
+            const comment = data.comment
+
+            let commentListIndex = state.containersData[containerNID].comments.indexOf(comment)
+            if (commentListIndex > -1) {
+                state.containersData[containerNID].comments[commentListIndex] = comment
+                state.containersData = state.containersData.slice(0)
             }
         },
-        updatePosts: function (state, posts) {
-            state.posts = posts
-        },
-        addComment: function (state, comment) {
-            state.comments.push(comment)
-        },
-        deleteComment: function (state, comment) {
-            let commentListIndex = state.comments.indexOf(comment)
-            if(commentListIndex > -1) {
-                state.comments.splice(commentListIndex, 1)
+        deleteComment: function (state, data) {
+            const containerNID = data.containerNID
+            const comment = data.comment
+
+            let commentListIndex = state.containersData[containerNID].comments.indexOf(comment)
+            if (commentListIndex > -1) {
+                state.containersData[containerNID].comments.splice(commentListIndex, 1)
             }
+
+            state.containersData = state.containersData.slice(0)
+
         },
-        updateComments: function (state, comments) {
-            state.comments = comments
+        updateComments: function (state, data) {
+            const containerNID = data.containerNID
+            const comments = data.comments
+
+            state.containersData[containerNID].comments = comments
+
+            state.containersData = state.containersData.slice(0)
         },
         addUser: function (state, user) {
             state.users.push(user)
@@ -217,23 +506,80 @@ export default new Vuex.Store({
         updateUsers: function (state, users) {
             state.users = users
         },
+        updateInitialized: function (state, data) {
+            const containerNID = data.containerNID
+            const initialized = data.initialized
+
+            state.containersData[containerNID].initialized = initialized
+
+            state.containersData = state.containersData.slice(0)
+        },
         setFilter(state, filter) {
             state.filterParams = filter
         },
-        setBusy(state, busy) {
-            state.busyLoading = busy
+        setBusy(state, data) {
+            const containerNID = data.containerNID
+            const busy = data.busy
+
+            // initialize object, if not existing yet
+            if (!state.containersData[containerNID]) {
+                state.containersData[containerNID] = {}
+            }
+
+            state.containersData[containerNID].busyLoading = busy
+
+            state.containersData = state.containersData.slice(0)
         },
-        setBusyMore(state, busy) {
-            state.busyLoadingMore = busy
+        setPostVisibleInViewPort(state, data) {
+            const containerNID = data.containerNID
+            const visibleInViewPort = data.visibleInViewPort
+
+            // initialize object, if not existing yet
+            if (!state.containersData[containerNID]) {
+                state.containersData[containerNID] = {}
+            }
+
+            state.containersData[containerNID].visibleInViewPort = visibleInViewPort
+
+            //state.containersData = state.containersData.slice(0)
         },
-        setMaxToShow(state, maxToShow) {
-            state.maxPostsToShow = maxToShow
+        setBusyMore(state, data) {
+            const containerNID = data.containerNID
+            const busy = data.busy
+
+            state.containersData[containerNID].busyLoadingMore = busy
+
+            state.containersData = state.containersData.slice(0)
         },
-        setPollingUpdate(state, pollingUpdate) {
-            state.pollingUpdate = pollingUpdate
+        setMaxToShow(state, data) {
+
+            const containerNID = data.containerNID
+            const maxToShow = data.maxToShow
+
+            state.containersData[containerNID].maxPostsToShow = maxToShow
+
+            state.containersData = state.containersData.slice(0)
+
         },
-        maxPostsLimitReached(state, postsLimitReached) {
-            state.maxPostsLimitReached = postsLimitReached
+        setPollingUpdate(state, data) {
+            const containerNID = data.containerNID
+            const pollingUpdate = data.pollingUpdate
+
+            state.containersData[containerNID].pollingUpdate = pollingUpdate
+
+            state.containersData = state.containersData.slice(0)
+
+        },
+        maxPostsLimitReached(state, data) {
+            const containerNID = data.containerNID
+            const maxPostsLimitReached = data.maxPostsLimitReached
+
+            state.containersData[containerNID].maxPostsLimitReached = maxPostsLimitReached
+
+            state.containersData = state.containersData.slice(0)
+        },
+        setinfiniteScrollLimit(state, infiniteScrollLimit) {
+            state.infiniteScrollLimit = infiniteScrollLimit
         }
     }
 })

@@ -13,7 +13,7 @@ export default {
 
         let apiNodePollAddVoteUrl = config.api.apiNodePollAddVote.replace('%node', nid).replace('%token', token)
 
-        Vue.axios.get(apiNodePollAddVoteUrl, {withCredentials: true}).then((response) => {
+        Vue.axios.post(apiNodePollAddVoteUrl, votes, {withCredentials: true}).then((response) => {
             if (response.data.status === 1) {
                 return cb(response.data)
             } else {
