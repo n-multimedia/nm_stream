@@ -10,7 +10,9 @@ const debug = process.env.NODE_ENV !== 'production'
 export default new Vuex.Store({
     state: {
         containerNID: 0, //0 = global
+        aggregated: false, //0 = global
         containers: [],
+        pollUpdateInterval: [],
         containersData: [{'initialized': false}],
         // attributes - todo move to own class
         // - visibleInViewPort
@@ -30,7 +32,7 @@ export default new Vuex.Store({
         //busyLoadingMore: false, // complete list loading (e.g. container)
         //initialized: false,
         infiniteScrollLimit: 3,
-        infiniteScrollLimitAgr: 3, //overrides infiniteScrollLimit in aggr view
+        infiniteScrollLimitContainers: 2,
         pollingUpdate: false,
         users: []
     },
@@ -39,10 +41,15 @@ export default new Vuex.Store({
         setinfiniteScrollLimit({commit}, infiniteScrollLimit) {
             commit('setinfiniteScrollLimit', infiniteScrollLimit)
         },
-        initializeStream({commit, dispatch}, containerNID) {
+        initializeStream({commit, dispatch, getters}, containerNID) {
 
             commit('setBusy', {containerNID: containerNID, busy: true})
-            streamApi.initializeStream(containerNID, data => {
+
+
+            // pass filter parameters
+            const params = getters.getFilterParams()
+
+            streamApi.initializeStream({params, containerNID}, data => {
                 commit('initializeStream', {containerNID: containerNID, data: data})
 
                 // expand user array
@@ -51,6 +58,7 @@ export default new Vuex.Store({
                 })
 
                 commit('setBusy', {containerNID: containerNID, busy: false})
+                commit('setBusyMore', {containerNID: containerNID, busy: false})
             })
 
             // start polling
@@ -62,9 +70,10 @@ export default new Vuex.Store({
 
             //override scroll limit for aggr view
 
-            commit('setMaxToShow', {containerNID: 0, maxToShow: state.infiniteScrollLimit})
+            commit('setMaxToShow', {containerNID: 0, maxToShow: state.infiniteScrollLimitContainers})
 
             commit('setBusy', {containerNID: 0, busy: true})
+
 
             streamApi.initializeStreamAggregated(data => {
                 commit('initializeStreamAggregated', data)
@@ -101,6 +110,11 @@ export default new Vuex.Store({
         updateStream({dispatch, commit, getters, state}, containerNID) {
 
             // abort if container has not been initialized yet
+            if(!state.containersData[containerNID]) {
+                // polling
+                return
+            }
+
             if (!state.containersData[containerNID].initialized || !!state.containersData[containerNID].busyLoading || !!state.containersData[containerNID].busyLoadingMore) {
                 return
             }
@@ -119,14 +133,14 @@ export default new Vuex.Store({
 
             streamApi.updateStream({params, maxPostsToShow, containerNID, token}, data => {
                 if (state.containersData[containerNID].busyLoadingMore) {
-                    commit('maxPostsLimitReached', {
+
+                    commit('setMaxPostsLimitReached', {
                         containerNID: containerNID,
-                        busy: state.containersData[containerNID].posts.length >= data.posts.length
+                        maxPostsLimitReached: state.containersData[containerNID].posts.length >= data.posts.length
                     })
                     commit('setBusyMore', {containerNID: containerNID, busy: false})
                 }
                 commit('setBusy', {containerNID: containerNID, busy: false})
-                commit('setBusyMore', {containerNID: containerNID, busy: false})
                 commit('updateStream', {containerNID: containerNID, data: data})
 
                 // expand user array
@@ -148,9 +162,9 @@ export default new Vuex.Store({
 
             streamApi.updateContextsStream({params, maxPostsToShow, token}, data => {
                 if (state.containersData[0].busyLoadingMore) {
-                    commit('maxPostsLimitReached', {
+                    commit('setMaxPostsLimitReached', {
                         containerNID: 0,
-                        busy: state.containers.length >= data.containers.length
+                        maxPostsLimitReached: state.containers.length >= data.containers.length
                     })
                 }
                 commit('setBusy', {containerNID: 0, busy: false})
@@ -184,9 +198,31 @@ export default new Vuex.Store({
                 commit('addUser', user)
             }
         },
-        setFilter({commit, dispatch}, filter) {
+        setFilter({commit, state, dispatch}, filter) {
             commit('setFilter', filter)
-            dispatch('updateStreamAggregated')
+
+
+            if (state.containersData[0].streamOptions && state.aggregated) {
+                commit('setMaxPostsLimitReached', {
+                    containerNID: 0,
+                    maxPostsLimitReached: false
+                })
+
+                dispatch('updateStreamAggregated')
+                // important order
+                commit('setBusy', {containerNID: 0, busy: true})
+            } else {
+                clearInterval(state.pollUpdateInterval)
+
+                commit('setMaxPostsLimitReached', {
+                    containerNID: state.containerNID,
+                    maxPostsLimitReached: false
+                })
+
+                dispatch('pollUpdate', state.containerNID)
+                // important order
+                commit('setBusy', {containerNID: state.containerNID, busy: true})
+            }
         },
         loadMore({commit, state, dispatch}, containerNID) {
             // wait for initialization
@@ -200,15 +236,15 @@ export default new Vuex.Store({
 
             const showMoreNum = state.infiniteScrollLimit
 
-
-            commit('setBusyMore', {containerNID: containerNID, busy: true})
             commit('setMaxToShow', {
                 containerNID: containerNID,
                 maxToShow: state.containersData[containerNID].maxPostsToShow + showMoreNum
             })
 
             // trigger a update
-            dispatch('pollUpdate', containerNID)
+            dispatch('updateStream', containerNID)
+            // important set busy afterwards
+            commit('setBusyMore', {containerNID: containerNID, busy: true})
 
         },
         loadMoreContainers({commit, dispatch, state}, containerNID) {
@@ -219,36 +255,41 @@ export default new Vuex.Store({
                 return false
             }
 
-            commit('setBusyMore', {containerNID: containerNID, busy: true})
+            commit('setBusyMore', {containerNID: 0, busy: true})
             commit('setMaxToShow', {
                 containerNID: containerNID,
-                maxToShow: state.containersData[containerNID].maxPostsToShow + state.infiniteScrollLimit
+                maxToShow: state.containersData[containerNID].maxPostsToShow + state.infiniteScrollLimitContainers
             })
 
             // trigger a update
             dispatch('updateContainers')
         },
-        pollUpdate({dispatch, state}, containerNID) {
+        pollUpdate({dispatch, commit, state}, containerNID) {
 
             //console.log('check poll condition')
             //console.log(state.containersData[containerNID])
 
             // todo prevent polling overkill in aggregated mode
-            //clearInterval(state.pollingUpdate)
+            if(state.pollUpdateInterval[containerNID]) {
+                clearInterval(state.pollUpdateInterval[containerNID])
+            }
+
 
             dispatch('updateStream', containerNID)
             /*const pollingUpdate = */
-            setInterval(() => {
+            let pollUpdateInterval = setInterval(() => {
                 // check if user sees the container in his viewport
                 // check if browser has focus
                 let focused = document.hasFocus()
-                if (!focused || !state.containersData[containerNID].visibleInViewPort) {
+
+                // check state.containersData[containerNID] because of active poll request after filter
+                if (!focused || state.containersData[containerNID] && !state.containersData[containerNID].visibleInViewPort) {
                     return;
                 }
-                console.log(' polling ' + containerNID)
                 dispatch('updateStream', containerNID)
             }, 5000)
-            //commit('setPollingUpdate', pollingUpdate)
+
+            commit('setPollUpdateInterval', {containerNID: containerNID, pollUpdateInterval: pollUpdateInterval})
         },
     },
     getters: {
@@ -300,10 +341,10 @@ export default new Vuex.Store({
         },
         getPost: (state, getters) => (containerNID, nid) => {
             if (!state.containersData[containerNID].posts) {
-                console.log(state.containersData[containerNID].posts)
+                //console.log(state.containersData[containerNID].posts)
                 return null
             }
-            let result = state.containersData[containerNID].posts.find(post => post.nid === nid)
+            let result = state.containersData[containerNID].posts.filter(post => post.nid === nid)[0]
             let post = result
             post.user = getters.getUser(post.uid)
             return post
@@ -356,14 +397,27 @@ export default new Vuex.Store({
             })
 
             return state.mentionMembers
-        }
+        },
+        getMaxPostsLimitReached: (state) => (containerNID) => {
+
+            if (!state.containersData[containerNID]) {
+                return false
+            }
+
+            return state.containersData[containerNID].maxPostsLimitReached
+        },
     },
     mutations: {
         setcontainerNID(state, containerNID) {
+            // undefined or 0
+            if (!containerNID) {
+                state.aggregated = true
+            }
             state.containerNID = containerNID
         },
         initializeStream(state, payload) {
             const containerNID = payload.containerNID
+
             const data = payload.data
             if (!state.containersData[containerNID]) {
                 state.containersData[containerNID] = {}
@@ -380,7 +434,7 @@ export default new Vuex.Store({
             state.containersData = state.containersData.slice(0)
         },
         initializeStreamAggregated(state, data) {
-            state.containers = data.containers.slice(0, state.infiniteScrollLimitAgr)
+            state.containers = data.containers.slice(0, state.infiniteScrollLimit)
 
             state.containersData[0].streamOptions = data.streamOptions
             state.containersData[0].initialized = true
@@ -394,9 +448,18 @@ export default new Vuex.Store({
         },
         updateContainers(state, data) {
             state.containers = data.containers
+
             state.containersData[0].streamOptions.timestamp = data.timestamp
 
-            console.log(state.containers)
+            /*
+            state.containers.forEach(container => {
+                if (container.nid > 0 && state.containersData[container.nid]) {
+                    state.containersData[container.nid].posts = []
+                    state.containersData[container.nid].comments = []
+                }
+            })*/
+
+            //console.log(state.containers)
             // prepare structure for new polled containers
             /*state.containers.forEach(container => {
                 if (!state.containersData[container.nid]) {
@@ -411,6 +474,10 @@ export default new Vuex.Store({
             const containerNID = payload.containerNID
             const data = payload.data
 
+            //keys chaning! propagate changes
+            //state.containersData[containerNID].posts = []
+            //state.containersData = state.containersData.slice(0)
+
             state.containersData[containerNID].posts = data.posts
             state.containersData[containerNID].comments = data.comments
             state.containersData[containerNID].streamOptions.timestamp = data.timestamp
@@ -420,6 +487,8 @@ export default new Vuex.Store({
         addPost: function (state, post) {
 
             state.containersData[post.container.nid].posts.push(post)
+            // show one more post
+            state.containersData[post.container.nid].maxPostsToShow++
 
             state.containersData = state.containersData.slice(0)
         },
@@ -570,7 +639,7 @@ export default new Vuex.Store({
             state.containersData = state.containersData.slice(0)
 
         },
-        maxPostsLimitReached(state, data) {
+        setMaxPostsLimitReached(state, data) {
             const containerNID = data.containerNID
             const maxPostsLimitReached = data.maxPostsLimitReached
 
@@ -580,6 +649,11 @@ export default new Vuex.Store({
         },
         setinfiniteScrollLimit(state, infiniteScrollLimit) {
             state.infiniteScrollLimit = infiniteScrollLimit
+        },
+        setPollUpdateInterval(state, data) {
+            const containerNID = data.containerNID
+            const pollUpdateInterval = data.pollUpdateInterval
+            state.pollUpdateInterval[containerNID] = pollUpdateInterval
         }
     }
 })

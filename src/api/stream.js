@@ -5,10 +5,13 @@ import config from '../assets/config.js'
 
 export default {
     // initialize stream
-    initializeStream: function (containerNID, cb) {
+    initializeStream: function ({params, containerNID}, cb) {
         let result = {}
         let url = config.api.apiInitUrl.replace('%node', containerNID)
-        Vue.axios.get(url, {withCredentials: true}).then((response) => {
+        Vue.axios.get(url, {
+            params: params,
+            withCredentials: true
+        }).then((response) => {
             result.posts = response.data.stream.posts
             result.users = response.data.stream.users
             result.comments = response.data.stream.comments
@@ -21,7 +24,9 @@ export default {
     initializeStreamAggregated: function (cb) {
         let result = {}
         let url = config.api.apiInitAgrUrl
-        Vue.axios.get(url, {withCredentials: true}).then((response) => {
+        Vue.axios.get(url, {
+            withCredentials: true
+        }).then((response) => {
             result.containers = response.data.stream.containers
             result.loggedInUser = response.data.stream.loggedInUser
             result.streamOptions = this.processStreamOptions(response)
@@ -79,6 +84,7 @@ export default {
     //helper
     processStreamOptions(response) {
         let streamOptions = new StreamOptions()
+        streamOptions.aggregated = response.data.stream.aggregated
         streamOptions.privacyOptions = response.data.stream.privacyOptions
         streamOptions.privacyOptionsAll = response.data.stream.privacyOptionsAll
         streamOptions.privacyDefault = response.data.stream.privacyDefault

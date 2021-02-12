@@ -19,7 +19,8 @@
       "nmDictHideFile": "Verstecken",
       "dictMaxFilesExceeded": "Das Uploadlimit von {{maxFiles}} wurde überschritten",
       "postContextFrom": "Beitrag aus",
-      "edited": "bearbeitet"
+      "edited": "bearbeitet",
+      "load_more": "mehr laden..."
     },
     "link": {
       "show_x_comments": "{count} Kommentare anzeigen",

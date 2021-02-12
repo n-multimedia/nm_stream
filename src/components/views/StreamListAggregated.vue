@@ -22,7 +22,6 @@
               :data-nid="container.nid"
               :aggregated=true
               v-waypoint="{ active: true, callback: onWaypointContainer, options: intersectionOptions }">
-
           </stream-list>
         </b-collapse>
       </div>
@@ -30,7 +29,7 @@
     <div v-if="!busyLoading"
          v-waypoint="{ active: true, callback: onWaypointLoadMore, options: intersectionOptions }"></div>
     <br/>
-    <pulse-loader :loading="getbusyLoadingMore(0)" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
+    <pulse-loader :loading="!busyLoading && getbusyLoadingMore(0)" :color="busyLoadingColor" :size="busyLoadingSize"></pulse-loader>
     <br/>
   </div>
 </template>
@@ -54,7 +53,7 @@ export default {
       busyLoadingSize: '12px',
       maxPostsLimitReached: false,
       loggedInUser: 1,
-      infiniteScrollLimit: 3,
+      infiniteScrollLimit: 2,
       iconFaArrowUp: faArrowAltCircleUp,
       iconFaArrowDown: faArrowAltCircleDown,
       intersectionOptions: {
@@ -112,6 +111,11 @@ export default {
       }
     },
     onWaypointLoadMore({going}) {
+      if (this.busyLoading || this.getbusyLoadingMore(0)) {
+        // wait until page has been loaded
+        return
+      }
+
       // going: in, out
       if (going === this.$waypointMap.GOING_IN) {
         this.loadMoreContainers(0)
@@ -287,24 +291,6 @@ Flipping
 
 #stream *:focus {
   outline-width: 0px;
-}
-
-#bv-modal-delete-attachment.fade {
-  opacity: initial;
-}
-
-#bv-modal-delete-attachment___BV_modal_outer_ .modal-backdrop {
-  opacity: 0.5;
-}
-
-#bv-modal-delete-attachment .modal-dialog {
-  top: 20vh;
-}
-
-#bv-modal-delete-attachment #bv-modal-delete-attachment___BV_modal_header_ .close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
 }
 
 .stream-container-label {

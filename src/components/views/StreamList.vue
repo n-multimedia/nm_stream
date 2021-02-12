@@ -1,7 +1,7 @@
 <template>
   <div id="stream" class="container">
     <transition name="fade">
-      <stream-filter v-if="initialized" :streamOptions="streamOptions"></stream-filter>
+      <stream-filter v-if="initialized && !aggregated" :streamOptions="streamOptions"></stream-filter>
     </transition>
     <pulse-loader :loading="!initialized || getbusyLoading(containernid)" :color="busyLoadingColor"
                   :size="busyLoadingSize"></pulse-loader>
@@ -28,9 +28,12 @@
     <br/>
     <div v-if="!aggregated && !getbusyLoadingMore(containernid)"
          v-waypoint="{ active: true, callback: onWaypointLoadMore, options: intersectionOptions }"></div>
-    <pulse-loader :loading="getbusyLoadingMore(containernid)" :color="busyLoadingColor"
+    <pulse-loader :loading="!getbusyLoading(containernid) && getbusyLoadingMore(containernid)" :color="busyLoadingColor"
                   :size="busyLoadingSize"></pulse-loader>
     <br/>
+    <div class="load-more-wrapper" v-if="!getMaxPostsLimitReached(containernid) && !getbusyLoadingMore(containernid)">
+      <button @click="loadMore(containernid)">{{ $t('label.load_more') }}</button>
+    </div>
   </div>
 </template>
 
@@ -76,7 +79,8 @@ export default {
       'getStreamOptionsContainer',
       'getPost',
       'getbusyLoading',
-      'getbusyLoadingMore'
+      'getbusyLoadingMore',
+      'getMaxPostsLimitReached'
     ]),
     streamOptions() {
       return this.getStreamOptionsContainer(this.containernid)
@@ -86,7 +90,7 @@ export default {
     },
     initialized() {
       return this.getInitializedContainer(this.containernid)
-    },
+    }
   },
   methods: {
     ...mapActions([
@@ -100,10 +104,9 @@ export default {
       'setinfiniteScrollLimit',
     ]),
     initialize: function () {
-      if(!this.aggregated) {
-        // increase max list items for non aggregated list
-        this.setinfiniteScrollLimit(this.infiniteScrollLimit)
+      if (!this.aggregated) {
         // enable polling for this list
+        this.setinfiniteScrollLimit(this.infiniteScrollLimit)
         this.$store.commit('setPostVisibleInViewPort', {containerNID: this.containernid, visibleInViewPort: true})
       }
 
@@ -159,25 +162,6 @@ export default {
   }
 }
 </script>
-
-
-<style scoped lang="scss">
-/deep/ {
-  @import "../../../node_modules/bootstrap/scss/_functions.scss";
-  @import "../../../node_modules/bootstrap/scss/_variables.scss";
-  //customize bootstrap to match okl
-  @import "./../../assets/scss/bootstrap_custom.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap-grid.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap-reboot.scss";
-  @import "../../../node_modules/bootstrap/scss/card.scss";
-  @import "../../../node_modules/bootstrap/scss/alert.scss";
-  @import "../../../node_modules/bootstrap/scss/dropdown.scss";
-  @import "../../../node_modules/bootstrap/scss/modal.scss";
-  @import "../../../node_modules/bootstrap/scss/buttons.scss";
-}
-
-</style>
 
 <style lang="scss">
 #stream {
@@ -297,22 +281,19 @@ Flipping
   outline-width: 0px;
 }
 
-#bv-modal-delete-attachment.fade {
-  opacity: initial;
-}
-
-#bv-modal-delete-attachment___BV_modal_outer_ .modal-backdrop {
-  opacity: 0.5;
-}
-
-#bv-modal-delete-attachment .modal-dialog {
-  top: 20vh;
-}
-
-#bv-modal-delete-attachment #bv-modal-delete-attachment___BV_modal_header_ .close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
+#stream {
+  .load-more-wrapper {
+    text-align: right;
+    button {
+      border: 0;
+      background: none;
+      color:  #337ab7;
+      &:hover, &:active, &:focus {
+        text-decoration: underline;
+        color: #2c3e50;
+      }
+    }
+  }
 }
 
 </style>
