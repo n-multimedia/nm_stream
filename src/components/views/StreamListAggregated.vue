@@ -1,5 +1,5 @@
 <template>
-  <div id="stream" class="container">
+  <div id="stream-aggregated" class="container">
     <transition name="fade">
       <stream-filter v-if="initialized" :streamOptions="streamOptions"></stream-filter>
     </transition>
@@ -13,8 +13,8 @@
             <span class="when-open"><font-awesome-icon :icon="iconFaArrowDown"/></span><span class="when-closed"><font-awesome-icon
               :icon="iconFaArrowUp"/></span>
           </b-button>
-          <a :href="container.url"> {{ container.title }}</a>: <a :href="container.context_url">
-          {{ container.context_title }}</a>
+          <a :href="container.url"> {{ container.title }}</a>:
+          <a :href="container.context_url">{{ container.context_title }}</a>
         </div>
         <b-collapse visible class="stream-container-wrapper" :id="'collapse-nid-' + container.nid">
           <stream-list
@@ -149,26 +149,9 @@ export default {
 </script>
 
 
-<style scoped lang="scss">
-/deep/ {
-  @import "../../../node_modules/bootstrap/scss/_functions.scss";
-  @import "../../../node_modules/bootstrap/scss/_variables.scss";
-  //customize bootstrap to match okl
-  @import "./../../assets/scss/bootstrap_custom.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap-grid.scss";
-  @import "../../../node_modules/bootstrap/scss/bootstrap-reboot.scss";
-  @import "../../../node_modules/bootstrap/scss/card.scss";
-  @import "../../../node_modules/bootstrap/scss/alert.scss";
-  @import "../../../node_modules/bootstrap/scss/dropdown.scss";
-  @import "../../../node_modules/bootstrap/scss/modal.scss";
-  @import "../../../node_modules/bootstrap/scss/buttons.scss";
-}
-
-</style>
-
 <style lang="scss">
-#stream {
+
+#stream-aggregated {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -181,7 +164,7 @@ body {
   background-color: #efefef;
 }
 
-#stream {
+#stream-aggregated {
   .stream-container-wrapper {
     border-left: 1px solid #999;
     margin-bottom: 5em;
@@ -189,38 +172,38 @@ body {
   }
 }
 
-#stream .card {
+#stream-aggregated .card {
   padding: 1em;
   margin-bottom: 1em;
 }
 
 /* Enter and leave animations can use different */
 /* durations and timing functions.              */
-#stream .slide-fade-enter-active {
+#stream-aggregated .slide-fade-enter-active {
   transition: all .1s ease;
 }
 
-#stream .slide-fade-leave-active {
+#stream-aggregated .slide-fade-leave-active {
   transition: all .1s cubic-bezier(1.0, 0.5, 0.8, 1.0);
 }
 
-#stream .slide-fade-enter, #stream .slide-fade-leave-to
+#stream-aggregated .slide-fade-enter, #stream-aggregated .slide-fade-leave-to
   /* .slide-fade-leave-active below version 2.1.8 */
 {
   transform: translateX(10px);
   opacity: 0;
 }
 
-#stream .list-item {
+#stream-aggregated .list-item {
   display: inline-block;
   margin-right: 10px;
 }
 
-#stream .list-enter-active, #stream .list-leave-active {
+#stream-aggregated .list-enter-active, #stream-aggregated .list-leave-active {
   transition: all 1s;
 }
 
-#stream .list-enter, #stream .list-leave-to /* .list-leave-active below version 2.1.8 */
+#stream-aggregated .list-enter, #stream-aggregated .list-leave-to /* .list-leave-active below version 2.1.8 */
 {
   opacity: 0;
   transform: translateY(30px);
@@ -229,7 +212,7 @@ body {
 /**
 Flipping
  */
-#stream .card-flip {
+#stream-aggregated .card-flip {
   perspective: 100vw;
 
   &.flip-active .flip,
@@ -238,58 +221,58 @@ Flipping
   }
 }
 
-#stream .card-flip,
-#stream .front,
-#stream .back-delete,
-#stream .back-edit {
+#stream-aggregated .card-flip,
+#stream-aggregated .front,
+#stream-aggregated .back-delete,
+#stream-aggregated .back-edit {
   width: 100%;
   // height: 480px;
 }
 
-#stream .back-delete {
+#stream-aggregated .back-delete {
   button {
     margin-left: 10px;
   }
 }
 
-#stream .flip {
+#stream-aggregated .flip {
   transition: 0.6s;
   transform-style: preserve-3d;
   position: relative;
 }
 
-#stream .front,
-#stream .back-delete,
-#stream .back-edit {
+#stream-aggregated .front,
+#stream-aggregated .back-delete,
+#stream-aggregated .back-edit {
   backface-visibility: hidden;
   // position: absolute;
   // top: 0;
   // left: 0;
 }
 
-#stream .back-delete,
-#stream .back-edit {
+#stream-aggregated .back-delete,
+#stream-aggregated .back-edit {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 3;
 }
 
-#stream .front {
+#stream-aggregated .front {
   z-index: 2;
   transform: rotateY(0deg);
 }
 
-#stream .back-delete,
-#stream .back-edit {
+#stream-aggregated .back-delete,
+#stream-aggregated .back-edit {
   transform: rotateY(180deg);
 }
 
-#stream .stream-post-wrapper .v-spinner {
+#stream-aggregated .stream-post-wrapper .v-spinner {
   position: absolute;
 }
 
-#stream *:focus {
+#stream-aggregated *:focus {
   outline-width: 0px;
 }
 
