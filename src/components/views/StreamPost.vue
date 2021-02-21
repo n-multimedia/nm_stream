@@ -327,7 +327,6 @@ export default {
       PollService.addVote(this.post.nid, obj, this.streamOptions.token, (response) => {
         //callback
         this.post.poll = response.poll
-        console.log(response)
         this.updatePost(this.post, response)
       }, () => {
         //error callback
