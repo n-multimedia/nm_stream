@@ -1,52 +1,52 @@
 <template>
-  <div class="plugin plugin-abstract" v-bind:class="name">
+    <div class="plugin plugin-abstract" v-bind:class="name">
     <span class="plugin-toolbar-btn" v-bind:class="{ active: isActive }" v-on:click="onClickCallback" :title="title">
       <font-awesome-icon :icon="icon"/>
     </span>
-  </div>
+    </div>
 </template>
 <script>
-import {faChessQueen} from '@fortawesome/free-solid-svg-icons'
+    import {faChessQueen} from '@fortawesome/free-solid-svg-icons'
 
-export default {
-  props: ['param1'],
-  components: {},
-  name: 'plugin',
-  data() {
-    return {
-      icon: faChessQueen,
-      label: 'Not implemented yet',
-      title: 'Not implemented yet',
-      name: this.$options._componentTag
+    export default {
+        props: ['param1'],
+        components: {},
+        name: 'plugin',
+        data() {
+            return {
+                icon: faChessQueen,
+                label: 'Not implemented yet',
+                title: 'Not implemented yet',
+                name: this.$options._componentTag
+            }
+        },
+        computed: {
+            isActive: function () {
+                return false
+            }
+        },
+        methods: {
+            onClickCallback() {
+                alert('To be implemented')
+            }
+        }
     }
-  },
-  computed: {
-    isActive: function () {
-      return false
-    }
-  },
-  methods: {
-    onClickCallback() {
-      alert('To be implemented')
-    }
-  }
-}
 </script>
 
 <style lang="scss" scoped>
-.plugin {
-  .active {
-    color: #007bff;
-  }
-}
+    .plugin {
+        .active {
+            color: #007bff;
+        }
+    }
 
-.plugin-toolbar-btn {
-  float: right;
-  cursor: pointer;
+    .plugin-toolbar-btn {
+        float: right;
+        cursor: pointer;
 
-  &:hover {
-    color: #007bff;
-    filter: brightness(140%);
-  }
-}
+        &:hover {
+            color: #007bff;
+            filter: brightness(140%);
+        }
+    }
 </style>

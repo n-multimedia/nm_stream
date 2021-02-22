@@ -1,7 +1,5 @@
 export default {
     api: {
-        apiInitAgrUrl: '/api/v2.0/nm_stream/initialize_aggregated',
-        apiUpdateContextsUrl: '/api/v2.0/nm_stream/update_contexts/%offset/%limit/%token',
         apiInitUrl: '/api/v2.0/nm_stream/node/%node/initialize',
         apiPollUpdateUrl: '/api/v2.0/nm_stream/node/%node/poll_update/%offset/%limit/%token',
         apiPostAttachmentDeleteUrl: '/api/v2.0/nm_stream/node/%node/file/%file/delete/%token',

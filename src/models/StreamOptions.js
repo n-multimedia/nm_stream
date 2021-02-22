@@ -1,6 +1,5 @@
 export default class StreamOptions {
     constructor() {
-        //this.aggregated = '' // aggregated mode - available but not used
         this.privacyDefault = ''
         this.privacyOptions = []
         this.privacyOptionsAll = []
