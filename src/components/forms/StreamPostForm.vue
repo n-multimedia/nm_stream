@@ -72,16 +72,22 @@
             <div class="row">
               <transition name="fade">
                 <div class="col-12 action-buttons" v-if="formActive" :key="formActive">
-                  <stream-privacy-widget :privacyOptions="privacyOptions" :privacyValue="privacyValue"
-                                         @interface="privacyValue = $event"></stream-privacy-widget>
-                  <button class="btn btn-outline-primary stream-post-post float-right"
-                          v-on:click="savePost" :disabled="this.bodyText.length < 1 || busyLoading">{{
-                      $t('button.post')
-                    }}
-                  </button>
-                  <button class="btn btn-outline-secondary stream-post-cancel float-right"
-                          v-on:click="resetForm" :disabled="busyLoading">{{ $t('button.cancel') }}
-                  </button>
+                  <div class="row">
+                    <div class="col-5">
+                      <stream-privacy-widget :privacyOptions="privacyOptions" :privacyValue="privacyValue"
+                                             @interface="privacyValue = $event"></stream-privacy-widget>
+                    </div>
+                    <div class="col-7">
+                      <button class="btn btn-outline-primary stream-post-post float-right"
+                              v-on:click="savePost" :disabled="this.bodyText.length < 1 || busyLoading">{{
+                          $t('button.post')
+                        }}
+                      </button>
+                      <button class="btn btn-outline-secondary stream-post-cancel float-right"
+                              v-on:click="resetForm" :disabled="busyLoading">{{ $t('button.cancel') }}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </transition>
             </div>
@@ -561,9 +567,10 @@ export default {
   }
 }
 
+button.stream-post-post,
 button.stream-post-cancel {
   margin-left: 15px;
-  margin-right: 15px;
+  margin-bottom: 15px;
 }
 </style>
 
