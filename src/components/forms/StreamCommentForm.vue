@@ -1,5 +1,5 @@
 <template>
-  <div class="stream-comment-from card">
+  <div class="stream-comment-form card">
     <div class="row">
       <div class="col-2">
         <transition name="fade">
@@ -210,7 +210,7 @@ export default {
 
 <style lang="scss" scoped>
 
-.stream-comment-from {
+.stream-comment-form {
   text-align: left;
 
   &.card {
