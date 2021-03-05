@@ -45,6 +45,7 @@
                   id="dropzone"
                   @vdropzone-processing="dropzoneQueueProcess"
                   @vdropzone-file-added="resizeDropArea"
+                  @vdropzone-error="dropzoneError"
                   @vdropzone-success="vdropzoneSuccess"
                   @vdropzone-queue-complete="queueCompleted"
                   :options="dropzoneOptions" :disabled="busyLoading"></vue-dropzone>
@@ -291,6 +292,11 @@ export default {
     vdropzoneSuccess(file, response) {
       // update post
       this.$store.dispatch('updateAttachments', response.nodeData)
+    },
+    dropzoneError(file, message, xhr) {
+      // update post
+      console.error(file, message, xhr);
+      alert(message.message + " (" + message.nid + ")")
     },
     resizeDropArea() {
       // resize droparea
