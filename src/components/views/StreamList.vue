@@ -111,6 +111,10 @@ export default {
       }
 
       this.initializeStream(this.containernid)
+
+      document.addEventListener('nm-stream:update-model', () => {
+        this.streamUpdateOnRerender = true
+      }, false)
     },
     // get mention member asynchronously and cache
     getMentionMembers: function (contextNID) {
