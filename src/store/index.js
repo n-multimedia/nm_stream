@@ -59,6 +59,9 @@ export default new Vuex.Store({
 
                 commit('setBusy', {containerNID: containerNID, busy: false})
                 commit('setBusyMore', {containerNID: containerNID, busy: false})
+
+                let eventUpdate = new Event('nm-stream:update-model')
+                document.dispatchEvent(eventUpdate)
             })
 
             // start polling
@@ -174,9 +177,13 @@ export default new Vuex.Store({
         },
         addPost: function ({commit}, post) {
             commit('addPost', post)
+            let eventUpdate = new Event('nm-stream:update-model')
+            document.dispatchEvent(eventUpdate)
         },
         updatePost: function ({commit}, post) {
             commit('updatePost', post)
+            let eventUpdate = new Event('nm-stream:update-model')
+            document.dispatchEvent(eventUpdate)
         },
         updateAttachments: function ({commit}, post) {
             commit('updateAttachments', post)
@@ -189,9 +196,13 @@ export default new Vuex.Store({
         },
         addComment: function ({commit}, data) {
             commit('addComment', data)
+            let eventUpdate = new Event('nm-stream:update-model')
+            document.dispatchEvent(eventUpdate)
         },
         updateComment: function ({commit}, data) {
             commit('updateComment', data)
+            let eventUpdate = new Event('nm-stream:update-model')
+            document.dispatchEvent(eventUpdate)
         },
         addUser: function ({commit, getters}, user) {
             if (!getters.getUser(user.uid)) {
