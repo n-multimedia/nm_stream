@@ -13,6 +13,7 @@ export default {
             withCredentials: true
         }).then((response) => {
             result.posts = response.data.stream.posts
+            result.postsCount = response.data.stream.postsCount
             result.users = response.data.stream.users
             result.comments = response.data.stream.comments
             result.loggedInUser = response.data.stream.loggedInUser
@@ -57,6 +58,7 @@ export default {
             withCredentials: true
         }).then((response) => {
             result.posts = response.data.stream.posts
+            result.postsCount = response.data.stream.postsCount
             result.users = response.data.stream.users
             result.comments = response.data.stream.comments
             result.comments = response.data.stream.comments

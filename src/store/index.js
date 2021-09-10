@@ -139,7 +139,7 @@ export default new Vuex.Store({
 
                     commit('setMaxPostsLimitReached', {
                         containerNID: containerNID,
-                        maxPostsLimitReached: state.containersData[containerNID].posts.length >= data.posts.length
+                        maxPostsLimitReached: state.containersData[containerNID].posts.length == state.containersData[containerNID].postsCount
                     })
                     commit('setBusyMore', {containerNID: containerNID, busy: false})
                 }
@@ -411,9 +411,15 @@ export default new Vuex.Store({
         },
         getMaxPostsLimitReached: (state) => (containerNID) => {
 
-            if (!state.containersData[containerNID]) {
+            if (!state.containersData[containerNID] || !state.containersData[containerNID].initialized) {
                 return false
             }
+
+
+            if (state.containersData[containerNID].posts.length == state.containersData[containerNID].postsCount) {
+                return true
+            }
+
 
             return state.containersData[containerNID].maxPostsLimitReached
         },
@@ -435,6 +441,7 @@ export default new Vuex.Store({
             }
 
             state.containersData[containerNID].posts = data.posts
+            state.containersData[containerNID].postsCount = data.postsCount
             state.containersData[containerNID].comments = data.comments
             state.containersData[containerNID].streamOptions = data.streamOptions
             // provide default attributes
@@ -490,6 +497,7 @@ export default new Vuex.Store({
             //state.containersData = state.containersData.slice(0)
 
             state.containersData[containerNID].posts = data.posts
+            state.containersData[containerNID].postsCount = data.postsCount
             state.containersData[containerNID].comments = data.comments
             state.containersData[containerNID].streamOptions.timestamp = data.timestamp
 
