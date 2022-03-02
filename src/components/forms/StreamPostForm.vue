@@ -325,9 +325,15 @@ export default {
         return postPrivacyOptions
       }
 
+      let defaultPrivacyValue = null;
+      if (this.editPost) {
+        // add saved privacy setting to default option set
+        let valueKeyInteger = parseInt(this.editPost.privacy.privacyDefault)
+        defaultPrivacyValue = Vue._.filter(this.streamOptions.privacyOptionsAll, ['value', valueKeyInteger])[0]
+      }
 
-      this.streamOptions.privacyOptions.forEach(element => {
-        if (privacyValues.indexOf(element.value) > -1) {
+      this.streamOptions.privacyOptionsAll.forEach(element => {
+        if (privacyValues.indexOf(element.value) > -1 || (defaultPrivacyValue && element.value == defaultPrivacyValue.value)) {
           postPrivacyOptions.push(element)
         }
       })
