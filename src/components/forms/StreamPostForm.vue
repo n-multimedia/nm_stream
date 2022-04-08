@@ -166,16 +166,8 @@ export default {
           // or just show spinner instead
           // self.resetForm()
 
-          if (response.data.status === 1) {
-            self.editPost.body = response.data.nodeData.body
-            self.editPost.body_formatted = response.data.nodeData.body_formatted
-            self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
-            self.editPost.sticky = response.data.nodeData.sticky
-            self.editPost.poll = response.data.nodeData.poll
-            self.editPost.changed = response.data.nodeData.changed
 
-            this.$store.dispatch('updatePost', self.editPost)
-            this.$root.$emit('nm-stream:node:save', self.editPost)
+          if (response.data.status === 1) {
 
             // check for queued uploads
             if (self.$refs.vueDropZone.getQueuedFiles().length > 0) {
@@ -183,11 +175,23 @@ export default {
               // self.editPost = nodeData
               // self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
               // self.$refs.vueDropZone.setOption('url', self.getPostUploadUrl(nodeData))
+              this.$store.commit('setUpdateLock', true)
 
               self.dropzoneResetAfterComplete = true
               // start uploading attachments
               self.$refs.vueDropZone.processQueue()
             } else {
+
+              self.editPost.body = response.data.nodeData.body
+              self.editPost.body_formatted = response.data.nodeData.body_formatted
+              self.editPost.privacy.privacyDefault = response.data.nodeData.privacy.privacyDefault
+              self.editPost.sticky = response.data.nodeData.sticky
+              self.editPost.poll = response.data.nodeData.poll
+              self.editPost.changed = response.data.nodeData.changed
+
+              this.$store.dispatch('updatePost', self.editPost)
+              this.$root.$emit('nm-stream:node:save', self.editPost)
+
               // refresh form values
               self.resetForm()
             }
@@ -277,11 +281,13 @@ export default {
     queueCompleted() {
       // trigger reset, if not editing only!
       // if (!this.editPost) {
+
+      console.log('completed');
       if (this.dropzoneQueueProcessing) {
         this.resetForm()
         this.dropzoneResetAfterComplete = false
-
         this.dropzoneQueueProcessing = false
+        this.$store.commit('setUpdateLock', false)
       }
 
       // }
@@ -495,6 +501,7 @@ export default {
         createImageThumbnails: false,
         autoProcessQueue: this.getAutoProcessQueue(),
         addRemoveLinks: true,
+        parallelUploads: 1,
         acceptedFiles: this.streamOptions.acceptedFiles,
         maxFilesize: 20,
         dictDefaultMessage: this.$t('label.dictDefaultMessage'),
