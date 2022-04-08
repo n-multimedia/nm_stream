@@ -282,7 +282,6 @@ export default {
       // trigger reset, if not editing only!
       // if (!this.editPost) {
 
-      console.log('completed');
       if (this.dropzoneQueueProcessing) {
         this.resetForm()
         this.dropzoneResetAfterComplete = false
