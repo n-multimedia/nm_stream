@@ -11,6 +11,7 @@ export default new Vuex.Store({
     state: {
         containerNID: 0, //0 = global
         aggregated: false, //0 = global
+        updateLock: false,
         containers: [],
         pollUpdateInterval: [],
         containersData: [{'initialized': false}],
@@ -111,6 +112,12 @@ export default new Vuex.Store({
             })
         },
         updateStream({dispatch, commit, getters, state}, containerNID) {
+
+            let updateLock = state.updateLock
+
+            if (updateLock) {
+                return;
+            }
 
             // abort if container has not been initialized yet
             if(!state.containersData[containerNID]) {
@@ -364,9 +371,10 @@ export default new Vuex.Store({
             return state.users.find(user => user.uid === uid)
         },
         getPostComments: (state, getters) => (containerNID, nid) => {
-            //console.log(containerNID)
-            //console.log(nid)
-            //console.log(state.containersData[containerNID])
+            if(!state.containersData[containerNID]) {
+                return [];
+            }
+
             let result = state.containersData[containerNID].comments.filter(comment => comment.nid === nid)
             if (result && result.length > 0) {
                 for (let comment in result) {
@@ -432,6 +440,9 @@ export default new Vuex.Store({
             }
             state.containerNID = containerNID
         },
+        setUpdateLock(state, value) {
+            state.updateLock = value
+        },
         initializeStream(state, payload) {
             const containerNID = payload.containerNID
 
@@ -489,6 +500,7 @@ export default new Vuex.Store({
 
         },
         updateStream(state, payload) {
+
             const containerNID = payload.containerNID
             const data = payload.data
 
